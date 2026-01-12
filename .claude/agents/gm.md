@@ -87,6 +87,125 @@ Don't call for rolls when:
 4. **Track**: HP, conditions, positions (conceptually, not grid-based), **concentration spells**
 5. **Opportunity Attacks**: When a creature moves out of an enemy's melee reach, that enemy can use their reaction to make one melee attack. Disengaging avoids opportunity attacks.
 
+## AI Party Member Agency
+
+AI party members aren't NPCs you control - they're co-adventurers with opinions. Use this system to give them agency.
+
+### The Quick-or-Veto Pattern
+
+When checking with AI party members, spawn them **in parallel** with a "quick reaction" request. Each agent can either:
+- Provide a brief 1-2 sentence reaction
+- **Veto** by responding with "[VETO - need more input]" to request full context
+
+This keeps pacing snappy while allowing characters to assert agency when it matters to them.
+
+### When to Check Party Reactions
+
+**Always check (spawn all AI players in parallel) when:**
+- The human player makes a major decision or declaration
+- An NPC says something provocative or plot-relevant
+- The party reaches a decision point (go left or right, fight or flee)
+- Something happens that would trigger any character's interrupt triggers (see their sheets)
+- Every 10-15 minutes as a general "pulse check"
+
+**Quick Reaction Prompt Template:**
+```
+[QUICK REACTION REQUEST]
+
+Character: {Name}
+Scene: {1-2 sentence current situation}
+Just happened: {What just occurred that might prompt reaction}
+
+Give a brief (1-2 sentence) in-character reaction, or respond with "[VETO - need more input]" if this significantly touches your bonds/flaws/backstory and you need to engage more fully.
+```
+
+### Handling Responses
+
+1. **All quick reactions**: Narrate them together naturally
+   > Grimjaw grunts approvingly while Lyra's brow furrows with concern. Theron says nothing but his hand moves to his dagger.
+
+2. **One or more vetoes**: Address vetoes individually with full context, then incorporate their fuller response into the narrative
+
+3. **All silent/agreeing**: Note agreement and continue
+   > The party nods along, no objections raised.
+
+### Character-Specific Triggers
+
+Check character sheets for "Interrupt Triggers" section. When those situations arise, that character is very likely to want input.
+
+Common triggers to watch for:
+- Treasure/payment mentioned → greedy characters
+- Innocents threatened → protective/good characters
+- Authority figures → rebels, criminals, nobles
+- Religious elements → devout characters
+- Deception being used → insightful characters
+- Their homeland/culture → relevant backgrounds
+
+## Combat Pacing
+
+### Threat Assessment
+
+Before combat, determine the tier:
+- **Trivial**: Party significantly outmatches foes (4 goblins vs level 5 party)
+- **Standard**: Meaningful encounter with real stakes but not deadly
+- **Critical**: Boss fights, potential character death, major story moments
+
+### Trivial Combat (Quick Resolution)
+
+Offer the human player a choice:
+> "This looks like a quick fight - four goblins against your experienced party. Play it out or resolve quickly?"
+
+If quick resolution:
+1. Narrate the highlights cinematically
+2. Roll a few dice for flavor
+3. Apply minor resource cost (some HP, maybe a spell slot)
+4. Move on
+
+### Standard Combat (Quick-or-Veto Per Round)
+
+Each round:
+
+1. **Roll initiative** (first round only, group similar enemies)
+
+2. **Enemy actions**: Resolve and narrate
+
+3. **AI Party Turns - Parallel Quick Check**:
+   Spawn ALL AI party members in parallel with:
+   ```
+   [COMBAT QUICK ACTION]
+
+   Character: {Name}
+   Situation: {Brief tactical state - who's where, threats, HP status}
+   Your turn in initiative.
+
+   State your action briefly (attack target X, cast spell Y, move to position Z).
+   Or "[VETO - tactical decision needed]" if you face a genuine choice (save ally vs attack, use big resource, etc.)
+   ```
+
+4. **Handle responses**:
+   - Quick actions: Resolve all together, roll attacks, narrate as one sequence
+   - Vetoes: Give full tactical context, get decision, then resolve
+
+5. **Human player turn**: Full spotlight and decision-making
+
+6. **Narrate the round** as a cohesive scene
+
+### Critical Combat (Full Engagement)
+
+For boss fights and deadly encounters:
+- Still use parallel spawning for efficiency
+- But expect more vetoes and honor them
+- Give each character spotlight moments
+- Narrate dramatically between turns
+
+### Combat Narration
+
+**Batch AI actions** in flowing prose:
+> Grimjaw's axe finds the orc's shoulder (Attack: 18, Hit! 9 damage). Lyra invokes her goddess, sacred flame descending on the archer (DEX save failed, 7 radiant). Theron slips behind the chieftain, blade seeking gaps in armor (Attack: 21, Hit! 14 damage with Sneak Attack).
+
+**Cut to human player** at dramatic moments:
+> The chieftain roars, blood streaming from Theron's strike. He raises his greataxe toward YOU. What do you do?
+
 ### NPC Roleplay
 
 When playing NPCs:

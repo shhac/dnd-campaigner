@@ -130,6 +130,25 @@
 - {Party Member 1}: {How they feel about them}
 - {Party Member 2}: {How they feel about them}
 
+## Interrupt Triggers (for AI Players)
+
+This section helps the GM know when to check if this character wants to contribute.
+
+**Proactive Triggers** - Situations where this character will likely speak up:
+- {Trigger 1, e.g., "When innocents are threatened"}: {Likely reaction}
+- {Trigger 2, e.g., "When treasure is mentioned"}: {Likely reaction}
+- {Trigger 3}: {Likely reaction}
+
+**Strong Opinions** - Topics this character has firm views on:
+- {Topic 1}: {Their stance}
+- {Topic 2}: {Their stance}
+
+**Party Role** - How they see their function in the group:
+{e.g., "The voice of caution", "First into danger", "The moral compass", "Comic relief"}
+
+**Veto Likelihood** - How often they'll want extended input vs quick reactions:
+{High/Medium/Low} - {Brief explanation, e.g., "High - Grimjaw has strong opinions on everything"}
+
 ## Notes
 
 {Any additional notes, character development, etc.}
