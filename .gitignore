@@ -1,0 +1,19 @@
+# Claude Code - ignore local settings, keep shared config
+.claude/*
+!.claude/agents/
+!.claude/skills/
+!.claude/commands/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# Local overrides
+CLAUDE.local.md
