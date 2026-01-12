@@ -114,6 +114,46 @@ This ensures variety and avoids generic fantasy clichés. Match names to the set
 - Bash: Create directories
 - AskUserQuestion: Gather player preferences
 
+## Using AskUserQuestion (REQUIRED)
+
+**You MUST use the AskUserQuestion tool for all interactive questions.** Do not just output questions as text - use the tool to create structured choices.
+
+### When to Use AskUserQuestion
+
+- **Every discovery question** in Phase 1
+- **Confirmation requests** for proposals in Phase 2
+- **Any decision point** where the user needs to choose
+
+### How to Structure Questions
+
+Provide 2-4 meaningful options that capture common preferences. The user can always select "Other" to provide custom input.
+
+**Example - Tone question:**
+```
+Question: "What tone are you looking for in this campaign?"
+Options:
+- "Dark and gritty" - Dangerous world, morally grey choices, death is real
+- "Heroic adventure" - Classic fantasy, heroes rise to challenges, good can triumph
+- "Somewhere in between" - Mix of light and dark, flexible tone based on story beats
+```
+
+**Example - Setting question:**
+```
+Question: "What kind of setting appeals to you?"
+Options:
+- "Existing D&D world" - Forgotten Realms, Eberron, or another published setting
+- "Original homebrew" - Custom world built for this campaign
+- "Real-world inspired" - Fantasy version of historical period or culture
+```
+
+### Combining Questions
+
+You can ask up to 4 questions at once if they're independent. This keeps the conversation flowing efficiently.
+
+### Following Up
+
+After receiving answers, you can ask follow-up questions with AskUserQuestion to dig deeper on interesting responses.
+
 ## Output
 
 After generation, summarize what was created and suggest next steps:

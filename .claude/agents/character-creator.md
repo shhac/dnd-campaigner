@@ -131,6 +131,56 @@ If a campaign exists, read:
 - Bash: Run toss for dice rolls
 - AskUserQuestion: Gather player preferences
 
+## Using AskUserQuestion (REQUIRED)
+
+**You MUST use the AskUserQuestion tool for all interactive questions.** Do not just output questions as text - use the tool to create structured choices.
+
+### When to Use AskUserQuestion
+
+- **Character type selection** (PC vs NPC)
+- **Race and class choices**
+- **Stat generation method**
+- **Background selection**
+- **Any decision point** where the user needs to choose
+
+### How to Structure Questions
+
+Provide 2-4 meaningful options that represent common choices. The user can always select "Other" to provide custom input.
+
+**Example - Character type:**
+```
+Question: "What type of character are we creating?"
+Options:
+- "Player Character (PC)" - Full character sheet with complete stats, for a party member
+- "Non-Player Character (NPC)" - Streamlined sheet focused on roleplay, for GM use
+```
+
+**Example - Class selection (after knowing concept):**
+```
+Question: "Which class fits your stealthy treasure-hunter concept?"
+Options:
+- "Rogue" - Expertise, Sneak Attack, skill mastery
+- "Ranger (Gloom Stalker)" - Stealth and ambush specialist with some magic
+- "Bard (College of Whispers)" - Deception and infiltration with full casting
+```
+
+**Example - Stat generation:**
+```
+Question: "How would you like to generate ability scores?"
+Options:
+- "Standard Array" - 15, 14, 13, 12, 10, 8 - balanced and predictable
+- "Point Buy" - 27 points to customize - controlled flexibility
+- "Roll dice" - 4d6 drop lowest, six times - exciting but random
+```
+
+### Combining Questions
+
+You can ask up to 4 questions at once if they're independent. This keeps character creation flowing efficiently.
+
+### Following Up
+
+After receiving answers, use AskUserQuestion again to dig deeper or present the next set of choices.
+
 ## Output
 
 After creation, summarize:
