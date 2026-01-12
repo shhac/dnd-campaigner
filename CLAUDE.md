@@ -120,10 +120,12 @@ Exports a campaign as a standalone project with all necessary agents, skills, an
 - **campaign-creator**: Designs new campaigns through interactive Q&A
 - **character-creator**: Builds PCs/NPCs with proper D&D 5e stats
 - **gm**: Runs the game - narrates, controls NPCs, adjudicates rules
-- **ai-player**: Plays a single party member (isolated context)
+- **ai-player**: Plays a single party member (isolated context, quick-or-veto system)
+- **dnd-enthusiast**: Experienced D&D player/DM offering feedback on campaign design, rules, and player experience
 
 ## Skills
 
 - **dice-roll**: Intelligent `toss` CLI wrapper for D&D dice notation
-- **ability-check**: DC tables, advantage/disadvantage, contested checks, skill guidance
+- **ability-check**: DC tables, saving throws, conditions, advantage/disadvantage, skill guidance
 - **name-generator**: Creates varied, original names by race/culture while avoiding duplicates
+- **random-events**: Generates weather, encounters, rumors, NPC moods to make the world feel alive
