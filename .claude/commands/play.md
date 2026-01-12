@@ -147,6 +147,22 @@ The GM should:
 - Update story-state.md with GM-only information
 - Maintain running session log in sessions/
 
+### Scene Flow: Show PC Dialogue Before NPC Responses
+
+When the player chooses an action or dialogue approach (e.g., "Respect the professional" or "Try to intimidate"), the GM must narrate what the PC actually says or does BEFORE showing NPC responses:
+
+1. **Player chooses approach** → "I'll try flattery"
+2. **GM shows PC's actual words/actions** → *"Your reputation precedes you, Captain. The harbor masters speak highly of your... discretion."*
+3. **Then NPC responds** → The captain's weathered face creases into a half-smile...
+
+This ensures the player sees their character's voice in the narrative, not just the outcome.
+
+**Two options for generating PC dialogue:**
+- **GM writes it directly** (preferred for flow): Keep it brief and in-character based on the character sheet's voice/personality
+- **Spawn ai-player Task**: For important moments where the player's character voice matters, spawn them as a Task to generate their own line
+
+The player should always see what their character said before seeing how NPCs react.
+
 ## Orchestration: Handling GM Questions
 
 When the GM agent returns output that contains a question for the player (character selection, action choices, decision points), the orchestrator MUST present these using **AskUserQuestion** with structured options rather than just relaying the text.
