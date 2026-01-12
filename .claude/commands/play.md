@@ -146,3 +146,18 @@ The GM should:
 - **Update party-knowledge.md at every save point** (AI players depend on this)
 - Update story-state.md with GM-only information
 - Maintain running session log in sessions/
+
+## Orchestration: Handling GM Questions
+
+When the GM agent returns output that contains a question for the player (character selection, action choices, decision points), the orchestrator MUST present these using **AskUserQuestion** with structured options rather than just relaying the text.
+
+Examples of when to use AskUserQuestion:
+- "Which character are you playing?" → Present list of available PCs as options
+- "What do you do?" → Present as open question (AskUserQuestion still allows free-text)
+- "Do you want to [X] or [Y]?" → Present X and Y as explicit options
+- "Would you like to play out the combat or resolve it quickly?" → Present both options
+
+This ensures:
+1. Clear, structured interaction for the player
+2. Consistent UX across all player decisions
+3. Easier input handling (especially for selection-type questions)
