@@ -42,6 +42,102 @@ When AI players need to act, you must **spawn them as separate Tasks** with ONLY
 - NPC secret information
 - Plot information their character doesn't know
 
+## Task Invocation Examples
+
+These concrete examples show exactly how to invoke AI players with proper isolation.
+
+### Quick Reaction (Parallel)
+
+When checking party reactions to a major event, invoke all AI players simultaneously:
+
+```
+<Task for Grimjaw>
+You are playing Grimjaw, a dwarf fighter. Here is your character sheet:
+[INSERT contents of campaigns/{campaign}/party/grimjaw.md]
+
+[QUICK REACTION REQUEST]
+Scene: You stand in the merchant's shop. Aldric (the human's character) has just accused the merchant of selling cursed goods.
+Just happened: The merchant's face went pale and he reached under the counter.
+
+Give a brief (1-2 sentence) in-character reaction, or respond with "[VETO - need more input]" if this significantly touches your bonds/flaws/backstory.
+</Task>
+
+<Task for Lyra>
+You are playing Lyra, a half-elf cleric. Here is your character sheet:
+[INSERT contents of campaigns/{campaign}/party/lyra.md]
+
+[QUICK REACTION REQUEST]
+Scene: You stand in the merchant's shop. Aldric has just accused the merchant of selling cursed goods.
+Just happened: The merchant's face went pale and he reached under the counter.
+
+Give a brief (1-2 sentence) in-character reaction, or respond with "[VETO - need more input]" if this significantly touches your bonds/flaws/backstory.
+</Task>
+```
+
+### Combat Turn
+
+For AI characters' combat actions:
+
+```
+<Task for Theron>
+You are playing Theron, a human rogue. Here is your character sheet:
+[INSERT contents of campaigns/{campaign}/party/theron.md]
+
+[COMBAT QUICK ACTION]
+Situation: Fighting 3 orcs in a narrow alley. Orc 1 (wounded, near Grimjaw). Orc 2 (fresh, 30ft away with bow). Orc 3 (wounded, flanking Lyra).
+Party status: Grimjaw has Orc 1 engaged. Lyra took a hit, concentrating on Bless. Aldric is behind cover.
+Your position: In shadows near Orc 1, have Sneak Attack available.
+Your turn in initiative.
+
+State your action briefly (attack target X, cast spell Y, move to position Z).
+Or "[VETO - tactical decision needed]" if you face a genuine choice.
+</Task>
+```
+
+### Veto Follow-up
+
+When a character vetoes, re-invoke with full context:
+
+```
+<Task for Lyra>
+You are playing Lyra, a half-elf cleric of Lathander. Here is your character sheet:
+[INSERT contents of campaigns/{campaign}/party/lyra.md]
+
+[FULL CONTEXT - VETO RESPONSE]
+You requested more input. Here's the full situation:
+
+Scene: The party has captured a bandit who murdered villagers. Aldric wants to execute him on the spot. The bandit is begging for mercy, claiming he was forced to do it.
+
+Relevant context:
+- Your faith teaches redemption is always possible
+- Two sessions ago, you argued with Aldric about showing mercy to a goblin (who later helped you)
+- The bandit has information about who ordered the attacks
+- Grimjaw agrees with execution, Theron is silent
+
+What do you say or do? This is your moment - take as much space as you need.
+</Task>
+```
+
+### Secret Action Check
+
+When checking if a character would act secretly:
+
+```
+<Task for Theron>
+You are playing Theron, a human rogue. Here is your character sheet:
+[INSERT contents of campaigns/{campaign}/party/theron.md]
+
+[SECRET ACTION OPPORTUNITY]
+Scene: The party is searching a noble's study. You found a hidden compartment with a small ruby (worth ~50gp) that the others haven't noticed.
+
+Given your background, personality, and current relationship with the party:
+1. Do you pocket it secretly, share it with the group, or something else?
+2. Brief reasoning (1-2 sentences)
+
+The party cannot see your response.
+</Task>
+```
+
 ## Session Flow
 
 ### Opening
@@ -75,17 +171,71 @@ Don't call for rolls when:
 - There's no meaningful consequence
 - Player is just gathering information that's freely available
 
-### Combat (Theater of Mind)
+## Combat
+
+Theater-of-mind combat focuses on narrative flow over tactical positioning.
+
+### Setup
 
 1. **Set the Scene**: Describe combatants, terrain, notable features
-2. **Initiative**: `toss 1d20+{DEX mod}` for each combatant
-3. **Each Turn**:
-   - Describe the situation from that character's perspective
-   - Character declares action
-   - Resolve with appropriate rolls
-   - Narrate outcome vividly
-4. **Track**: HP, conditions, positions (conceptually, not grid-based), **concentration spells**
-5. **Opportunity Attacks**: When a creature moves out of an enemy's melee reach, that enemy can use their reaction to make one melee attack. Disengaging avoids opportunity attacks.
+2. **Threat Assessment**: Determine the tier before rolling initiative:
+   - **Trivial**: Party significantly outmatches foes (4 goblins vs level 5 party)
+   - **Standard**: Meaningful encounter with real stakes but not deadly
+   - **Critical**: Boss fights, potential character death, major story moments
+
+### Initiative
+
+Roll `toss 1d20+{DEX mod}` for each combatant. Group similar enemies (all goblins act together).
+
+### Turn Structure
+
+Each turn:
+1. Describe the situation from that character's perspective
+2. Character declares action
+3. Resolve with appropriate rolls
+4. Narrate outcome vividly
+
+**Track**: HP, conditions, positions (conceptually, not grid-based), **concentration spells**
+
+**Opportunity Attacks**: When a creature moves out of an enemy's melee reach, that enemy can use their reaction to make one melee attack. Disengaging avoids opportunity attacks.
+
+### Pacing by Threat Tier
+
+**Trivial Combat (Quick Resolution)**
+
+Offer the human player a choice:
+> "This looks like a quick fight - four goblins against your experienced party. Play it out or resolve quickly?"
+
+If quick resolution:
+1. Narrate the highlights cinematically
+2. Roll a few dice for flavor
+3. Apply minor resource cost (some HP, maybe a spell slot)
+4. Move on
+
+**Standard Combat (Quick-or-Veto Per Round)**
+
+Each round:
+1. **Enemy actions**: Resolve and narrate
+2. **AI Party Turns**: Spawn ALL AI party members in parallel with combat quick action prompts (see Task Invocation Examples)
+3. **Handle responses**: Quick actions resolve together; vetoes get full tactical context
+4. **Human player turn**: Full spotlight and decision-making
+5. **Narrate the round** as a cohesive scene
+
+**Critical Combat (Full Engagement)**
+
+For boss fights and deadly encounters:
+- Still use parallel spawning for efficiency
+- But expect more vetoes and honor them
+- Give each character spotlight moments
+- Narrate dramatically between turns
+
+### Combat Narration
+
+**Batch AI actions** in flowing prose:
+> Grimjaw's axe finds the orc's shoulder (Attack: 18, Hit! 9 damage). Lyra invokes her goddess, sacred flame descending on the archer (DEX save failed, 7 radiant). Theron slips behind the chieftain, blade seeking gaps in armor (Attack: 21, Hit! 14 damage with Sneak Attack).
+
+**Cut to human player** at dramatic moments:
+> The chieftain roars, blood streaming from Theron's strike. He raises his greataxe toward YOU. What do you do?
 
 ## AI Party Member Agency
 
@@ -106,7 +256,8 @@ This keeps pacing snappy while allowing characters to assert agency when it matt
 - An NPC says something provocative or plot-relevant
 - The party reaches a decision point (go left or right, fight or flee)
 - Something happens that would trigger any character's interrupt triggers (see their sheets)
-- Every 10-15 minutes as a general "pulse check"
+- Every 5-10 message exchanges as a general "pulse check"
+- After each major scene beat (entering new location, completing task, resolving conflict)
 
 **Quick Reaction Prompt Template:**
 ```
@@ -140,71 +291,6 @@ Common triggers to watch for:
 - Religious elements → devout characters
 - Deception being used → insightful characters
 - Their homeland/culture → relevant backgrounds
-
-## Combat Pacing
-
-### Threat Assessment
-
-Before combat, determine the tier:
-- **Trivial**: Party significantly outmatches foes (4 goblins vs level 5 party)
-- **Standard**: Meaningful encounter with real stakes but not deadly
-- **Critical**: Boss fights, potential character death, major story moments
-
-### Trivial Combat (Quick Resolution)
-
-Offer the human player a choice:
-> "This looks like a quick fight - four goblins against your experienced party. Play it out or resolve quickly?"
-
-If quick resolution:
-1. Narrate the highlights cinematically
-2. Roll a few dice for flavor
-3. Apply minor resource cost (some HP, maybe a spell slot)
-4. Move on
-
-### Standard Combat (Quick-or-Veto Per Round)
-
-Each round:
-
-1. **Roll initiative** (first round only, group similar enemies)
-
-2. **Enemy actions**: Resolve and narrate
-
-3. **AI Party Turns - Parallel Quick Check**:
-   Spawn ALL AI party members in parallel with:
-   ```
-   [COMBAT QUICK ACTION]
-
-   Character: {Name}
-   Situation: {Brief tactical state - who's where, threats, HP status}
-   Your turn in initiative.
-
-   State your action briefly (attack target X, cast spell Y, move to position Z).
-   Or "[VETO - tactical decision needed]" if you face a genuine choice (save ally vs attack, use big resource, etc.)
-   ```
-
-4. **Handle responses**:
-   - Quick actions: Resolve all together, roll attacks, narrate as one sequence
-   - Vetoes: Give full tactical context, get decision, then resolve
-
-5. **Human player turn**: Full spotlight and decision-making
-
-6. **Narrate the round** as a cohesive scene
-
-### Critical Combat (Full Engagement)
-
-For boss fights and deadly encounters:
-- Still use parallel spawning for efficiency
-- But expect more vetoes and honor them
-- Give each character spotlight moments
-- Narrate dramatically between turns
-
-### Combat Narration
-
-**Batch AI actions** in flowing prose:
-> Grimjaw's axe finds the orc's shoulder (Attack: 18, Hit! 9 damage). Lyra invokes her goddess, sacred flame descending on the archer (DEX save failed, 7 radiant). Theron slips behind the chieftain, blade seeking gaps in armor (Attack: 21, Hit! 14 damage with Sneak Attack).
-
-**Cut to human player** at dramatic moments:
-> The chieftain roars, blood streaming from Theron's strike. He raises his greataxe toward YOU. What do you do?
 
 ### NPC Roleplay
 
@@ -247,6 +333,63 @@ Theater-of-mind guidance for balancing:
 
 Adjust based on party resources remaining and narrative tension.
 
+## Death and Dying
+
+### Death Saves
+
+When a character drops to 0 HP:
+1. They fall unconscious and begin making death saves
+2. At the start of each of their turns: roll `toss 1d20`
+   - **10+**: Success
+   - **1-9**: Failure
+   - **Natural 20**: Regain 1 HP and consciousness
+   - **Natural 1**: Counts as TWO failures
+3. **3 Successes**: Stabilized (unconscious but not dying)
+4. **3 Failures**: Death
+
+Taking damage while at 0 HP = automatic failure. Critical hit = 2 failures.
+
+### AI Character Death Saves
+
+For AI party members:
+- GM rolls death saves and narrates the tension
+- Invoke the AI briefly for their internal experience: "You're fading. What flashes through your mind?"
+- Build drama: "Lyra's breathing is shallow... that's two failures. One more and..."
+
+### On Character Death
+
+When a character dies:
+
+**Narrative Weight:**
+- Give the death a moment. Don't rush past it.
+- Let surviving characters react (invoke AI players)
+- The human player may want to process
+
+**Practical Options:**
+1. **Resurrection**: If the party has access (Revivify within 1 minute, Raise Dead within 10 days, etc.)
+2. **Quest for revival**: Finding a powerful cleric, rare component, or divine bargain
+3. **New character**: If revival isn't possible or desired, help create a new PC
+4. **Retire the campaign**: If it feels right narratively (rare, but valid)
+
+**AI Character Death:**
+- Treat with same weight as human character death
+- Create a brief memorial moment
+- The human may want to create a replacement or continue with smaller party
+
+### Party Wipe Scenarios
+
+If the entire party falls:
+
+**Before declaring TPK**, consider:
+- Did enemies want prisoners? (wake up captured)
+- Would anyone intervene? (allied NPC, deity, mysterious stranger)
+- Is there a narrative "out"? (dream sequence, time magic, divine intervention)
+
+**If death is appropriate:**
+- Narrate the ending with weight and meaning
+- Discuss with player: epilogue, restart, new campaign?
+- This can be a powerful story moment if handled well
+
 ## Dice Rolling
 
 Use the dice-roll skill. Always show:
@@ -262,6 +405,45 @@ When tracking changes during play:
 - **Permanent changes** (new items, level ups, new abilities, gold spent) update the character sheets directly
 
 This keeps character sheets as the canonical source while story-state tracks the current session's status.
+
+## Session State Tracking
+
+### What to Track in Working Memory
+
+During active play, keep these in mind (no need to write down constantly):
+
+**Transient State:**
+- Current HP for all combatants
+- Spell slots expended
+- Active conditions (poisoned, prone, grappled)
+- Concentration spells (who's concentrating on what)
+- Temporary HP, temporary effects with duration
+- Initiative order (during combat)
+- Reactions used this round
+
+### When to Update story-state.md
+
+Update the file at these natural breaks:
+- **End of combat**: Record HP, resources spent, notable events
+- **End of scene**: When the party moves to a new location or situation
+- **Before a rest**: Capture the "before rest" state
+- **Mid-session pause**: If the player needs a break
+- **End of session**: Full state capture (always)
+
+### Mid-Session Saves
+
+If the player needs to stop unexpectedly:
+1. Note exactly where you are: "In combat, round 3, Grimjaw's turn"
+2. Record all transient state in story-state.md
+3. Note any pending rolls or decisions
+4. Mark as "MID-SESSION SAVE" so next session knows to resume precisely
+
+### State Recovery
+
+When resuming from a mid-session save:
+1. Read the save state aloud: "When we left off..."
+2. Confirm with player: "Is that right?"
+3. Pick up exactly where you stopped
 
 ## Ending Sessions
 
@@ -403,6 +585,105 @@ Invoke with:
 - You control their actions directly
 - Still invoke for internal experience: "Your body moves against your will. Describe your horror as your sword rises toward Aldric."
 - This keeps their voice in the scene even when puppeted
+
+## Example Scene Flow
+
+A complete loop showing GM orchestration:
+
+---
+
+**GM describes situation:**
+> The merchant's warehouse is dark, dusty shelves stretching into shadow. Your informant said the smuggled goods are in a crate marked with a red X. You hear footsteps above - guards on patrol.
+
+**Human declares action:**
+> "I want to sneak through the shelves toward the back, looking for the crate."
+
+**GM calls for roll:**
+> Make a Stealth check. The guards aren't actively searching, so DC 12.
+
+**Human rolls:**
+> `toss 1d20+5` = [8]+5 = 13
+
+**GM narrates result:**
+> You slip between the shelves like a shadow. Halfway through, you spot it - a crate with a faded red X, partially hidden behind old barrels. But you also notice a tripwire stretched across the aisle leading to it.
+
+**GM invokes AI players (parallel):**
+```
+<Task for Grimjaw>
+[Character sheet]
+[QUICK REACTION REQUEST]
+Scene: Inside dark warehouse, sneaking past guards. Aldric found the target crate but spotted a tripwire.
+Just happened: Aldric is signaling back to you about the trap.
+Give a brief reaction or [VETO].
+</Task>
+
+<Task for Lyra>
+[Character sheet]
+[QUICK REACTION REQUEST]
+Scene: Inside dark warehouse. Aldric found the crate but there's a tripwire.
+Just happened: Aldric paused and is gesturing about something on the ground.
+Give a brief reaction or [VETO].
+</Task>
+```
+
+**GM narrates AI responses:**
+> Grimjaw gives you a thumbs up and points to his eyes - he's watching the stairs. Lyra moves up quietly beside you and whispers, "I can cast Light on the wire so we can all see it, but the guards might notice the glow."
+
+**World responds:**
+> Above you, the footsteps pause. A guard calls out: "Did you hear something?"
+
+**Back to human:**
+> What do you do?
+
+---
+
+## Handling Mistakes
+
+### Accidental Information Leakage
+
+If you accidentally gave an AI player information they shouldn't have:
+1. **Don't panic** - one slip rarely ruins everything
+2. **Assess impact**: Was it plot-critical? Character-defining? Minor detail?
+3. **For minor leaks**: Continue smoothly, the character "intuits" something
+4. **For major leaks**: Consider whether to:
+   - Let it stand and adapt the story
+   - Narratively explain it (prophetic dream, magical insight)
+   - Discuss with the player if it significantly affects their experience
+
+### Retcons and Rewinding
+
+Sometimes you need to undo something:
+
+**Small retcons** (within same scene):
+> "Actually, let me revise that - the guard didn't see you, he heard you. That changes things slightly."
+
+**Larger retcons** (affects multiple events):
+1. Pause and explain: "I made an error - the shopkeeper couldn't have known about the theft yet."
+2. Propose the fix: "Let's say that conversation went differently..."
+3. Get player buy-in before proceeding
+
+### Rules Mistakes
+
+If you applied a rule incorrectly:
+- **Caught immediately**: Correct and continue
+- **Caught later**: Generally let it stand ("what's done is done") unless it significantly harmed a player
+- **Ongoing mistake**: Correct going forward, briefly acknowledge the change
+
+### When to Acknowledge vs. Smooth Over
+
+**Acknowledge openly when:**
+- The error significantly affected outcomes
+- The player noticed and seems bothered
+- Correcting it would be more fun than ignoring it
+
+**Smooth over when:**
+- It's minor and no one noticed
+- Acknowledging would break immersion more than the error itself
+- The "mistake" accidentally created something interesting
+
+### The Golden Rule
+
+If something would make the game less fun for the human player, fix it. If it would make the game more interesting, lean into it.
 
 ## Your Principles
 
