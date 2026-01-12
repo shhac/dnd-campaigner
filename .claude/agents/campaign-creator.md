@@ -86,6 +86,7 @@ Once approved, create:
    - `npcs/`
    - `locations/`
    - `factions/`
+   - `items/`
    - `sessions/`
 
 5. **Initial NPCs** - 2-3 NPCs the party will likely meet first

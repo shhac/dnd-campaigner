@@ -56,6 +56,13 @@
 ### Act 3: {Title}
 {Overview of climax and resolution}
 
+## Notable Items
+
+### {Item Name}
+- **Type**: {Weapon/Artifact/etc.}
+- **Location**: {Where it can be found}
+- **Significance**: {Why it matters to the story}
+
 ## House Rules
 
 {Any campaign-specific rule modifications}
