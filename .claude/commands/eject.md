@@ -36,7 +36,10 @@ If no destination is provided, you'll be asked where to put it.
 {destination}/
 ├── overview.md
 ├── story-state.md
+├── party-knowledge.md         # Shared knowledge for AI players
 ├── party/
+│   ├── {character}.md         # Character sheets
+│   └── {character}-journal.md # AI character memories
 ├── npcs/
 ├── locations/
 ├── factions/
@@ -70,7 +73,9 @@ If no destination is provided, you'll be asked where to put it.
 ├── item.md                     # For notable items
 ├── location.md                 # For new locations
 ├── faction.md                  # For factions
-└── relationships.md            # For tracking party dynamics
+├── relationships.md            # For tracking party dynamics
+├── character-journal.md        # For AI character memory files
+└── party-knowledge.md          # For shared party knowledge
 ```
 
 ### Standalone CLAUDE.md
@@ -154,6 +159,8 @@ Copy templates for ongoing content creation:
 - `templates/location.md`
 - `templates/faction.md`
 - `templates/relationships.md`
+- `templates/character-journal.md`
+- `templates/party-knowledge.md`
 
 ### Step 6: Create Modified Commands
 
@@ -217,9 +224,16 @@ Simply run `/play` to begin.
 Use the `gm` agent with campaign files at root level:
 - overview.md
 - story-state.md
-- party/*.md
+- party-knowledge.md (shared knowledge for AI players)
+- party/*.md (character sheets)
+- party/*-journal.md (AI character memories)
 - npcs/*.md
 - locations/, factions/, items/
+
+SAVE POINTS: Update story-state.md AND party-knowledge.md at:
+- End of combat, end of scene, major discovery, after NPC conversations, before rests, end of session
+
+When spawning AI players, tell them to read party-knowledge.md and their journal file.
 
 [Rest of play.md content with paths adjusted]
 ```

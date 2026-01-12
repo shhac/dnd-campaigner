@@ -66,13 +66,31 @@ The GM handles these edge cases:
 - **AI character secrets**: AI characters may act secretly in-character; tracked by GM for dramatic reveals
 - **Charmed/paralyzed AI characters**: Still invoked for internal experience, but actions constrained by condition
 
+## Save Points (IMPORTANT)
+
+The GM should save game state at these moments:
+
+1. **End of combat** - Record HP, resources, what happened
+2. **End of scene** - When moving to new location or situation changes
+3. **Major discovery** - When the party learns important information
+4. **After NPC conversations** - When significant information is exchanged
+5. **Before rests** - Capture state before healing
+6. **When you ask** - Say "let's save" anytime
+
+**Files updated at save points:**
+- `story-state.md` - Full GM state including secrets
+- `party-knowledge.md` - Shared knowledge (AI players read this)
+- `sessions/session-{N}.md` - Running session log
+
+**Why this matters:** AI party members are spawned fresh each time with no memory. They rely on `party-knowledge.md` and their personal journals for continuity. If the GM doesn't save, AI players won't know what happened.
+
 ## Ending a Session
 
 When you want to stop:
 1. Tell the GM
 2. GM will find a good stopping point
-3. GM updates `story-state.md`
-4. GM creates a session log in `sessions/`
+3. GM updates `story-state.md` AND `party-knowledge.md`
+4. GM creates/finalizes session log in `sessions/`
 
 ## Information Isolation
 
@@ -96,6 +114,7 @@ Task: gm agent
 Prompt: Run a D&D session for the {campaign} campaign. First read:
 - campaigns/{campaign}/overview.md
 - campaigns/{campaign}/story-state.md
+- campaigns/{campaign}/party-knowledge.md
 - All files in campaigns/{campaign}/party/
 - Relevant NPCs from campaigns/{campaign}/npcs/
 
@@ -104,13 +123,26 @@ Then:
 2. Ask which character the player is controlling
 3. Begin running the session
 
-When AI party members need to act, spawn them as separate Tasks with ONLY their character sheet and current scene. Never pass story-state.md or GM secrets to AI players.
+SAVE POINTS: Update story-state.md AND party-knowledge.md at these moments:
+- End of combat
+- End of scene (location change or major situation change)
+- Major discovery or after significant NPC conversation
+- Before rests
+- When the player asks to save
+- End of session (always)
 
-When the session ends, update story-state.md and create a session log.
+When AI party members need to act, spawn them as separate Tasks. Tell them to read:
+- Their character sheet
+- campaigns/{campaign}/party-knowledge.md
+- Their journal: campaigns/{campaign}/party/{name}-journal.md
+
+Never pass story-state.md or GM secrets to AI players.
 ```
 
 The GM should:
 - Have full access to all campaign files
 - Maintain strict isolation for AI players
 - Use the dice-roll and ability-check skills
-- Update campaign state after session
+- **Update party-knowledge.md at every save point** (AI players depend on this)
+- Update story-state.md with GM-only information
+- Maintain running session log in sessions/
