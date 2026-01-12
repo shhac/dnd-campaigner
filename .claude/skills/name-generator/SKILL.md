@@ -54,6 +54,8 @@ Avoid duplicates unless the user explicitly wants to reuse a character from anot
 | Orc/Half-orc | Guttural, strong stops | -gash, -krul, Gr-, Ur- |
 | Dragonborn | Clan name + personal, draconic feel | -asar, -inn, -ax |
 | Gnome | Playful, often long with nicknames | Multiple names, diminutives |
+| Aasimar | Celestial, virtue-inspired | -ael, -iel, virtue names (Grace, Valor) |
+| Genasi | Element-influenced | Fire: harsh (Ember, Ash), Water: flowing (Wave, Mist), Earth: solid (Stone, Clay), Air: light (Breeze, Zephyr) |
 
 ### For Place Names
 

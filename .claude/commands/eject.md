@@ -149,14 +149,27 @@ Generate a new CLAUDE.md that:
 - Includes the information isolation rules
 - Notes this was ejected from dnd-campaigner
 
-### Step 8: Initialize Git (Optional)
+### Step 8: Create .gitignore
+
+Create a `.gitignore` file in the ejected project:
+```
+.DS_Store
+.claude/settings.local.json
+CLAUDE.local.md
+*.swp
+*~
+.idea/
+.vscode/
+```
+
+### Step 9: Initialize Git (Optional)
 
 Ask if user wants to initialize a git repo:
 ```bash
 cd {destination} && git init
 ```
 
-### Step 9: Report
+### Step 10: Report
 
 Tell the user:
 - What was created

@@ -29,6 +29,11 @@
 | **Hit Dice** | {Dice} |
 | **Speed** | {Speed} ft |
 | **Initiative** | {Mod} |
+| **Proficiency Bonus** | +{PB} |
+
+> Note: Proficiency bonus is +2 at levels 1-4, +3 at 5-8, +4 at 9-12, +5 at 13-16, +6 at 17-20
+
+**Death Saves**: Successes [ ][ ][ ] | Failures [ ][ ][ ]
 
 ### Saving Throws
 - **Proficient**: {Save 1}, {Save 2}
@@ -47,6 +52,10 @@
 
 **Expertise** (double proficiency):
 - {Skill if any}
+
+## Languages
+- {Language 1}
+- {Language 2}
 
 ## Features & Traits
 
@@ -71,9 +80,9 @@
 - {Cantrip 1}
 
 ### Spell Slots
-| 1st | 2nd | 3rd | 4th | 5th |
-|:---:|:---:|:---:|:---:|:---:|
-| {slots} | {slots} | {slots} | {slots} | {slots} |
+| 1st | 2nd | 3rd | 4th | 5th | 6th | 7th | 8th | 9th |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| {slots} | {slots} | {slots} | {slots} | {slots} | {slots} | {slots} | {slots} | {slots} |
 
 ### Prepared/Known Spells
 **1st Level**: {Spell 1}, {Spell 2}

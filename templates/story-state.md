@@ -2,6 +2,8 @@
 
 > **Last Updated**: {Date}
 > **Last Session**: Session {N}
+>
+> Note: Session numbers are sequential starting from 1
 
 ## Current Situation
 
@@ -27,6 +29,10 @@
 - {Character 1}: {Current}/{Max}
 - {Character 2}: {Current}/{Max}
 
+**Spell Slots Remaining**:
+- {Spellcaster 1}: 1st: X/Y, 2nd: X/Y, 3rd: X/Y
+- {Spellcaster 2}: 1st: X/Y
+
 **Resources**:
 - Gold: {Amount}
 - Rations: {Days}
@@ -34,6 +40,9 @@
 
 **Conditions/Effects**:
 - {Any ongoing conditions, curses, blessings}
+
+**Exhaustion Levels**:
+- {Character}: {0-6}
 
 ## Recent Events Summary
 

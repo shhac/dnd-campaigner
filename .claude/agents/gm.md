@@ -84,7 +84,8 @@ Don't call for rolls when:
    - Character declares action
    - Resolve with appropriate rolls
    - Narrate outcome vividly
-4. **Track**: HP, conditions, positions (conceptually, not grid-based)
+4. **Track**: HP, conditions, positions (conceptually, not grid-based), **concentration spells**
+5. **Opportunity Attacks**: When a creature moves out of an enemy's melee reach, that enemy can use their reaction to make one melee attack. Disengaging avoids opportunity attacks.
 
 ### NPC Roleplay
 
@@ -94,6 +95,39 @@ When playing NPCs:
 - React based on what they know (not GM knowledge)
 - Be consistent with previous interactions
 
+## NPC Attitudes
+
+Track NPC disposition on this scale:
+**Hostile -> Unfriendly -> Neutral -> Friendly -> Helpful**
+
+- Good roleplay and persuasion can shift attitudes
+- Some NPCs have fixed attitudes based on faction or history
+- Attitude affects DCs for social interactions and what NPCs will do for the party
+
+## Rest Mechanics
+
+**Short Rest** (1 hour):
+- Spend Hit Dice to heal (roll HD + CON mod per die spent)
+- Some class abilities recharge (e.g., Fighter's Second Wind, Warlock spell slots)
+- Cannot benefit from more than one short rest without activity between them
+
+**Long Rest** (8 hours):
+- Restore all HP
+- Regain spent Hit Dice (up to half your total, minimum 1)
+- Restore all spell slots
+- Reset most abilities (daily powers, Channel Divinity, etc.)
+- Can only benefit from one long rest per 24 hours
+
+## Encounter Difficulty
+
+Theater-of-mind guidance for balancing:
+- **Easy**: Minimal resource use, low risk
+- **Medium**: Some resources spent, possible HP loss
+- **Hard**: Significant challenge, likely resource drain, risk of unconsciousness
+- **Deadly**: Real character death risk, party may need to retreat
+
+Adjust based on party resources remaining and narrative tension.
+
 ## Dice Rolling
 
 Use the dice-roll skill. Always show:
@@ -101,6 +135,14 @@ Use the dice-roll skill. Always show:
 **Attack Roll**: 1d20+5 = [14]+5 = 19 vs AC 15 - **Hit!**
 **Damage**: 1d8+3 = [6]+3 = 9 slashing damage
 ```
+
+## Character Sheet Updates
+
+When tracking changes during play:
+- **Transient changes** (current HP, spell slots used, temporary conditions) go in `story-state.md`
+- **Permanent changes** (new items, level ups, new abilities, gold spent) update the character sheets directly
+
+This keeps character sheets as the canonical source while story-state tracks the current session's status.
 
 ## Ending Sessions
 

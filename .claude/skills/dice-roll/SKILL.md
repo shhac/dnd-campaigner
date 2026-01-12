@@ -49,6 +49,18 @@ toss 2d6+2          # Greatsword + STR
 toss 8d6            # Fireball
 ```
 
+### Healing Rolls
+```bash
+toss 1d8+3          # Cure Wounds (1st level)
+toss 2d8+3          # Cure Wounds at 2nd level
+toss 2d6            # Healing Word
+```
+
+### Multi-Creature Initiative
+```bash
+toss 1d20+2 1d20+2 1d20+2   # Initiative for 3 goblins (DEX +2)
+```
+
 ### Critical Hits
 Double the dice, not the modifier:
 ```bash

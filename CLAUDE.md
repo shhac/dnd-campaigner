@@ -9,6 +9,20 @@ This repository manages D&D campaigns where:
 - AI agents play other party members
 - An AI Game Master runs the world
 
+## Prerequisites
+
+The `toss` CLI is required for dice rolling.
+
+**Install via Homebrew:**
+```bash
+brew tap shhac/tap && brew install toss
+```
+
+**Verify installation:**
+```bash
+toss 1d20
+```
+
 ## Directory Structure
 
 ```
@@ -19,6 +33,7 @@ This repository manages D&D campaigns where:
 
 templates/              # Markdown templates for campaign content
 campaigns/{name}/       # Individual campaign data
+├── items/              # Notable items and artifacts
 ```
 
 ## Core Design Principle: Information Isolation
@@ -97,6 +112,7 @@ Exports a campaign as a standalone project with all necessary agents, skills, an
 | `story-state.md` | Current situation, active quests, secrets | GM only |
 | `party/{name}.md` | Character sheet | GM, that character's agent |
 | `npcs/{name}.md` | NPC details + secrets | GM only |
+| `items/{name}.md` | Notable items, artifacts, equipment | GM, reference |
 | `sessions/session-*.md` | What happened (shared knowledge) | Everyone |
 
 ## Agent Descriptions
