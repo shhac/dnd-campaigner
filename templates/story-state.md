@@ -67,6 +67,14 @@
 - {Secret 1 the party doesn't know}
 - {Secret 2}
 
+### Character Secrets
+
+Track secret actions taken by AI characters. Each entry should note: what happened, when it could be discovered, and potential story hooks.
+
+| Character | Secret | How Discovered | Story Hook |
+|-----------|--------|----------------|------------|
+| {Name} | {What they did secretly} | {Trigger for revelation} | {Potential plot development} |
+
 ### Upcoming Planned Events
 - {What's about to happen if they go to X}
 - {What the villain is doing meanwhile}

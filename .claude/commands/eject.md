@@ -50,14 +50,27 @@ If no destination is provided, you'll be asked where to put it.
 ├── agents/
 │   ├── gm.md
 │   ├── ai-player.md
-│   └── character-creator.md    # For adding new characters
+│   ├── character-creator.md    # For adding new characters
+│   └── dnd-enthusiast.md       # For rules/design feedback
 ├── skills/
 │   ├── dice-roll/SKILL.md
 │   ├── ability-check/SKILL.md
-│   └── name-generator/SKILL.md
+│   ├── name-generator/SKILL.md
+│   └── random-events/SKILL.md  # Weather, encounters, rumors
 └── commands/
     ├── play.md                 # Modified for standalone use
     └── new-character.md        # Modified for standalone use
+```
+
+### Templates
+```
+{destination}/templates/
+├── npc.md                      # For creating new NPCs
+├── session-log.md              # For session logging
+├── item.md                     # For notable items
+├── location.md                 # For new locations
+├── faction.md                  # For factions
+└── relationships.md            # For tracking party dynamics
 ```
 
 ### Standalone CLAUDE.md
@@ -109,7 +122,9 @@ mkdir -p {destination}/.claude/agents
 mkdir -p {destination}/.claude/skills/dice-roll
 mkdir -p {destination}/.claude/skills/ability-check
 mkdir -p {destination}/.claude/skills/name-generator
+mkdir -p {destination}/.claude/skills/random-events
 mkdir -p {destination}/.claude/commands
+mkdir -p {destination}/templates
 ```
 
 ### Step 4: Copy Campaign Content
@@ -124,11 +139,21 @@ Copy these agents (no modification needed):
 - `.claude/agents/gm.md`
 - `.claude/agents/ai-player.md`
 - `.claude/agents/character-creator.md`
+- `.claude/agents/dnd-enthusiast.md`
 
 Copy skills (no modification needed):
 - `.claude/skills/dice-roll/SKILL.md`
 - `.claude/skills/ability-check/SKILL.md`
 - `.claude/skills/name-generator/SKILL.md`
+- `.claude/skills/random-events/SKILL.md`
+
+Copy templates for ongoing content creation:
+- `templates/npc.md`
+- `templates/session-log.md`
+- `templates/item.md`
+- `templates/location.md`
+- `templates/faction.md`
+- `templates/relationships.md`
 
 ### Step 6: Create Modified Commands
 

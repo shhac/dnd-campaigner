@@ -55,6 +55,17 @@ While playing, you can say:
 - "Let's take a short/long rest" - Rest mechanics
 - "I'd like to stop here" - End session gracefully
 
+## Special Situations
+
+The GM handles these edge cases:
+
+- **Split party**: Interleaved scenes, cutting between groups at dramatic moments
+- **Your character unconscious**: You can narrate their experience, direct spotlight to allies, or suggest environmental developments
+- **Downtime/shopping**: Batched resolution for routine activities, full scenes only for meaningful choices
+- **Loot distribution**: In-character negotiation; you have final say as party leader
+- **AI character secrets**: AI characters may act secretly in-character; tracked by GM for dramatic reveals
+- **Charmed/paralyzed AI characters**: Still invoked for internal experience, but actions constrained by condition
+
 ## Ending a Session
 
 When you want to stop:

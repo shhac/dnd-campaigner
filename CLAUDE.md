@@ -98,6 +98,12 @@ Creates PCs or NPCs with full sheets.
 ```
 Starts a session. You declare your character, GM orchestrates.
 
+### Listing Campaigns
+```
+/campaigns
+```
+Shows all available campaigns and their status.
+
 ### Ejecting a Campaign
 ```
 /eject {campaign-name} [destination]
