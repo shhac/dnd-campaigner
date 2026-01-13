@@ -2,6 +2,23 @@
 
 Setting up and tracking combat initiative.
 
+## Pre-Combat Setup
+
+Before rolling initiative, establish the battlefield state:
+
+1. **Active Concentration Spells** - List any ongoing concentration spells:
+   ```
+   **Concentration Active:**
+   - Seraphine: Bless (Grimjaw, Tilda, self)
+   - Enemy Druid: Entangle (zone near door)
+   ```
+
+2. **Conditions** - Note any pre-existing conditions on combatants
+
+3. **Positions** - Briefly describe relative positions in theater-of-mind terms
+
+If no concentration spells are active, note: "No active concentration"
+
 ## Rolling Initiative
 
 Roll `toss 1d20+{DEX mod}` for each combatant.
@@ -96,6 +113,9 @@ Round 2 of fight against bandits in warehouse.
 - Bandit Archer: Fresh, on raised platform 30ft away
 - Bandit Thug: Near door, blocking exit
 
+## Concentration Active
+- Corwin: Bless (you, Grimjaw, self)
+
 ## Party Status
 - Grimjaw: 28/35 HP, engaged with Leader
 - Corwin: Full HP, concentrating on Bless
@@ -104,3 +124,7 @@ Round 2 of fight against bandits in warehouse.
 ## Your Turn
 Declare your action. Quick decision or [VETO] for tactical choice.
 ```
+
+Always include concentration status in combat prompts so AI players know:
+- Which allies are concentrating (avoid breaking their line of sight/effect)
+- What buffs/debuffs are active from concentration spells

@@ -138,7 +138,9 @@ Check for vetoes (response starts with `[VETO`). Handle vetoes by writing a new 
 
 ### Journal Mode: Recording Memories
 
-After narrating outcomes, trigger journal updates for ALL characters (including the human's character):
+After narrating outcomes, trigger journal updates for **ALL party members**.
+
+**CRITICAL**: Always include the human player's character in journal updates. The human's character gets the same journal treatment as AI characters - the orchestrator spawns the ai-player agent in journal mode for them too. This ensures continuity for everyone.
 
 **Step 1: Write journal prompt files**
 
@@ -168,7 +170,7 @@ Record this from your perspective. What did you learn? How do you feel?
 [JOURNAL_UPDATE: corwin, tilda, grimjaw]
 ```
 
-Include the human player's character - they get a journal too.
+**Always list ALL party members** - including the human player's character. Write a journal prompt for each one.
 
 **Step 3: Continue after resumption**
 

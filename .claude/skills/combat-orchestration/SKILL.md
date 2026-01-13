@@ -55,9 +55,14 @@ Each turn:
 1. Describe situation from character's perspective
 2. Character declares action
 3. Resolve with appropriate rolls
-4. Narrate outcome vividly
+4. **If damage dealt to concentrating character:** Call for concentration save immediately (see [concentration.md](concentration.md))
+5. Narrate outcome vividly
 
-**Track:** HP, conditions, positions (conceptual), concentration spells
+**Track:**
+- HP
+- Conditions
+- Positions (conceptual)
+- Concentration (who's concentrating on what spell)
 
 ## AI Player Combat Flow
 
@@ -68,6 +73,22 @@ Write prompts for ALL AI players, signal once:
 ```
 
 They respond in parallel. Batch their actions in narrative.
+
+## After Combat
+
+Post-combat checklist:
+
+1. **Confirm resolution** - Enemies defeated, fled, or surrendered
+2. **Update story-state.md**:
+   - [ ] Final HP for all party members
+   - [ ] Resources expended (spell slots, abilities)
+   - [ ] Combat outcome summary
+   - [ ] Loot acquired
+3. **Update party-knowledge.md** with combat results
+4. **Trigger journal updates** for all characters (including human's):
+   - Write journal prompts to `tmp/`
+   - Signal `[JOURNAL_UPDATE: all-characters]`
+5. **Clean up** any combat-related tmp files
 
 ## Detailed Procedures
 

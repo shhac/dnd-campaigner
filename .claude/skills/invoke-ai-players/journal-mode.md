@@ -27,18 +27,22 @@ Separate journaling captures the full narrative arc.
 
 ## Human Player Character
 
-The human player's character also gets a journal, maintained the same way as AI characters. The GM includes them in the `[JOURNAL_UPDATE]` signal:
+The human player's character is journaled **exactly the same way** as AI characters. The ai-player agent doesn't know or care whether it's updating the journal for a human-controlled or AI-controlled character - it just receives a journal prompt and updates the journal.
+
+The GM includes the human's character in the `[JOURNAL_UPDATE]` signal:
 
 ```
 [JOURNAL_UPDATE: corwin, tilda, grimjaw]
          │
-         └── Human player's character
+         └── Human player's character (gets journal update too)
 ```
 
+The orchestrator spawns ai-player in journal mode for ALL listed characters, including the human's.
+
 This gives the human's character:
-- A record of their adventure
-- Continuity between sessions
-- The same journaling quality as AI characters
+- A record of their adventure from their character's perspective
+- Continuity between sessions (AI agents can read the journal for context)
+- The same journaling quality and format as AI characters
 
 ## File Flow
 

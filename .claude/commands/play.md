@@ -145,13 +145,13 @@ When you want to trigger journaling:
 
 Monitor GM output for signals:
 - `[AWAIT_AI_PLAYERS: char1, char2]` → Spawn AI players in action mode
-- `[JOURNAL_UPDATE: char1, char2]` → Spawn AI players in journal mode
+- `[JOURNAL_UPDATE: char1, char2, char3]` → Spawn AI players in journal mode for ALL listed characters
 - No signal → Relay narrative to player, await input, resume GM
 
 Key rules:
 - **Spawn in parallel** when multiple characters are listed
 - **Don't pass campaign content** - all context flows through files
-- **Human character gets journaling** - included in `[JOURNAL_UPDATE]` signals
+- **Human character gets journaling** - when `[JOURNAL_UPDATE]` is signaled, spawn ai-player in journal mode for ALL listed characters including the human's. The human's character gets the same journal treatment as AI characters.
 
 ### Scene Flow: Show PC Dialogue Before NPC Responses
 
