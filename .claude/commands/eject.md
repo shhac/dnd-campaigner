@@ -37,6 +37,7 @@ If no destination is provided, you'll be asked where to put it.
 ├── overview.md
 ├── story-state.md
 ├── party-knowledge.md         # Shared knowledge for AI players
+├── preferences.md             # Narrative style, player character
 ├── party/
 │   ├── {character}.md         # Character sheets
 │   └── {character}-journal.md # AI character memories
@@ -64,7 +65,9 @@ If no destination is provided, you'll be asked where to put it.
 │   ├── save-point/SKILL.md     # Session state persistence
 │   ├── quick-or-veto/SKILL.md  # AI player reaction pattern
 │   ├── combat-orchestration/SKILL.md    # Combat management
-│   └── invoke-ai-players/SKILL.md       # AI player spawning
+│   ├── invoke-ai-players/SKILL.md       # AI player spawning
+│   ├── play-orchestration/SKILL.md      # Session orchestration
+│   └── narrative-formatting/            # Scene formatting styles
 └── commands/
     ├── play.md                 # Modified for standalone use
     └── new-character.md        # Modified for standalone use
@@ -80,7 +83,8 @@ If no destination is provided, you'll be asked where to put it.
 ├── faction.md                  # For factions
 ├── relationships.md            # For tracking party dynamics
 ├── character-journal.md        # For AI character memory files
-└── party-knowledge.md          # For shared party knowledge
+├── party-knowledge.md          # For shared party knowledge
+└── preferences.md              # Campaign preferences template
 ```
 
 ### Standalone CLAUDE.md
@@ -138,6 +142,8 @@ mkdir -p {destination}/.claude/skills/save-point
 mkdir -p {destination}/.claude/skills/quick-or-veto
 mkdir -p {destination}/.claude/skills/combat-orchestration
 mkdir -p {destination}/.claude/skills/invoke-ai-players
+mkdir -p {destination}/.claude/skills/play-orchestration
+mkdir -p {destination}/.claude/skills/narrative-formatting/conversation
 mkdir -p {destination}/.claude/commands
 mkdir -p {destination}/templates
 ```
@@ -166,6 +172,8 @@ Copy skills (no modification needed):
 - `.claude/skills/quick-or-veto/SKILL.md`
 - `.claude/skills/combat-orchestration/SKILL.md`
 - `.claude/skills/invoke-ai-players/SKILL.md`
+- `.claude/skills/play-orchestration/SKILL.md`
+- `.claude/skills/narrative-formatting/SKILL.md` (and all subdirectory files)
 
 Copy templates for ongoing content creation:
 - `templates/npc.md`
@@ -176,6 +184,7 @@ Copy templates for ongoing content creation:
 - `templates/relationships.md`
 - `templates/character-journal.md`
 - `templates/party-knowledge.md`
+- `templates/preferences.md`
 
 ### Step 6: Create Modified Commands
 
@@ -240,6 +249,7 @@ Use the `gm` agent with campaign files at root level:
 - overview.md
 - story-state.md
 - party-knowledge.md (shared knowledge for AI players)
+- preferences.md (narrative style, player character)
 - party/*.md (character sheets)
 - party/*-journal.md (AI character memories)
 - npcs/*.md
@@ -249,6 +259,8 @@ SAVE POINTS: Update story-state.md AND party-knowledge.md at:
 - End of combat, end of scene, major discovery, after NPC conversations, before rests, end of session
 
 When spawning AI players, tell them to read party-knowledge.md and their journal file.
+
+Read narrative style from preferences.md and apply via narrative-formatting skill.
 
 [Rest of play.md content with paths adjusted]
 ```

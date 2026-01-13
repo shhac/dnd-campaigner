@@ -18,6 +18,8 @@ Launches a game session where:
 - You play your chosen character
 - AI agents play other party members (with isolated context)
 
+**Preferences**: The orchestrator reads campaign preferences (narrative style, player character) from `preferences.md`. If preferences aren't set, you'll be asked once and they're saved for future sessions.
+
 ## Prerequisites
 
 Before playing, you need:
@@ -34,7 +36,7 @@ Before playing, you need:
 The GM will:
 1. Load campaign context (overview, story-state)
 2. Summarize where you left off
-3. Ask which character you're playing
+3. Use your saved character preference (or ask if first session)
 4. Begin narrating
 
 ## Session Flow
@@ -115,11 +117,15 @@ You are the **orchestrator** for the D&D session. Your job is to manage the flow
    - Check `campaigns/{campaign}/` directory exists
    - Read `campaigns/{campaign}/overview.md` to confirm it's valid
 
-2. **Check for party members**:
+2. **Load preferences**:
+   - Read `campaigns/{campaign}/preferences.md` if it exists
+   - Note narrative style and player character for the session
+
+3. **Check for party members**:
    - List files in `campaigns/{campaign}/party/`
    - Confirm at least one character exists
 
-3. **Start the session using the play-orchestration skill**
+4. **Start the session using the play-orchestration skill**
 
 ### Use the Play-Orchestration Skill
 
@@ -144,6 +150,7 @@ Simply invoke the skill with the campaign name to begin orchestration.
 | `[JOURNAL_UPDATE: ...]` | Use invoke-ai-players skill (journal mode) |
 | Player responds | Resume GM with player's response |
 | Context compacted | Re-invoke play-orchestration skill |
+| Missing preferences | Ask player, save to preferences.md |
 
 ### Related Skills
 

@@ -22,7 +22,10 @@ Use this skill when:
 /play {campaign}
     |
     v
-Spawn GM (with campaign context) ----------------+
+Load Preferences (or ask player)
+    |
+    v
+Spawn GM (with campaign context + preferences) --+
     |                                            |
     v                                            |
 GM narrates -> Relay to player                   |
@@ -43,13 +46,76 @@ Resume GM ----------------------------------------+
 Loop until session ends
 ```
 
+## Step 0: Load Preferences
+
+Before spawning the GM, check for and load player preferences.
+
+### Read Preferences File
+
+Check if `campaigns/{campaign}/preferences.md` exists.
+
+If the file exists, read it to extract:
+- `narrative_style`: The formatting style for dialogue and scenes
+- `player_character`: Which character the player controls
+
+### Handle Narrative Style
+
+If `narrative_style` is set in preferences:
+- Note it for passing to the GM (e.g., "script", "novel", "hybrid", "minimal")
+
+If `narrative_style` is NOT set:
+- Use AskUserQuestion to ask the player:
+
+```
+AskUserQuestion:
+  question: "What narrative style would you like for this session?"
+  header: "Narrative Style"
+  options:
+    - label: "Script"
+      description: "Clean dialogue format with speaker names, minimal prose"
+    - label: "Novel"
+      description: "Rich prose with woven dialogue, like reading a fantasy novel"
+    - label: "Hybrid"
+      description: "Mix of both - prose narration with clear dialogue formatting"
+    - label: "Minimal"
+      description: "Brief, functional descriptions focused on game mechanics"
+```
+
+- Save their choice to `campaigns/{campaign}/preferences.md`
+
+### Handle Player Character
+
+If `player_character` is set in preferences:
+- Note it for passing to the GM (skip the "which character" question)
+
+If `player_character` is NOT set:
+- The GM will ask during session start (or you can ask here via AskUserQuestion)
+- After the player answers, save to `campaigns/{campaign}/preferences.md`
+
+### Preferences File Format
+
+```markdown
+# Session Preferences
+
+## Narrative Style
+narrative_style: hybrid
+
+## Player Character
+player_character: Corwin
+```
+
 ## Step 1: Spawning the GM
 
 When starting a session, spawn the GM agent with this prompt:
 
 ```
 Task: gm agent
-Prompt: Run a D&D session for the {campaign} campaign. First read:
+Prompt: Run a D&D session for the {campaign} campaign.
+
+Use {narrative_style} formatting style for dialogue and scenes.
+[If player_character is known: The player is controlling {player_character}.]
+
+First read:
 - campaigns/{campaign}/overview.md
 - campaigns/{campaign}/story-state.md
 - campaigns/{campaign}/party-knowledge.md
@@ -58,7 +124,7 @@ Prompt: Run a D&D session for the {campaign} campaign. First read:
 
 Then:
 1. Summarize where we left off
-2. Ask which character the player is controlling
+2. [If player_character unknown: Ask which character the player is controlling]
 3. Begin running the session
 
 When you need AI player input:
@@ -217,9 +283,11 @@ Always show what the PC says/does before showing NPC reactions.
 If this skill is invoked after context compaction:
 
 1. You are the orchestrator for a D&D session
-2. There should be an active GM agent running the campaign
-3. Resume the orchestration loop from wherever it was interrupted
-4. If unclear what state the session is in, resume GM and ask it to recap
+2. Re-read `campaigns/{campaign}/preferences.md` to restore narrative style and player character settings
+3. There should be an active GM agent running the campaign
+4. Resume the orchestration loop from wherever it was interrupted
+5. If unclear what state the session is in, resume GM and ask it to recap
+6. When resuming GM, include the narrative style preference to maintain consistent formatting
 
 ## Error Handling
 

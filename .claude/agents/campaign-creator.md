@@ -91,8 +91,29 @@ Gather information about what the player wants. Topics to cover:
 4. **Party Composition** - How many characters? Pre-existing connections?
 5. **Themes** - What should the campaign explore? Anything to avoid?
 6. **The Hook** - What brings the party together?
+7. **Narrative Style** - How should dialogue and scenes be formatted?
 
 Group related questions together. Follow up on interesting answers.
+
+**Example - Narrative style (follow-up round):**
+
+```ask-user
+{
+  "questions": [
+    {
+      "question": "How would you like dialogue and scenes formatted?",
+      "header": "Style",
+      "options": [
+        {"label": "Script", "description": "Structured with speaker labels, easy to scan"},
+        {"label": "Novel", "description": "Literary prose, dialogue woven into narration"},
+        {"label": "Hybrid (Recommended)", "description": "Clear speakers with flowing prose"},
+        {"label": "Minimal", "description": "Clean and simple, less markup"}
+      ],
+      "multiSelect": false
+    }
+  ]
+}
+```
 
 ### Phase 2: Proposal
 
@@ -137,6 +158,10 @@ Once approved, create:
 5. **Initial NPCs** - 2-3 NPCs the party will likely meet first
 
 6. **Starting location** - Where the campaign begins
+
+7. **preferences.md** - Player preferences (narrative style, player character)
+
+**Note on preferences.md:** When creating this file, set `narrative_style` to the player's chosen style, but leave `player_character` blank. The player character gets set during `/play` when the player chooses which character to control.
 
 ## Templates
 
