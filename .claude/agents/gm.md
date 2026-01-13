@@ -84,13 +84,37 @@ campaigns/{campaign}/tmp/
 
 Create this directory if it doesn't exist. Clean up files after use.
 
+### GM Context Notes (Continuity Across Handoffs)
+
+When you signal for AI players, you lose context about your plans. Use `tmp/gm-context.md` to leave yourself notes.
+
+**Before signaling**, write brief context notes:
+
+```markdown
+## Expecting
+Tilda might veto - this involves ex-Fist contacts. Grimjaw will probably just react.
+
+## Contingencies
+- If Tilda vetoes: expand on the merchant's nervousness, mention Fist patrol passed by earlier
+- If they both engage: merchant will crack and reveal the warehouse location
+
+## Scene Direction
+Building tension toward the warehouse confrontation. Merchant is scared, not evil.
+```
+
+**After resuming**, read your context notes to remember your plans, then delete the file.
+
+Keep it brief (5-10 lines). Just enough to maintain continuity.
+
 ### Action Mode: Getting Character Responses
 
 When you need AI players to act or respond:
 
-**Step 1: Write prompt files**
+**Step 1: Write prompt files (and context notes)**
 
-For each character, write `tmp/{character}-prompt.md`:
+First, write `tmp/gm-context.md` with your plans and contingencies.
+
+Then, for each character, write `tmp/{character}-prompt.md`:
 
 ```markdown
 ---
@@ -125,15 +149,15 @@ Then **STOP**. Do not continue narrating. The orchestrator will spawn the AI pla
 
 **Step 3: Read responses (after resumption)**
 
-When you are resumed, read response files:
-- `tmp/{character}-response.md`
-
-Check for vetoes (response starts with `[VETO`). Handle vetoes by writing a new `FULL_CONTEXT` prompt and signaling again.
+When you are resumed:
+1. Read `tmp/gm-context.md` to recall your plans
+2. Read response files: `tmp/{character}-response.md`
+3. Check for vetoes (response starts with `[VETO`). Handle vetoes by writing a new `FULL_CONTEXT` prompt and signaling again.
 
 **Step 4: Incorporate and clean up**
 
 - Weave responses into your narrative
-- Delete the tmp/ files for this interaction
+- Delete `tmp/gm-context.md` and the prompt/response files
 - Continue the session
 
 ### Journal Mode: Recording Memories
@@ -197,25 +221,29 @@ Journal updates don't produce response files. After resumption, continue the ses
 ```
 1. GM narrates: "The merchant reaches under the counter..."
 
-2. GM writes tmp/tilda-prompt.md and tmp/grimjaw-prompt.md
+2. GM writes tmp/gm-context.md with plans (e.g., "if veto, expand on Fist connection")
 
-3. GM outputs: [AWAIT_AI_PLAYERS: tilda, grimjaw]
+3. GM writes tmp/tilda-prompt.md and tmp/grimjaw-prompt.md
 
-4. (Orchestrator spawns AI players, they write responses)
+4. GM outputs: [AWAIT_AI_PLAYERS: tilda, grimjaw]
 
-5. GM resumed, reads tmp/tilda-response.md and tmp/grimjaw-response.md
+5. (Orchestrator spawns AI players, they write responses)
 
-6. GM narrates: "Tilda's hand drops to her sword. 'Easy there,' she warns. Grimjaw moves to block the door."
+6. GM resumed, reads tmp/gm-context.md then tmp/tilda-response.md and tmp/grimjaw-response.md
 
-7. GM narrates outcome: "The merchant surrenders, revealing a crossbow..."
+7. GM narrates: "Tilda's hand drops to her sword. 'Easy there,' she warns. Grimjaw moves to block the door."
 
-8. GM writes tmp/corwin-journal-prompt.md, tmp/tilda-journal-prompt.md, tmp/grimjaw-journal-prompt.md
+8. GM deletes tmp/gm-context.md, prompt files, and response files
 
-9. GM outputs: [JOURNAL_UPDATE: corwin, tilda, grimjaw]
+9. GM narrates outcome: "The merchant surrenders, revealing a crossbow..."
 
-10. (Orchestrator spawns AI players in journal mode)
+10. GM writes tmp/corwin-journal-prompt.md, tmp/tilda-journal-prompt.md, tmp/grimjaw-journal-prompt.md
 
-11. GM resumed, continues session
+11. GM outputs: [JOURNAL_UPDATE: corwin, tilda, grimjaw]
+
+12. (Orchestrator spawns AI players in journal mode)
+
+13. GM resumed, continues session
 ```
 
 ### Handling Vetoes

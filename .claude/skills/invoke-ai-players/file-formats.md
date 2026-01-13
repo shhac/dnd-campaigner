@@ -7,6 +7,7 @@ Specifications for files used in GM ↔ AI player communication.
 ```
 campaigns/{campaign}/
 ├── tmp/                              # Temporary communication files
+│   ├── gm-context.md                 # GM's own notes for continuity across handoffs
 │   ├── {character}-prompt.md         # GM → AI player (action mode)
 │   ├── {character}-response.md       # AI player → GM (action mode)
 │   └── {character}-journal-prompt.md # GM → AI player (journal mode)
@@ -18,6 +19,35 @@ campaigns/{campaign}/
 ├── story-state.md                    # GM secrets (NEVER read by AI player)
 └── ...
 ```
+
+## GM Context Notes
+
+### Context File: `tmp/gm-context.md`
+
+Written by GM before signaling, read when resumed. Provides continuity across AI player handoffs.
+
+```markdown
+## Expecting
+[What the GM hopes/expects from AI player responses]
+
+## Contingencies
+- If veto: [planned response]
+- If they agree: [next beat]
+- If combat starts: [approach]
+
+## NPC Reactions
+[How NPCs will react to various outcomes]
+
+## Scene Direction
+[Where the scene is heading, tone notes]
+```
+
+Keep it brief (5-10 lines max). This is a scratch pad, not a detailed plan.
+
+**Lifecycle:**
+1. GM writes `tmp/gm-context.md` BEFORE signaling `[AWAIT_AI_PLAYERS]`
+2. GM reads it when resumed after AI players complete
+3. GM deletes it after incorporating (or updates it before next signal)
 
 ## Action Mode Files
 
@@ -109,12 +139,14 @@ Appended by AI player. Each entry:
 ### Action Mode
 
 ```
-1. GM creates tmp/{character}-prompt.md
-2. GM signals [AWAIT_AI_PLAYERS: ...]
-3. AI player reads prompt + character files
-4. AI player creates tmp/{character}-response.md
-5. GM reads response
-6. GM deletes tmp/{character}-prompt.md and tmp/{character}-response.md
+1. GM creates tmp/gm-context.md (own continuity notes)
+2. GM creates tmp/{character}-prompt.md
+3. GM signals [AWAIT_AI_PLAYERS: ...]
+4. AI player reads prompt + character files
+5. AI player creates tmp/{character}-response.md
+6. GM reads tmp/gm-context.md to recall plans
+7. GM reads response files
+8. GM deletes tmp/gm-context.md, tmp/{character}-prompt.md, and tmp/{character}-response.md
 ```
 
 ### Journal Mode
@@ -131,7 +163,7 @@ Appended by AI player. Each entry:
 
 The GM is responsible for cleanup:
 
-- **After incorporating action responses:** Delete prompt and response files
+- **After incorporating action responses:** Delete `gm-context.md`, prompt files, and response files
 - **After journal updates complete:** Delete journal prompt files
 - **Before writing new prompts:** Check for and delete any stale files
 - **At session end:** Ensure tmp/ is empty

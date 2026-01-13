@@ -20,9 +20,10 @@ The GM agent outputs signals when it needs AI player input:
 
 ### Action Mode Flow
 
-1. GM wrote prompt files to `campaigns/{campaign}/tmp/{character}-prompt.md`
-2. GM output `[AWAIT_AI_PLAYERS: tilda, grimjaw]`
-3. **You spawn ai-player agents** (in parallel):
+1. GM wrote context notes to `campaigns/{campaign}/tmp/gm-context.md` (for its own continuity)
+2. GM wrote prompt files to `campaigns/{campaign}/tmp/{character}-prompt.md`
+3. GM output `[AWAIT_AI_PLAYERS: tilda, grimjaw]`
+4. **You spawn ai-player agents** (in parallel):
    ```
    Task: ai-player (for each character)
    Prompt: |
@@ -30,8 +31,8 @@ The GM agent outputs signals when it needs AI player input:
      Character: {character}
      Mode: action
    ```
-4. AI players read prompts, write responses to `tmp/{character}-response.md`
-5. Resume GM to continue
+5. AI players read prompts, write responses to `tmp/{character}-response.md`
+6. Resume GM to continue (GM reads its context notes, then responses)
 
 ### Journal Mode Flow
 
