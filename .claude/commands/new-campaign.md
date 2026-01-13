@@ -42,41 +42,7 @@ Once complete, you can:
 
 ## Instructions for Claude
 
-Use the `campaign-creator` agent with the **question orchestration pattern**.
-
-### Orchestration Pattern
-
-The agent cannot call AskUserQuestion directly. Instead:
-
-1. **Launch the agent** with the Task tool
-2. **Check the response** for ```ask-user code blocks
-3. **If found**: Parse the JSON and call AskUserQuestion with those questions
-4. **Resume the agent** with the user's answers
-5. **Repeat** until the agent completes without asking questions
-
-### Parsing ask-user Blocks
-
-Look for code blocks with the `ask-user` language tag:
-````
-```ask-user
-{
-  "questions": [...]
-}
-```
-````
-
-Parse the JSON and pass it directly to AskUserQuestion's `questions` parameter.
-
-### Resuming with Answers
-
-When resuming, tell the agent what the user chose:
-```
-The user answered your questions:
-- Tone: "Dark and gritty"
-- Setting: "Original homebrew"
-
-Continue with campaign creation based on these preferences.
-```
+Use the `campaign-creator` agent with the **ask-user-orchestration skill**.
 
 ### Initial Prompt
 
@@ -85,10 +51,14 @@ Task: campaign-creator agent
 Prompt: Help the user create a new D&D campaign. Read the templates first, then begin the discovery process by asking about tone, setting, and themes. Make sure the campaign directory name is lowercase with hyphens.
 ```
 
-### Example Flow
+### Orchestration
 
-1. Launch agent → Agent outputs ask-user block with tone/setting questions
-2. Parse block → Call AskUserQuestion with those questions
-3. User answers → Resume agent with "User chose: Dark and gritty, Original homebrew"
-4. Agent continues → May ask more questions or propose campaign
-5. Repeat until agent generates files and completes
+Follow the `ask-user-orchestration` skill pattern:
+
+1. Launch the agent
+2. Watch for `ask-user` code blocks in output
+3. Parse JSON and call AskUserQuestion
+4. Resume agent with answers
+5. Repeat until agent completes without asking questions
+
+See the skill for detailed parsing and resumption examples.

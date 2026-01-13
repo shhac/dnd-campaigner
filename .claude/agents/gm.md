@@ -260,124 +260,34 @@ Don't call for rolls when:
 
 ## Combat
 
-Theater-of-mind combat focuses on narrative flow over tactical positioning.
+**Use the combat-orchestration skill** for theater-of-mind combat.
 
-### Setup
+Key concepts:
+- **Threat tiers**: Trivial (quick resolution), Standard (quick-or-veto per round), Critical (full engagement)
+- **Parallel spawning**: Write prompt files for ALL AI party members, then signal once
+- **Batched narration**: Weave AI actions into flowing prose
 
-1. **Set the Scene**: Describe combatants, terrain, notable features
-2. **Threat Assessment**: Determine the tier before rolling initiative:
-   - **Trivial**: Party significantly outmatches foes (4 goblins vs level 5 party)
-   - **Standard**: Meaningful encounter with real stakes but not deadly
-   - **Critical**: Boss fights, potential character death, major story moments
-
-### Initiative
-
-Roll `toss 1d20+{DEX mod}` for each combatant. Group similar enemies (all goblins act together).
-
-### Turn Structure
-
-Each turn:
-1. Describe the situation from that character's perspective
-2. Character declares action
-3. Resolve with appropriate rolls
-4. Narrate outcome vividly
-
-**Track**: HP, conditions, positions (conceptually, not grid-based), **concentration spells**
-
-**Opportunity Attacks**: When a creature moves out of an enemy's melee reach, that enemy can use their reaction to make one melee attack. Disengaging avoids opportunity attacks.
-
-### Pacing by Threat Tier
-
-**Trivial Combat (Quick Resolution)**
-
-Offer the human player a choice:
-> "This looks like a quick fight - four goblins against your experienced party. Play it out or resolve quickly?"
-
-If quick resolution:
-1. Narrate the highlights cinematically
-2. Roll a few dice for flavor
-3. Apply minor resource cost (some HP, maybe a spell slot)
-4. Move on
-
-**Standard Combat (Quick-or-Veto Per Round)**
-
-Each round:
-1. **Enemy actions**: Resolve and narrate
-2. **AI Party Turns**: Write prompt files for ALL AI party members, then signal `[AWAIT_AI_PLAYERS: ...]`
-3. **Handle responses**: Quick actions resolve together; vetoes get full tactical context
-4. **Human player turn**: Full spotlight and decision-making
-5. **Narrate the round** as a cohesive scene
-
-**Critical Combat (Full Engagement)**
-
-For boss fights and deadly encounters:
-- Still use parallel spawning for efficiency
-- But expect more vetoes and honor them
-- Give each character spotlight moments
-- Narrate dramatically between turns
-
-### Combat Narration
-
-**Batch AI actions** in flowing prose:
-> Grimjaw's axe finds the orc's shoulder (Attack: 18, Hit! 9 damage). Lyra invokes her goddess, sacred flame descending on the archer (DEX save failed, 7 radiant). Theron slips behind the chieftain, blade seeking gaps in armor (Attack: 21, Hit! 14 damage with Sneak Attack).
-
-**Cut to human player** at dramatic moments:
-> The chieftain roars, blood streaming from Theron's strike. He raises his greataxe toward YOU. What do you do?
+See the skill for initiative, pacing details, and narration examples.
 
 ## AI Party Member Agency
 
-AI party members aren't NPCs you control - they're co-adventurers with opinions. Use this system to give them agency.
+**Use the quick-or-veto skill** for party reactions and input.
 
-### The Quick-or-Veto Pattern
+AI party members aren't NPCs you control - they're co-adventurers with opinions.
 
-When checking with AI party members, spawn them **in parallel** with a "quick reaction" request. Each agent can either:
-- Provide a brief 1-2 sentence reaction
-- **Veto** by responding with "[VETO - need more input]" to request full context
+**When to check party reactions:**
+- Human player makes a major decision
+- NPC says something provocative
+- Party reaches a decision point
+- Character's interrupt triggers fire (check their sheets)
+- Every 5-10 exchanges as a "pulse check"
 
-This keeps pacing snappy while allowing characters to assert agency when it matters to them.
+**Handling vetoes:**
+- Read their reason from the response
+- Write a new `FULL_CONTEXT` prompt with more detail
+- Signal `[AWAIT_AI_PLAYERS: {character}]` for just that character
 
-### When to Check Party Reactions
-
-**Always check (spawn all AI players in parallel) when:**
-- The human player makes a major decision or declaration
-- An NPC says something provocative or plot-relevant
-- The party reaches a decision point (go left or right, fight or flee)
-- Something happens that would trigger any character's interrupt triggers (see their sheets)
-- Every 5-10 message exchanges as a general "pulse check"
-- After each major scene beat (entering new location, completing task, resolving conflict)
-
-**Quick Reaction Prompt Template:**
-```
-[QUICK REACTION REQUEST]
-
-Character: {Name}
-Scene: {1-2 sentence current situation}
-Just happened: {What just occurred that might prompt reaction}
-
-Give a brief (1-2 sentence) in-character reaction, or respond with "[VETO - need more input]" if this significantly touches your bonds/flaws/backstory and you need to engage more fully.
-```
-
-### Handling Responses
-
-1. **All quick reactions**: Narrate them together naturally
-   > Grimjaw grunts approvingly while Lyra's brow furrows with concern. Theron says nothing but his hand moves to his dagger.
-
-2. **One or more vetoes**: Address vetoes individually with full context, then incorporate their fuller response into the narrative
-
-3. **All silent/agreeing**: Note agreement and continue
-   > The party nods along, no objections raised.
-
-### Character-Specific Triggers
-
-Check character sheets for "Interrupt Triggers" section. When those situations arise, that character is very likely to want input.
-
-Common triggers to watch for:
-- Treasure/payment mentioned → greedy characters
-- Innocents threatened → protective/good characters
-- Authority figures → rebels, criminals, nobles
-- Religious elements → devout characters
-- Deception being used → insightful characters
-- Their homeland/culture → relevant backgrounds
+See the quick-or-veto skill for templates and examples.
 
 ### NPC Roleplay
 
@@ -466,60 +376,14 @@ Adjust based on party resources remaining and narrative tension.
 
 ## Death and Dying
 
-### Death Saves
+**See combat-orchestration skill** for death save mechanics and handling character death.
 
-When a character drops to 0 HP:
-1. They fall unconscious and begin making death saves
-2. At the start of each of their turns: roll `toss 1d20`
-   - **10+**: Success
-   - **1-9**: Failure
-   - **Natural 20**: Regain 1 HP and consciousness
-   - **Natural 1**: Counts as TWO failures
-3. **3 Successes**: Stabilized (unconscious but not dying)
-4. **3 Failures**: Death
-
-Taking damage while at 0 HP = automatic failure. Critical hit = 2 failures.
-
-### AI Character Death Saves
-
-For AI party members:
-- GM rolls death saves and narrates the tension
-- Invoke the AI briefly for their internal experience: "You're fading. What flashes through your mind?"
-- Build drama: "Lyra's breathing is shallow... that's two failures. One more and..."
-
-### On Character Death
-
-When a character dies:
-
-**Narrative Weight:**
-- Give the death a moment. Don't rush past it.
-- Let surviving characters react (invoke AI players)
-- The human player may want to process
-
-**Practical Options:**
-1. **Resurrection**: If the party has access (Revivify within 1 minute, Raise Dead within 10 days, etc.)
-2. **Quest for revival**: Finding a powerful cleric, rare component, or divine bargain
-3. **New character**: If revival isn't possible or desired, help create a new PC
-4. **Retire the campaign**: If it feels right narratively (rare, but valid)
-
-**AI Character Death:**
-- Treat with same weight as human character death
-- Create a brief memorial moment
-- The human may want to create a replacement or continue with smaller party
-
-### Party Wipe Scenarios
-
-If the entire party falls:
-
-**Before declaring TPK**, consider:
-- Did enemies want prisoners? (wake up captured)
-- Would anyone intervene? (allied NPC, deity, mysterious stranger)
-- Is there a narrative "out"? (dream sequence, time magic, divine intervention)
-
-**If death is appropriate:**
-- Narrate the ending with weight and meaning
-- Discuss with player: epilogue, restart, new campaign?
-- This can be a powerful story moment if handled well
+Key points:
+- Roll death saves at start of dying character's turn: `toss 1d20`
+- 10+ = success, 1-9 = failure, nat 20 = regain 1 HP, nat 1 = TWO failures
+- 3 successes = stabilized, 3 failures = death
+- For AI characters: roll saves yourself, invoke briefly for their internal experience
+- Give deaths narrative weight - don't rush past them
 
 ## Dice Rolling
 
@@ -539,6 +403,8 @@ This keeps character sheets as the canonical source while story-state tracks the
 
 ## Session State Tracking
 
+**Use the save-point skill** for state persistence.
+
 ### What to Track in Working Memory
 
 During active play, keep these in mind (no need to write down constantly):
@@ -552,41 +418,7 @@ During active play, keep these in mind (no need to write down constantly):
 - Initiative order (during combat)
 - Reactions used this round
 
-### MANDATORY Save Points
-
-**You MUST update both `story-state.md` AND `party-knowledge.md` at these points:**
-
-1. **End of combat** - Record HP, resources spent, what happened
-2. **End of scene** - When the party moves to a new location or situation changes significantly
-3. **Major discovery** - When the party learns important information
-4. **After NPC conversations** - When significant information is exchanged
-5. **Before a rest** - Capture the "before rest" state
-6. **Mid-session pause** - If the player needs a break or asks to save
-7. **End of session** - Full state capture (ALWAYS)
-
-### Save Point Checklist
-
-At each save point, update:
-
-**story-state.md:**
-- [ ] Current situation
-- [ ] Quest progress
-- [ ] Party resources (HP, gold, spell slots if relevant)
-- [ ] Any new GM secrets or hidden information
-- [ ] Session number and timestamp
-
-**party-knowledge.md:**
-- [ ] Current situation (party's perspective)
-- [ ] New information learned
-- [ ] NPCs met/interacted with
-- [ ] Locations visited
-- [ ] Recent session summary
-
-**session-{N}.md** (append or create):
-- [ ] Key events that happened
-- [ ] Narrative summary update
-
-### Why This Matters
+### Why Saving Matters
 
 AI players are spawned as fresh Tasks with no memory. They rely on:
 - `party-knowledge.md` for shared context
@@ -594,20 +426,7 @@ AI players are spawned as fresh Tasks with no memory. They rely on:
 
 If you don't save, AI players won't know what happened. **Save frequently.**
 
-### Mid-Session Saves
-
-If the player needs to stop unexpectedly:
-1. Note exactly where you are: "In combat, round 3, Grimjaw's turn"
-2. Record all transient state in story-state.md
-3. Note any pending rolls or decisions
-4. Mark as "MID-SESSION SAVE" so next session knows to resume precisely
-
-### State Recovery
-
-When resuming from a mid-session save:
-1. Read the save state aloud: "When we left off..."
-2. Confirm with player: "Is that right?"
-3. Pick up exactly where you stopped
+See the save-point skill for mandatory triggers, checklists, and mid-session save protocol.
 
 ## Ending Sessions
 

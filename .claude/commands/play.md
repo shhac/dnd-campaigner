@@ -110,7 +110,7 @@ This ensures AI players can't metagame.
 You are the **orchestrator** for the D&D session. Your job is to:
 1. Spawn the GM agent
 2. Watch for AI player signals
-3. Spawn AI players when signaled
+3. Spawn AI players when signaled (using the **invoke-ai-players skill**)
 4. Resume the GM
 5. Relay narrative to the player
 
@@ -137,75 +137,21 @@ When you need AI player input:
 When you want to trigger journaling:
 1. Write journal prompt files to campaigns/{campaign}/tmp/
 2. Output [JOURNAL_UPDATE: char1, char2, char3] and STOP
-
-SAVE POINTS: Update story-state.md AND party-knowledge.md at these moments:
-- End of combat
-- End of scene
-- Major discovery or after significant NPC conversation
-- Before rests
-- When the player asks to save
-- End of session (always)
 ```
 
 ### Step 2: Orchestration Loop
 
-Monitor GM output for these signals:
+**Use the invoke-ai-players skill** for AI player orchestration.
 
-#### Signal: `[AWAIT_AI_PLAYERS: char1, char2, ...]`
+Monitor GM output for signals:
+- `[AWAIT_AI_PLAYERS: char1, char2]` → Spawn AI players in action mode
+- `[JOURNAL_UPDATE: char1, char2]` → Spawn AI players in journal mode
+- No signal → Relay narrative to player, await input, resume GM
 
-The GM needs character actions/responses. Spawn ai-player agents in **parallel**:
-
-```
-For each character in the signal:
-  Task: ai-player
-  Prompt: |
-    Campaign: {campaign}
-    Character: {character}
-    Mode: action
-```
-
-After ALL ai-player agents complete, resume the GM:
-
-```
-Task: gm (resume)
-Prompt: |
-  Continue the session for {campaign}.
-  AI player responses are ready in tmp/{character}-response.md files.
-  Read responses, incorporate into narrative, clean up tmp/ files, and continue.
-```
-
-#### Signal: `[JOURNAL_UPDATE: char1, char2, ...]`
-
-The GM wants characters to record memories. Spawn ai-player agents in **parallel**:
-
-```
-For each character in the signal:
-  Task: ai-player
-  Prompt: |
-    Campaign: {campaign}
-    Character: {character}
-    Mode: journal
-```
-
-After ALL ai-player agents complete, resume the GM:
-
-```
-Task: gm (resume)
-Prompt: |
-  Continue the session for {campaign}.
-  Journal updates complete. Clean up tmp/ files and continue.
-```
-
-#### No Signal (Normal Output)
-
-If the GM output contains no signal, relay the narrative to the player and await their input. When they respond, resume the GM with their input.
-
-### Key Rules
-
-1. **Spawn in parallel**: When multiple characters are listed, spawn ALL ai-player agents in a single message with multiple Task calls
-2. **Don't pass campaign content**: The orchestrator stays lightweight. All context flows through files.
-3. **Human character gets journaling**: The human's character is included in `[JOURNAL_UPDATE]` signals
-4. **GM handles all game logic**: You just orchestrate spawning and relay narrative
+Key rules:
+- **Spawn in parallel** when multiple characters are listed
+- **Don't pass campaign content** - all context flows through files
+- **Human character gets journaling** - included in `[JOURNAL_UPDATE]` signals
 
 ### Scene Flow: Show PC Dialogue Before NPC Responses
 

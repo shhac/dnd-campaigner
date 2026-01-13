@@ -52,41 +52,7 @@ campaigns/{campaign}/npcs/{npc-name}.md
 
 ## Instructions for Claude
 
-Use the `character-creator` agent with the **question orchestration pattern**.
-
-### Orchestration Pattern
-
-The agent cannot call AskUserQuestion directly. Instead:
-
-1. **Launch the agent** with the Task tool
-2. **Check the response** for ```ask-user code blocks
-3. **If found**: Parse the JSON and call AskUserQuestion with those questions
-4. **Resume the agent** with the user's answers
-5. **Repeat** until the agent completes without asking questions
-
-### Parsing ask-user Blocks
-
-Look for code blocks with the `ask-user` language tag:
-````
-```ask-user
-{
-  "questions": [...]
-}
-```
-````
-
-Parse the JSON and pass it directly to AskUserQuestion's `questions` parameter.
-
-### Resuming with Answers
-
-When resuming, tell the agent what the user chose:
-```
-The user answered your questions:
-- Type: "Player Character (PC)"
-- Stats: "Roll dice"
-
-Continue with character creation based on these preferences.
-```
+Use the `character-creator` agent with the **ask-user-orchestration skill**.
 
 ### Initial Setup
 
@@ -108,10 +74,14 @@ Pass to the agent:
 
 The agent should read existing party members to suggest good fits and avoid overlap.
 
-### Example Flow
+### Orchestration
 
-1. Launch agent → Agent outputs ask-user block asking PC vs NPC
-2. Parse block → Call AskUserQuestion
-3. User answers "PC" → Resume agent with answer
-4. Agent asks about concept/class → Parse and ask user
-5. Continue until character file is generated
+Follow the `ask-user-orchestration` skill pattern:
+
+1. Launch the agent
+2. Watch for `ask-user` code blocks in output
+3. Parse JSON and call AskUserQuestion
+4. Resume agent with answers
+5. Repeat until agent completes without asking questions
+
+See the skill for detailed parsing and resumption examples.

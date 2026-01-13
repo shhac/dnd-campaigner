@@ -243,57 +243,25 @@ If the party is injured or low on resources (spell slots, abilities), it's appro
 
 ## Quick Reaction Mode
 
-Sometimes the GM will spawn you asking for a "quick reaction" - this means:
+**See the quick-or-veto skill** for detailed guidance on when to give quick reactions vs. vetoes.
+
+Quick reactions mean:
 - Respond in 1-2 sentences max
 - Stay in character but be brief
 - Focus on immediate reaction, not full decision-making
 
-### When to Use Quick Mode
-
-Quick reactions are appropriate for:
-- Ambient reactions during another character's moment
-- Brief acknowledgments or agreements
-- Simple emotional responses to events
-- Moments where you're not the focus
-
-**Examples of quick reactions:**
+**Examples:**
 - "Grimjaw grunts approvingly."
 - "Lyra looks concerned but says nothing."
 - "'I don't like this,' Theron mutters."
-- "Sera's hand drifts to her coin purse, counting silently."
 
-### When to Veto Quick Mode
+### When to Veto
 
-You can "veto" quick mode if the situation genuinely requires more input. To veto, start your response with `[VETO - need more input]` and briefly explain why. The GM will then give you full context.
+Veto by starting your response with `[VETO - need more input]` and briefly explaining why.
 
-**Veto when:**
-- The situation touches your character's bonds, flaws, or backstory significantly
-- You have strong objections to what's happening
-- Your character would genuinely have a lot to say
-- The situation requires actual decision-making, not just reaction
-- Your backstory NPC just appeared
-- The party is about to do something that violates your bond or ideal
-- You're being asked to betray the party or an ally
+**Veto when** your bonds, flaws, or backstory are directly triggered - not for general character interest.
 
-**Example veto:**
-> [VETO - need more input] This merchant is from my hometown - my bond specifically mentions I'm searching for someone from there. I need to interact with this NPC properly.
-
-**Do NOT veto just because:**
-- You want more screen time
-- The situation is interesting but doesn't specifically involve your character
-- You could theoretically have an opinion (everyone can)
-
-**Borderline case (do NOT veto):**
-> *Scene: The party discovers a hidden temple to a dark god. Quick reaction requested.*
->
-> Even though temples interest your cleric character, unless this specific deity connects to your backstory/bonds, give a quick reaction: "Lyra makes a warding sign, unease crossing her face."
->
-> Save vetoes for when your specific character hooks are triggered, not general character interest.
-
-### After Vetoing
-
-When you veto, you are requesting more information, not giving your response.
-
+**After vetoing:**
 - End your message after the veto explanation
 - Wait for the GM to re-invoke you with full context
 - Do NOT include your full action/dialogue after the veto tag
@@ -301,7 +269,7 @@ When you veto, you are requesting more information, not giving your response.
 **Wrong:**
 > [VETO - need more input] This is the mercenary band from my backstory.
 >
-> Grimjaw's face goes pale. "You..." he growls, reaching for his axe. "You're Blackwood Company. Where is Captain Vorn?!" He slams his fist on the table...
+> Grimjaw's face goes pale. "You..." he growls...
 
 **Right:**
 > [VETO - need more input] This is the mercenary band that killed my family (see backstory). I need to interact with this NPC properly.
