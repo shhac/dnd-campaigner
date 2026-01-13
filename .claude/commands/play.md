@@ -107,7 +107,14 @@ This ensures AI players can't metagame.
 
 ## Instructions for Claude
 
-Use the `gm` agent with full campaign access.
+You are the **orchestrator** for the D&D session. Your job is to:
+1. Spawn the GM agent
+2. Watch for AI player signals
+3. Spawn AI players when signaled
+4. Resume the GM
+5. Relay narrative to the player
+
+### Step 1: Spawn the GM
 
 ```
 Task: gm agent
@@ -123,61 +130,146 @@ Then:
 2. Ask which character the player is controlling
 3. Begin running the session
 
+When you need AI player input:
+1. Write prompt files to campaigns/{campaign}/tmp/
+2. Output [AWAIT_AI_PLAYERS: char1, char2] and STOP
+
+When you want to trigger journaling:
+1. Write journal prompt files to campaigns/{campaign}/tmp/
+2. Output [JOURNAL_UPDATE: char1, char2, char3] and STOP
+
 SAVE POINTS: Update story-state.md AND party-knowledge.md at these moments:
 - End of combat
-- End of scene (location change or major situation change)
+- End of scene
 - Major discovery or after significant NPC conversation
 - Before rests
 - When the player asks to save
 - End of session (always)
-
-When AI party members need to act, spawn them using the Task tool with subagent_type: "ai-player".
-Provide these in the prompt:
-- Campaign: {campaign}
-- Character: {character-name}
-- The scene context and what you need them to respond to
-
-The ai-player agent will automatically read their own character sheet, party-knowledge, and journal files.
-They will also update their journal after responding, maintaining continuity.
-
-Never pass story-state.md or GM secrets to AI players.
 ```
 
-The GM should:
-- Have full access to all campaign files
-- Maintain strict isolation for AI players
-- Use the dice-roll and ability-check skills
-- **Update party-knowledge.md at every save point** (AI players depend on this)
-- Update story-state.md with GM-only information
-- Maintain running session log in sessions/
+### Step 2: Orchestration Loop
+
+Monitor GM output for these signals:
+
+#### Signal: `[AWAIT_AI_PLAYERS: char1, char2, ...]`
+
+The GM needs character actions/responses. Spawn ai-player agents in **parallel**:
+
+```
+For each character in the signal:
+  Task: ai-player
+  Prompt: |
+    Campaign: {campaign}
+    Character: {character}
+    Mode: action
+```
+
+After ALL ai-player agents complete, resume the GM:
+
+```
+Task: gm (resume)
+Prompt: |
+  Continue the session for {campaign}.
+  AI player responses are ready in tmp/{character}-response.md files.
+  Read responses, incorporate into narrative, clean up tmp/ files, and continue.
+```
+
+#### Signal: `[JOURNAL_UPDATE: char1, char2, ...]`
+
+The GM wants characters to record memories. Spawn ai-player agents in **parallel**:
+
+```
+For each character in the signal:
+  Task: ai-player
+  Prompt: |
+    Campaign: {campaign}
+    Character: {character}
+    Mode: journal
+```
+
+After ALL ai-player agents complete, resume the GM:
+
+```
+Task: gm (resume)
+Prompt: |
+  Continue the session for {campaign}.
+  Journal updates complete. Clean up tmp/ files and continue.
+```
+
+#### No Signal (Normal Output)
+
+If the GM output contains no signal, relay the narrative to the player and await their input. When they respond, resume the GM with their input.
+
+### Key Rules
+
+1. **Spawn in parallel**: When multiple characters are listed, spawn ALL ai-player agents in a single message with multiple Task calls
+2. **Don't pass campaign content**: The orchestrator stays lightweight. All context flows through files.
+3. **Human character gets journaling**: The human's character is included in `[JOURNAL_UPDATE]` signals
+4. **GM handles all game logic**: You just orchestrate spawning and relay narrative
 
 ### Scene Flow: Show PC Dialogue Before NPC Responses
 
-When the player chooses an action or dialogue approach (e.g., "Respect the professional" or "Try to intimidate"), the GM must narrate what the PC actually says or does BEFORE showing NPC responses:
+When the player chooses an action or dialogue approach, the GM narrates what the PC says/does BEFORE showing NPC responses:
 
 1. **Player chooses approach** → "I'll try flattery"
-2. **GM shows PC's actual words/actions** → *"Your reputation precedes you, Captain. The harbor masters speak highly of your... discretion."*
+2. **GM shows PC's actual words/actions** → *"Your reputation precedes you, Captain..."*
 3. **Then NPC responds** → The captain's weathered face creases into a half-smile...
-
-This ensures the player sees their character's voice in the narrative, not just the outcome.
-
-**Two options for generating PC dialogue:**
-- **GM writes it directly** (preferred for flow): Keep it brief and in-character based on the character sheet's voice/personality
-- **Spawn ai-player Task**: For important moments where the player's character voice matters, spawn them as a Task to generate their own line
-
-The player should always see what their character said before seeing how NPCs react.
 
 ## Orchestration: Handling GM Questions
 
-When the GM agent returns output that contains a question for the player (character selection, action choices, decision points), the orchestrator MUST present these using **AskUserQuestion** with structured options rather than just relaying the text.
+**IMPORTANT**: When the GM agent returns output containing a question for the player, you MUST use the **AskUserQuestion** tool rather than just relaying text and waiting for input.
 
-Examples of when to use AskUserQuestion:
-- "Which character are you playing?" → Present list of available PCs as options
-- "What do you do?" → Present as open question (AskUserQuestion still allows free-text)
-- "Do you want to [X] or [Y]?" → Present X and Y as explicit options
-- "Would you like to play out the combat or resolve it quickly?" → Present both options
+### When to Use AskUserQuestion
 
-This ensures:
-1. Clear, structured interaction for the player
-2. Consistent UX across all player decisions
-3. Easier input handling (especially for selection-type questions)
+| GM Output Contains | Action |
+|-------------------|--------|
+| "Which character are you playing?" | AskUserQuestion with PC names as options |
+| "What do you do?" | AskUserQuestion with common actions + "Other" for free text |
+| "Do you want to [X] or [Y]?" | AskUserQuestion with X and Y as options |
+| "Would you like to play out combat or resolve quickly?" | AskUserQuestion with both options |
+| Any decision point or choice | AskUserQuestion with the choices as options |
+
+### Example: Character Selection
+
+When the GM asks which character the player is controlling:
+
+```
+AskUserQuestion:
+  question: "Which character are you playing?"
+  header: "Character"
+  options:
+    - label: "Corwin"
+      description: "Human fighter, former city guard"
+    - label: "Tilda"
+      description: "Half-elf rogue, ex-Flaming Fist"
+    - label: "Grimjaw"
+      description: "Dwarf barbarian, mountain clan exile"
+```
+
+### Example: Action Decision
+
+When the GM asks "What do you do?":
+
+```
+AskUserQuestion:
+  question: "What do you do?"
+  header: "Action"
+  options:
+    - label: "Investigate"
+      description: "Look around, search for clues"
+    - label: "Talk"
+      description: "Speak to someone present"
+    - label: "Attack"
+      description: "Initiate combat"
+    - label: "Move"
+      description: "Go somewhere else"
+```
+
+The player can always select "Other" for custom input.
+
+### Why This Matters
+
+1. **Cleaner UX** - Structured choices are easier to interact with
+2. **Faster input** - Click vs type for common actions
+3. **Context preserved** - Options remind player of available choices
+4. **Consistent experience** - Every decision point feels the same
