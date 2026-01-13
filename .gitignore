@@ -17,3 +17,7 @@ Thumbs.db
 
 # Local overrides
 CLAUDE.local.md
+
+# Project specific
+campaigns/*/tmp/
+

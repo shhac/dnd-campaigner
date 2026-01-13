@@ -37,13 +37,19 @@ Player responds -> Resume GM with input          |
 [AWAIT_AI_PLAYERS] -> invoke-ai-players skill    |
     |                                            |
     v                                            |
-[JOURNAL_UPDATE] -> invoke-ai-players skill      |
+AI players respond                               |
     |                                            |
+    v                                            |
+decision-log agent (record what happened)        |
+    |                                            |
+    v                                            |
+[JOURNAL_UPDATE] -> invoke-ai-players skill      |
+    |              -> human-player journaling    |
     v                                            |
 Resume GM ----------------------------------------+
     |
     v
-Loop until session ends
+Loop until session ends (track significant interactions)
 ```
 
 ## Step 0: Load Preferences
@@ -265,8 +271,8 @@ Read any response files if applicable and continue.
 
 1. Strip the signal from displayed output
 2. **Use the invoke-ai-players skill** to spawn AI players in journal mode
-3. Note: Human player's character gets journaling too - all listed characters
-4. After all AI players complete, resume GM
+3. **Handle human player's character journaling** (see Human Player Journal section below)
+4. After all journaling complete, resume GM
 
 ## Scene Flow: PC Actions Before NPC Responses
 
@@ -277,6 +283,147 @@ When the player chooses an action or dialogue approach:
 3. **Then NPC responds** -> The captain's weathered face creases into a half-smile...
 
 Always show what the PC says/does before showing NPC reactions.
+
+## Auto-Journal Reminders
+
+The orchestrator should track significant interactions and trigger journal updates at natural breakpoints.
+
+### What Counts as a Significant Interaction
+
+| Interaction Type | Examples |
+|-----------------|----------|
+| Combat encounters | Any fight, regardless of outcome |
+| Major revelations | Plot secrets revealed, NPC motives uncovered |
+| Scene changes | Moving to new location, time jumps |
+| NPC conversations with new info | Learning lore, receiving quests, key dialogue |
+| Character moments | Personal growth, relationship changes, moral choices |
+
+### When to Trigger Journal Updates
+
+If it's been **2-3 significant interactions** since the last journal update:
+
+1. Wait for a **natural breakpoint** (scene transition, rest, travel)
+2. Note to yourself: "Journal update due - several significant events since last update"
+3. Ask the GM to trigger `[JOURNAL_UPDATE]` or trigger it directly
+
+### Tracking Approach
+
+Mentally track (or note in context):
+- Last journal update point
+- Count of significant interactions since then
+- Type of interactions (for journal richness)
+
+Example internal note:
+```
+Journal tracking: Last update after warehouse exploration.
+Since then: 1) Combat with fungal creatures, 2) Found Rina's body, 3) Discovered smuggling ledger
+-> 3 significant events, trigger journal at next natural break
+```
+
+## Decision-Log Integration
+
+After AI players respond to action prompts, invoke the decision-log agent to record what happened. This creates a reconstruction trail for debugging and continuity.
+
+### When to Invoke Decision-Log
+
+Invoke the decision-log agent:
+- **After** AI players complete their action responses
+- **Before** resuming the GM with the combined responses
+- At other significant decision points (optional)
+
+### Decision-Log Flow
+
+```
+[AWAIT_AI_PLAYERS] signal received
+    |
+    v
+Spawn AI players (action mode)
+    |
+    v
+Collect responses
+    |
+    v
+Invoke decision-log agent  <-- Record what happened
+    |
+    v
+Resume GM with responses
+```
+
+### Decision-Log Invocation
+
+```
+Task: decision-log agent
+Prompt: Record the following AI player decisions for {campaign}.
+
+Characters involved: {char1}, {char2}
+Scene context: {brief scene description}
+
+Responses:
+- {char1}: {summary of response}
+- {char2}: {summary of response}
+
+Record these for session reconstruction.
+```
+
+The decision-log agent handles file management and formatting.
+
+## Human Player Journal
+
+The human player's character (from `preferences.md`) should also get journal entries during `[JOURNAL_UPDATE]` triggers.
+
+### Why Human Player Journals Matter
+
+- Maintains parity with AI character journals
+- Creates a complete party journal record
+- Captures the human player's character's perspective on events
+- Useful for session recaps and long-term continuity
+
+### How to Handle Human Player Journaling
+
+**Option A: Orchestrator writes directly** (simpler)
+
+After AI player journals complete:
+1. Read the human player's character sheet from `campaigns/{campaign}/party/{player_character}.md`
+2. Write a journal entry from that character's perspective
+3. Save to `campaigns/{campaign}/party/{player_character}.md` in the journal section
+
+**Option B: Dedicated journal agent** (more consistent voice)
+
+Spawn a journal agent for the human player's character:
+```
+Task: ai-player agent (journal mode)
+Prompt: Write a journal entry for {player_character}.
+
+Character sheet: [read from party/{player_character}.md]
+Recent events: [from GM's journal prompt or scene summary]
+
+Write in {player_character}'s voice based on their personality.
+```
+
+### Journal Update Sequence
+
+1. GM triggers `[JOURNAL_UPDATE: char1, char2, char3]`
+2. Spawn AI players for AI-controlled characters (invoke-ai-players skill)
+3. **Also journal the human player's character** (Option A or B above)
+4. All journals complete
+5. Resume GM
+
+### Example Journal Entry (Human Character)
+
+If the human plays Corwin (pragmatic fighter):
+```markdown
+## Session Entry - The Warehouse
+
+We found what we came for, and more besides. Rina didn't make it—body
+was in the basement, looked like she'd been dead for days. The fungal
+growth down there... unnatural. Mira seemed shaken. Can't blame her.
+
+The ledger we found names names. Councilman Vance's seal was on half
+those shipping manifests. Whatever's growing in that warehouse, someone
+in the Hall of Lords paid to put it there.
+
+Tomorrow we dig into Vance's business dealings. Tonight, I need ale.
+```
 
 ## Post-Compaction Recovery
 
@@ -314,3 +461,4 @@ If prompt/response files are missing:
 - **invoke-ai-players**: Handles actual AI player spawning (action and journal modes)
 - **save-point**: Manages session state persistence
 - **combat-orchestration**: Special handling for combat encounters
+- **decision-log** (agent): Records AI player decisions for session reconstruction
