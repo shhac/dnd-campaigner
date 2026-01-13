@@ -168,17 +168,30 @@ The GM is responsible for cleanup:
 - **Before writing new prompts:** Check for and delete any stale files
 - **At session end:** Ensure tmp/ is empty
 
-## Character Name Normalization
+## Character Name Convention
 
-File names use lowercase character names:
+**CRITICAL**: Character names use the **full hyphenated format** matching the character sheet filename.
 
+| Character Sheet | Signal Name | File Names |
+|-----------------|-------------|------------|
+| `party/tilda-brannock.md` | `tilda-brannock` | `tilda-brannock-prompt.md`, `tilda-brannock-response.md` |
+| `party/gideon-harrowmoor.md` | `gideon-harrowmoor` | `gideon-harrowmoor-prompt.md`, `gideon-harrowmoor-response.md` |
+| `party/seraphine-dawnwhisper.md` | `seraphine-dawnwhisper` | `seraphine-dawnwhisper-prompt.md`, `seraphine-dawnwhisper-response.md` |
+
+**Rules:**
+- Always lowercase
+- Always hyphenated (no spaces)
+- Always full name (not just first name)
+- Must match the character sheet filename (minus `.md` extension)
+- Remove apostrophes and special characters
+
+**Edge case examples:**
 | Character Name | File Name |
 |----------------|-----------|
-| Tilda | `tilda-prompt.md` |
-| Grimjaw | `grimjaw-prompt.md` |
-| Corwin the Bold | `corwin-prompt.md` (first name only) |
+| Sir Edmund the Bold | `sir-edmund-the-bold-prompt.md` |
+| O'Brien | `obrien-prompt.md` |
 
-The GM and AI players must use consistent naming.
+The GM and AI players must use consistent naming throughout.
 
 ## Error Handling
 

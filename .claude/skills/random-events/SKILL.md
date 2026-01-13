@@ -169,3 +169,7 @@ Random doesn't mean disconnected. When you roll a result:
 4. **Escalate interesting results** - A nat 20 deserves special attention
 
 The goal is a world that feels alive beyond the party's actions, with surprises even the GM didn't plan.
+
+## Related Skills
+
+- **dice-roll**: Dice notation syntax and the `toss` CLI

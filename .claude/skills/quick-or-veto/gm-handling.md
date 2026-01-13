@@ -11,7 +11,7 @@ When all AI players give quick reactions:
 3. **Move forward** - Continue the scene
 
 **Example batched narration:**
-> Grimjaw grunts approvingly while Tilda's brow furrows with concern. Seraphine says nothing but her hand drifts to her holy symbol.
+> Grimjaw-Ironforge grunts approvingly while Tilda-Brannock's brow furrows with concern. Seraphine-Dawnwhisper says nothing but her hand drifts to her holy symbol.
 
 ## Handling Vetoes
 
@@ -54,7 +54,7 @@ This is your moment. Take as much space as you need.
 
 Signal for just that character:
 ```
-[AWAIT_AI_PLAYERS: tilda]
+[AWAIT_AI_PLAYERS: tilda-brannock]
 ```
 
 ### Step 4: Incorporate Full Response
@@ -70,9 +70,9 @@ When some players give quick reactions and others veto:
 3. **Weave the full response into the scene**
 
 **Example:**
-> Grimjaw grunts and watches the door. Seraphine nods thoughtfully.
+> Grimjaw-Ironforge grunts and watches the door. Seraphine-Dawnwhisper nods thoughtfully.
 >
-> But Tilda goes very still. Her eyes narrow at the merchant's words. "Friends in the Fist?" Her voice is cold. "Which division?"
+> But Tilda-Brannock goes very still. Her eyes narrow at the merchant's words. "Friends in the Fist?" Her voice is cold. "Which division?"
 
 ## Pacing Considerations
 

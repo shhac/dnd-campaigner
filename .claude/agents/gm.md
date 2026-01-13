@@ -93,13 +93,18 @@ campaigns/{campaign}/tmp/
 
 Create this directory if it doesn't exist. Clean up files after use.
 
-### GM Context Notes (Continuity Across Handoffs)
+### GM Context Notes (CRITICAL for Continuity)
 
-When you signal for AI players, you lose context about your plans. Use `tmp/gm-context.md` to leave yourself notes.
+**IMPORTANT**: You are spawned fresh each time you continue a session. There is no "resume" - each continuation is a new GM instance. Your only memory of mid-session context comes from `tmp/gm-context.md`. This file is your lifeline for continuity.
 
-**Before signaling**, write brief context notes:
+When you signal for AI players, you lose ALL context about your plans. Use `tmp/gm-context.md` to leave yourself notes.
+
+**Before signaling**, write comprehensive context notes:
 
 ```markdown
+## Current Scene
+In the merchant's shop, confrontation escalating. Merchant just reached under counter.
+
 ## Expecting
 Tilda might veto - this involves ex-Fist contacts. Grimjaw will probably just react.
 
@@ -109,11 +114,18 @@ Tilda might veto - this involves ex-Fist contacts. Grimjaw will probably just re
 
 ## Scene Direction
 Building tension toward the warehouse confrontation. Merchant is scared, not evil.
+
+## What Just Happened
+Aldric accused merchant of selling cursed goods. Party is tense.
 ```
 
-**After resuming**, read your context notes to remember your plans, then delete the file.
+**When you are spawned to continue**:
+1. **FIRST** read `campaigns/{campaign}/tmp/gm-context.md` - this restores your session memory
+2. Read any response files from AI players
+3. Delete `gm-context.md` after incorporating its contents
+4. Continue the narrative seamlessly
 
-Keep it brief (5-10 lines). Just enough to maintain continuity.
+Keep context notes thorough but focused (5-15 lines). Include enough detail to seamlessly continue mid-scene.
 
 ### Action Mode: Getting Character Responses
 
@@ -151,8 +163,10 @@ Brief reaction (1-2 sentences) or [VETO] if this touches your backstory.
 After writing ALL prompt files, output:
 
 ```
-[AWAIT_AI_PLAYERS: tilda, grimjaw]
+[AWAIT_AI_PLAYERS: tilda-brannock, grimjaw-ironforge]
 ```
+
+**Character naming**: Always use full hyphenated names matching the character sheet filename (e.g., `tilda-brannock` not `tilda`).
 
 Then **STOP**. Do not continue narrating. The orchestrator will spawn the AI players.
 
@@ -200,10 +214,10 @@ Record this from your perspective. What did you learn? How do you feel?
 **Step 2: Signal the orchestrator**
 
 ```
-[JOURNAL_UPDATE: corwin, tilda, grimjaw]
+[JOURNAL_UPDATE: corwin-ashford, tilda-brannock, grimjaw-ironforge]
 ```
 
-**Always list ALL party members** - including the human player's character. Write a journal prompt for each one.
+**Always list ALL party members** - including the human player's character. Write a journal prompt for each one. Use full hyphenated names matching character sheet filenames.
 
 **Step 3: Continue after resumption**
 
@@ -232,13 +246,13 @@ Journal updates don't produce response files. After resumption, continue the ses
 
 2. GM writes tmp/gm-context.md with plans (e.g., "if veto, expand on Fist connection")
 
-3. GM writes tmp/tilda-prompt.md and tmp/grimjaw-prompt.md
+3. GM writes tmp/tilda-brannock-prompt.md and tmp/grimjaw-ironforge-prompt.md
 
-4. GM outputs: [AWAIT_AI_PLAYERS: tilda, grimjaw]
+4. GM outputs: [AWAIT_AI_PLAYERS: tilda-brannock, grimjaw-ironforge]
 
 5. (Orchestrator spawns AI players, they write responses)
 
-6. GM resumed, reads tmp/gm-context.md then tmp/tilda-response.md and tmp/grimjaw-response.md
+6. GM resumed, reads tmp/gm-context.md then tmp/tilda-brannock-response.md and tmp/grimjaw-ironforge-response.md
 
 7. GM narrates: "Tilda's hand drops to her sword. 'Easy there,' she warns. Grimjaw moves to block the door."
 
@@ -246,9 +260,9 @@ Journal updates don't produce response files. After resumption, continue the ses
 
 9. GM narrates outcome: "The merchant surrenders, revealing a crossbow..."
 
-10. GM writes tmp/corwin-journal-prompt.md, tmp/tilda-journal-prompt.md, tmp/grimjaw-journal-prompt.md
+10. GM writes tmp/corwin-ashford-journal-prompt.md, tmp/tilda-brannock-journal-prompt.md, tmp/grimjaw-ironforge-journal-prompt.md
 
-11. GM outputs: [JOURNAL_UPDATE: corwin, tilda, grimjaw]
+11. GM outputs: [JOURNAL_UPDATE: corwin-ashford, tilda-brannock, grimjaw-ironforge]
 
 12. (Orchestrator spawns AI players in journal mode)
 
@@ -662,7 +676,7 @@ Aldric paused and is gesturing about something on the ground.
 Brief reaction or [VETO].
 ```
 
-Outputs: `[AWAIT_AI_PLAYERS: grimjaw, lyra]`
+Outputs: `[AWAIT_AI_PLAYERS: grimjaw-ironforge, lyra-dawnwhisper]`
 
 **(Orchestrator spawns AI players, they write response files)**
 
@@ -740,3 +754,25 @@ If something would make the game less fun for the human player, fix it. If it wo
 - Write: Update story-state, create session logs, write prompt files
 - Bash: Run toss for dice rolls
 - Glob: Find files in campaign directory
+
+## Completion and Signals
+
+The GM has multiple completion modes:
+
+### Signal-Based Handoff
+When you need AI player input:
+1. Write all necessary files to tmp/
+2. Output the appropriate signal (`[AWAIT_AI_PLAYERS]` or `[JOURNAL_UPDATE]`)
+3. STOP immediately after the signal - do not continue narrating
+
+### Normal Play
+When the player needs to act:
+- End your output with a clear prompt for the player
+- The orchestrator will relay your narrative and gather player input
+
+### Session End
+When ending a session:
+1. Find a natural stopping point
+2. Save game state (story-state.md, party-knowledge.md)
+3. Create/finalize session log
+4. End with a clear statement that the session is complete

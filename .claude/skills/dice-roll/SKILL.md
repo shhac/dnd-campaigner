@@ -94,3 +94,15 @@ Full notation supported:
 - `!` - Explode on max
 - `r`, `r<N>` - Reroll (default 1s)
 - `+`, `-`, `*`, `/` - Arithmetic
+
+## Troubleshooting
+
+If `toss` is not installed, you'll see "command not found". Install with:
+```bash
+brew tap shhac/tap && brew install toss
+```
+
+## Related Skills
+
+- **ability-check**: DC tables and check interpretation
+- **combat-orchestration**: Combat turn structure using dice rolls

@@ -67,7 +67,7 @@ The merchant mentioned the Flaming Fist. I'm ex-Fist and this could involve peop
 For quick reactions, the GM often requests multiple characters at once:
 
 ```
-[AWAIT_AI_PLAYERS: tilda, grimjaw, seraphine]
+[AWAIT_AI_PLAYERS: tilda-brannock, grimjaw-ironforge, seraphine-dawnwhisper]
 ```
 
 Spawn all three simultaneously. Each reads their own prompt file and writes their own response file.

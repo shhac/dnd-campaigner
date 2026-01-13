@@ -69,8 +69,10 @@ Each turn:
 Write prompts for ALL AI players, signal once:
 
 ```
-[AWAIT_AI_PLAYERS: grimjaw, tilda, seraphine]
+[AWAIT_AI_PLAYERS: grimjaw-ironforge, tilda-brannock, seraphine-dawnwhisper]
 ```
+
+**Character naming**: Always use full hyphenated names matching the character sheet filename.
 
 They respond in parallel. Batch their actions in narrative.
 
@@ -96,3 +98,7 @@ Post-combat checklist:
 - For batching AI actions in narrative, see [narration.md](narration.md)
 - For death and dying, see [death-saves.md](death-saves.md)
 - For concentration saves, see [concentration.md](concentration.md)
+
+## Related Skills
+
+- **invoke-ai-players**: Handles `[AWAIT_AI_PLAYERS]` and `[JOURNAL_UPDATE]` signals

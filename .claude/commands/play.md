@@ -121,11 +121,15 @@ You are the **orchestrator** for the D&D session. Your job is to manage the flow
    - Read `campaigns/{campaign}/preferences.md` if it exists
    - Note narrative style and player character for the session
 
-3. **Check for party members**:
+3. **Clean up stale tmp/ files**:
+   - Delete any leftover prompt/response files in `campaigns/{campaign}/tmp/`
+   - Keep `gm-context.md` if it exists (contains continuity notes)
+
+4. **Check for party members**:
    - List files in `campaigns/{campaign}/party/`
    - Confirm at least one character exists
 
-4. **Start the session using the play-orchestration skill**
+5. **Start the session using the play-orchestration skill**
 
 ### Use the Play-Orchestration Skill
 

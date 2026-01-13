@@ -5,6 +5,8 @@ description: Orchestrates agents that need to ask users questions. Use when spaw
 
 # Ask-User Orchestration
 
+> **Note**: `AskUserQuestion` is a built-in Claude Code tool that presents questions to the user with multiple-choice options and returns their selection.
+
 Guides the orchestrator (main conversation) through handling agents that need to ask users questions interactively.
 
 ## When This Skill Applies

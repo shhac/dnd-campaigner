@@ -32,7 +32,7 @@ The human player's character is journaled **exactly the same way** as AI charact
 The GM includes the human's character in the `[JOURNAL_UPDATE]` signal:
 
 ```
-[JOURNAL_UPDATE: corwin, tilda, grimjaw]
+[JOURNAL_UPDATE: corwin-ashford, tilda-brannock, grimjaw-ironforge]
          │
          └── Human player's character (gets journal update too)
 ```
@@ -138,7 +138,7 @@ Record this from your perspective.
 Like action mode, journal updates happen in parallel:
 
 ```
-[JOURNAL_UPDATE: corwin, tilda, grimjaw, seraphine]
+[JOURNAL_UPDATE: corwin-ashford, tilda-brannock, grimjaw-ironforge, seraphine-dawnwhisper]
 ```
 
 Spawn all four ai-player agents simultaneously in journal mode. They each update their own journal file.

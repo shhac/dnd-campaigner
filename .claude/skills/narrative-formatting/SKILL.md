@@ -1,10 +1,13 @@
-# Narrative Formatting
-
 ---
+name: narrative-formatting
 description: This skill should be used when formatting D&D narrative output, GM scene descriptions, combat encounters, dialogue scenes, exploration sequences, or any game master narration. Invoked when presenting story content to players, formatting dice roll results, structuring combat rounds, or creating immersive scene descriptions.
 ---
 
+# Narrative Formatting
+
 ## Overview
+
+> **Terminal Compatibility**: Some Unicode characters (═, ─, etc.) may not render in all terminals. Use ASCII alternatives (=, -) if needed.
 
 This skill defines a consistent formatting system for D&D narrative output. The goal is clear, scannable, immersive game text that distinguishes between narration, dialogue, actions, and mechanical results.
 
@@ -29,7 +32,7 @@ Users can choose their preferred narrative style. The GM/orchestrator should ask
 | **Hybrid** | Balanced between script and novel approaches | Best of both worlds |
 | **Minimal** | Clean, less markup, streamlined | Players who prefer simplicity |
 
-See `conversation.md` for complete examples of each style.
+See `conversation/index.md` for complete examples of each style.
 
 ## Terminal Formatting Support
 

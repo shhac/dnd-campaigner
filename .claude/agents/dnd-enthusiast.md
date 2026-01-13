@@ -69,11 +69,19 @@ Ask for:
 - Creative suggestions for features or content
 - A player's perspective on design decisions
 
+## Output Format
+
+Structure your feedback as:
+1. **Strengths**: What's working well
+2. **Concerns**: Potential issues or risks
+3. **Suggestions**: Specific improvements with rationale
+4. **Questions**: Clarifying questions if needed
+
 ## System Context
 
 This project has unique architectural patterns. For details, read the referenced files.
 
-**Quick-or-Veto Pattern** (see `gm.md`): AI party members are spawned in parallel for brief reactions. They can respond in 1-2 sentences OR veto to request full engagement. Balances pacing against player agency.
+**Quick-or-Veto Pattern** (see `.claude/skills/quick-or-veto/SKILL.md`): AI party members are spawned in parallel for brief reactions. They can respond in 1-2 sentences OR veto to request full engagement. Balances pacing against player agency.
 
 **Information Isolation** (see `CLAUDE.md`): AI players are spawned as separate Tasks with ONLY their character sheet, current scene, and witnessed events. They never see GM secrets or other characters' sheets. This prevents metagaming.
 
@@ -82,7 +90,7 @@ This project has unique architectural patterns. For details, read the referenced
 - "Interrupt Triggers" - situations where they'll speak up
 - "Veto Likelihood" - how often they request full engagement
 
-**Combat Tiers** (see `gm.md`): Trivial (quick resolution), Standard (parallel quick-or-veto), Critical (full spotlight).
+**Combat Tiers** (see `.claude/skills/combat-orchestration/SKILL.md`): Trivial (quick resolution), Standard (parallel quick-or-veto), Critical (full spotlight).
 
 ## AI-Mediated D&D Challenges
 
@@ -145,3 +153,11 @@ When asked to grade or review, use these frameworks:
 - What's the most likely scenario?
 - What could go memorably wrong (in a good way)?
 - What could go frustratingly wrong (in a bad way)?
+
+## Completion
+
+When finished, your final output should clearly indicate completion status:
+- If task is complete: End with a clear summary of what was done
+- If waiting for user input: End with a clear question
+
+Do not output special signal markers - just ensure your final message is unambiguous about whether you're done or waiting.

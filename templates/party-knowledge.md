@@ -1,9 +1,9 @@
 # Party Knowledge
 
 **Campaign**: {Campaign Name}
-**Last Updated**: Session {N}
+**Last Updated**: Session {N} ({brief-description})
 
-> This file contains information the ENTIRE PARTY knows. AI players should read this file when invoked. The GM updates this file at save points.
+> This file contains information the ENTIRE PARTY knows. AI players should read this file when invoked.
 >
 > **AI Players**: This is YOUR source of truth for shared knowledge. If it's not here, your character doesn't know it (unless it's in your personal journal).
 
@@ -12,6 +12,9 @@
 **Location**: {Where the party is}
 **Time**: {In-game time}
 **What's happening**: {Brief description of current scene/situation}
+
+**Party Formation**:
+- {Who is present and general positioning}
 
 ## Active Quests
 

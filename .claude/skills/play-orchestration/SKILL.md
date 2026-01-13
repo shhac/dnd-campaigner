@@ -31,22 +31,22 @@ Spawn GM (with campaign context + preferences) --+
 GM narrates -> Relay to player                   |
     |                                            |
     v                                            |
-Player responds -> Resume GM with input          |
+Player responds -> Spawn fresh GM with input     |
     |                                            |
     v                                            |
 [AWAIT_AI_PLAYERS] -> invoke-ai-players skill    |
-    |                                            |
+    |                 (all AI players parallel)  |
     v                                            |
 AI players respond                               |
     |                                            |
-    v                                            |
-decision-log agent (record what happened)        |
+    +---> decision-log (background, don't wait)  |
     |                                            |
     v                                            |
 [JOURNAL_UPDATE] -> invoke-ai-players skill      |
-    |              -> human-player journaling    |
+    |               (ALL chars parallel,         |
+    |                including human player)     |
     v                                            |
-Resume GM ----------------------------------------+
+Spawn fresh GM (reads gm-context.md) ------------+
     |
     v
 Loop until session ends (track significant interactions)
@@ -186,15 +186,15 @@ The four of you settle into the corner booth, tankards between you.
 
 > **Gideon**: "So. A warehouse sealed for a decade, and someone's paying to crack it open." *He takes a long pull of his ale.* "Fifty gold to walk into the dark."
 
-*Tilda drums her fingers on the table, her eyes scanning the room.*
+*Tilda-Brannock drums her fingers on the table, her eyes scanning the room.*
 
-> **Tilda**: "Fools with rent due. I've taken worse jobs."
+> **Tilda-Brannock**: "Fools with rent due. I've taken worse jobs."
 
-> **Mira**: *She speaks quietly.* "The posting mentioned 'disturbances.' What kind makes a merchant seal a warehouse and walk away?"
+> **Mira-Thornwood**: *She speaks quietly.* "The posting mentioned 'disturbances.' What kind makes a merchant seal a warehouse and walk away?"
 
-*Gideon raises his mug.*
+*Gideon-Harrowmoor raises his mug.*
 
-> **Gideon**: "Shall we go see what's rotting in Warehouse 7?"
+> **Gideon-Harrowmoor**: "Shall we go see what's rotting in Warehouse 7?"
 ```
 
 ## Step 4: Handling Player Questions with AskUserQuestion
@@ -217,11 +217,13 @@ AskUserQuestion:
   question: "Which character are you playing?"
   header: "Character"
   options:
-    - label: "Corwin"
+    - label: "Corwin-Ashford"
       description: "Human fighter, former city guard"
-    - label: "Tilda"
+    - label: "Tilda-Brannock"
       description: "Half-elf rogue, ex-Flaming Fist"
 ```
+
+**Note**: Character names use full hyphenated format matching the character sheet filename.
 
 ### Action Decision Example
 
@@ -242,13 +244,20 @@ AskUserQuestion:
 
 The player can always type a custom response instead of selecting an option.
 
-## Step 5: Resuming the GM
+## Step 5: Spawning a Fresh GM (After Signals)
 
-After handling signals or player input, resume the GM:
+After handling signals or player input, spawn a **fresh** GM agent (do NOT resume):
+
+**Why fresh spawn?** The GM agent doesn't properly "complete" before yielding control - the "STOP" instruction is just prompt text, not an API-level mechanism. Resuming incomplete agents causes 400 errors. Continuity is maintained via `gm-context.md`.
 
 ```
-Task: gm (resume)
+Task: gm agent
 Prompt: Continue the session for {campaign}.
+
+**First**: Read your context notes from campaigns/{campaign}/tmp/gm-context.md
+to restore continuity from before the handoff. This is CRITICAL for session flow.
+
+Use {narrative_style} formatting style for dialogue and scenes.
 
 [Include context based on what happened:]
 - If player responded: "Player said: {response}"
@@ -328,7 +337,7 @@ After AI players respond to action prompts, invoke the decision-log agent to rec
 
 Invoke the decision-log agent:
 - **After** AI players complete their action responses
-- **Before** resuming the GM with the combined responses
+- **In parallel** with resuming the GM (fire-and-forget)
 - At other significant decision points (optional)
 
 ### Decision-Log Flow
@@ -342,25 +351,24 @@ Spawn AI players (action mode)
     v
 Collect responses
     |
-    v
-Invoke decision-log agent  <-- Record what happened
+    +---> Invoke decision-log agent (background, fire-and-forget)
     |
     v
-Resume GM with responses
+Resume GM with responses (don't wait for decision-log)
 ```
 
 ### Decision-Log Invocation
 
+Run decision-log with `run_in_background: true` - don't wait for it. The agent reads response files from `tmp/` and appends to `decision-log.md`, which doesn't conflict with the GM's workflow.
+
 ```
-Task: decision-log agent
+Task: decision-log agent (run_in_background: true)
 Prompt: Record the following AI player decisions for {campaign}.
 
 Characters involved: {char1}, {char2}
 Scene context: {brief scene description}
 
-Responses:
-- {char1}: {summary of response}
-- {char2}: {summary of response}
+Responses are in campaigns/{campaign}/tmp/
 
 Record these for session reconstruction.
 ```
@@ -378,35 +386,23 @@ The human player's character (from `preferences.md`) should also get journal ent
 - Captures the human player's character's perspective on events
 - Useful for session recaps and long-term continuity
 
-### How to Handle Human Player Journaling
+### How Human Player Journaling Works
 
-**Option A: Orchestrator writes directly** (simpler)
+**The GM includes the human player's character in the JOURNAL_UPDATE signal.** All characters (both AI-controlled and human-controlled) are journaled in the same parallel batch.
 
-After AI player journals complete:
-1. Read the human player's character sheet from `campaigns/{campaign}/party/{player_character}.md`
-2. Write a journal entry from that character's perspective
-3. Save to `campaigns/{campaign}/party/{player_character}.md` in the journal section
-
-**Option B: Dedicated journal agent** (more consistent voice)
-
-Spawn a journal agent for the human player's character:
-```
-Task: ai-player agent (journal mode)
-Prompt: Write a journal entry for {player_character}.
-
-Character sheet: [read from party/{player_character}.md]
-Recent events: [from GM's journal prompt or scene summary]
-
-Write in {player_character}'s voice based on their personality.
-```
+When the GM triggers `[JOURNAL_UPDATE: gideon-harrowmoor, mira-thornwood, corwin-ashford]` (where `corwin-ashford` is the human player's character):
+- The invoke-ai-players skill spawns journal agents for ALL listed characters
+- The human player's character is treated the same as AI characters for journaling
+- All journal writes happen in parallel
 
 ### Journal Update Sequence
 
-1. GM triggers `[JOURNAL_UPDATE: char1, char2, char3]`
-2. Spawn AI players for AI-controlled characters (invoke-ai-players skill)
-3. **Also journal the human player's character** (Option A or B above)
-4. All journals complete
-5. Resume GM
+1. GM triggers `[JOURNAL_UPDATE: char1, char2, player_char]` (includes ALL characters)
+2. Spawn journal agents for ALL listed characters in parallel (via invoke-ai-players skill)
+3. All journals complete
+4. Resume GM
+
+**Note**: There is no separate step for human player journaling. The GM is responsible for including the human player's character name in the JOURNAL_UPDATE signal, and invoke-ai-players handles the entire batch.
 
 ### Example Journal Entry (Human Character)
 
@@ -424,6 +420,62 @@ in the Hall of Lords paid to put it there.
 
 Tomorrow we dig into Vance's business dealings. Tonight, I need ale.
 ```
+
+## Parallelization Guidelines
+
+Understanding what can run in parallel vs. sequentially is critical for efficient orchestration.
+
+### What Runs in Parallel
+
+| Task Type | Details |
+|-----------|---------|
+| **AI player actions** | All AI players in an AWAIT_AI_PLAYERS batch spawn simultaneously |
+| **AI player journals** | All characters (AI + human) in a JOURNAL_UPDATE batch spawn simultaneously |
+| **Decision-log** | Runs in background while GM continues (fire-and-forget) |
+
+### What Must Be Sequential
+
+| Dependency | Reason |
+|-----------|--------|
+| **Prompt files before spawn** | GM must write prompts before AI players can read them |
+| **AI responses before GM resume** | GM needs the response content to continue narration |
+| **Player input before GM resume** | GM waits for human player's chosen action |
+| **Journals before resume** (usually) | Optional - can fire-and-forget if not blocking |
+
+### Fire-and-Forget Tasks
+
+These tasks can run in background without waiting:
+- **Decision-log**: Reads response files and appends to log - no conflict with GM
+- **Journals** (optional): If you don't need confirmation, journals can fire-and-forget
+
+### Parallelization Flow Example
+
+```
+[AWAIT_AI_PLAYERS: gideon-harrowmoor, mira-thornwood, tilda-brannock]
+    |
+    +---> Spawn gideon-harrowmoor agent ----+
+    +---> Spawn mira-thornwood agent -------+---> Collect all responses
+    +---> Spawn tilda-brannock agent -------+
+                                            |
+                                            +---> decision-log (background, don't wait)
+                                            |
+                                            v
+                                       Resume GM
+
+[JOURNAL_UPDATE: gideon-harrowmoor, mira-thornwood, tilda-brannock, corwin-ashford]  (corwin-ashford = human player)
+    |
+    +---> Journal gideon-harrowmoor --------+
+    +---> Journal mira-thornwood -----------+
+    +---> Journal tilda-brannock -----------+---> All complete (or fire-and-forget)
+    +---> Journal corwin-ashford -----------+
+                                 |
+                                 v
+                            Resume GM
+```
+
+### Key Principle
+
+**Spawn all agents in a batch simultaneously.** Don't wait for one character before starting another. The only sequential requirement is having prompt files ready before spawning.
 
 ## Post-Compaction Recovery
 

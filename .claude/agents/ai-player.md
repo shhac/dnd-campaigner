@@ -22,6 +22,15 @@ Extract these three values. The **mode** determines what you do:
 - **action**: Respond to a situation (write response file, NO journal update)
 - **journal**: Update your journal with recent events (NO response file)
 
+## Character Name Format
+
+Character names use full hyphenated format matching the character sheet filename:
+- `tilda-brannock` (not `tilda`)
+- `gideon-harrowmoor` (not `gideon`)
+- `seraphine-dawnwhisper` (not `seraphine`)
+
+This applies to file paths, signals, and all references.
+
 ## Reading Your Files
 
 Based on your mode, read the appropriate files:
@@ -90,6 +99,20 @@ Keep entries brief (3-6 bullet points).
 - What I learned: He's been buying from smugglers in the warehouse district
 - How I feel: Don't trust his "I didn't know" excuse. But he folded fast.
 - Notes: Aldric was right to push. The warehouse lead is solid.
+```
+
+If the journal file doesn't exist, create it with:
+```markdown
+# {Character Name}'s Journal
+
+**Campaign**: {campaign}
+**Last Updated**: Session 1
+
+> This file is written BY and FOR {Character Name}. It provides continuity between invocations.
+
+## Recent Events (My Perspective)
+
+[Your first entry here]
 ```
 
 **DO NOT** write a response file in journal mode.
@@ -407,3 +430,11 @@ When treasure is found:
 - Don't let loot arguments derail the game
 
 Example: "Quick one - I'd argue my sneak attacks would get more mileage from that dagger, but Aldric takes more hits. I'll defer if he promises to let me borrow it for delicate work."
+
+## Completion
+
+When finished, your final output should clearly indicate completion status:
+- If task is complete: End with a clear summary of what was done
+- If waiting for user input: End with a clear question
+
+Do not output special signal markers - just ensure your final message is unambiguous about whether you're done or waiting.

@@ -36,6 +36,12 @@ campaigns/{name}/       # Individual campaign data
 ├── items/              # Notable items and artifacts
 ```
 
+## Path Conventions
+
+- `{campaign}`: Campaign directory name (kebab-case, e.g., `the-rot-beneath`)
+- `{character}`: Full hyphenated character name (e.g., `tilda-brannock`, matching the character sheet filename)
+- `{name}`: Generic name placeholder (lowercase, hyphenated)
+
 ## Core Design Principle: Information Isolation
 
 **CRITICAL**: AI players must not have access to GM knowledge.
@@ -128,10 +134,23 @@ Exports a campaign as a standalone project with all necessary agents, skills, an
 - **gm**: Runs the game - narrates, controls NPCs, adjudicates rules
 - **ai-player**: Plays a single party member (isolated context, quick-or-veto system)
 - **dnd-enthusiast**: Experienced D&D player/DM offering feedback on campaign design, rules, and player experience
+- **decision-log**: Records character decisions and actions after significant events to help with context reconstruction
 
 ## Skills
 
+Skills are automatically loaded by Claude Code when relevant. Agents reference them by name.
+
+### User-Facing Skills
 - **dice-roll**: Intelligent `toss` CLI wrapper for D&D dice notation
 - **ability-check**: DC tables, saving throws, conditions, advantage/disadvantage, skill guidance
 - **name-generator**: Creates varied, original names by race/culture while avoiding duplicates
 - **random-events**: Generates weather, encounters, rumors, NPC moods to make the world feel alive
+
+### Orchestration Skills
+- **play-orchestration**: Core orchestration loop for D&D play sessions
+- **invoke-ai-players**: Orchestrates AI player agent spawning for D&D sessions
+- **ask-user-orchestration**: Orchestrates agents that need to ask users questions
+- **combat-orchestration**: Manages theater-of-mind D&D combat with threat assessment and pacing tiers
+- **save-point**: Manages session state persistence for D&D campaigns
+- **quick-or-veto**: The quick-or-veto pattern for AI player reactions
+- **narrative-formatting**: Formatting system for D&D narrative output

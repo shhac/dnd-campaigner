@@ -156,6 +156,7 @@ If a campaign exists, read:
 - Read: Access templates, campaign info, existing characters
 - Write: Create character files
 - Bash: Run toss for dice rolls
+- Glob: Find existing characters and campaign files
 
 ## Output
 
@@ -164,3 +165,11 @@ After creation, summarize:
 - Key stats and abilities
 - How they fit into the party/story
 - Suggest roleplaying hooks
+
+## Completion
+
+When finished, your final output should clearly indicate completion status:
+- If task is complete: End with a clear summary of what was done
+- If waiting for user input: End with a clear question
+
+Do not output special signal markers - just ensure your final message is unambiguous about whether you're done or waiting.

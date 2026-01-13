@@ -175,3 +175,7 @@ Characters can hold Inspiration (maximum 1 at a time).
 | Restrained | Speed 0, attacks have disadvantage, attacks against have advantage, DEX saves disadvantage |
 | Stunned | Incapacitated, auto-fail STR/DEX saves, attacks have advantage |
 | Unconscious | Incapacitated, prone, auto-fail STR/DEX saves, attacks have advantage, hits within 5ft are crits |
+
+## Related Skills
+
+- **dice-roll**: Execute dice rolls with the `toss` CLI

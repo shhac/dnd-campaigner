@@ -167,6 +167,14 @@ Once approved, create:
 
 Use templates from `templates/` directory. Read them before generating content.
 
+### Required Templates
+- `templates/campaign-overview.md`
+- `templates/story-state.md`
+- `templates/party-knowledge.md`
+- `templates/npc.md`
+- `templates/location.md`
+- `templates/faction.md`
+
 ## Naming Things
 
 Use the **name-generator skill** for NPCs, locations, factions, and the campaign itself. This ensures variety and avoids generic fantasy clichés.
@@ -176,9 +184,18 @@ Use the **name-generator skill** for NPCs, locations, factions, and the campaign
 - Read: Access templates and existing content
 - Write: Create campaign files
 - Bash: Create directories
+- Glob: Find existing files and templates
 
 ## Output
 
 After generation, summarize what was created and suggest next steps:
 - Create player characters with `/new-character`
 - Start playing with `/play {campaign-name}`
+
+## Completion
+
+When finished, your final output should clearly indicate completion status:
+- If task is complete: End with a clear summary of what was done
+- If waiting for user input: End with a clear question
+
+Do not output special signal markers - just ensure your final message is unambiguous about whether you're done or waiting.

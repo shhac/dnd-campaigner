@@ -22,7 +22,7 @@ The GM agent outputs signals when it needs AI player input:
 
 1. GM wrote context notes to `campaigns/{campaign}/tmp/gm-context.md` (for its own continuity)
 2. GM wrote prompt files to `campaigns/{campaign}/tmp/{character}-prompt.md`
-3. GM output `[AWAIT_AI_PLAYERS: tilda, grimjaw]`
+3. GM output `[AWAIT_AI_PLAYERS: tilda-brannock, grimjaw-ironforge]`
 4. **You spawn ai-player agents** (in parallel):
    ```
    Task: ai-player (for each character)
@@ -37,7 +37,7 @@ The GM agent outputs signals when it needs AI player input:
 ### Journal Mode Flow
 
 1. GM wrote journal prompts to `campaigns/{campaign}/tmp/{character}-journal-prompt.md`
-2. GM output `[JOURNAL_UPDATE: corwin, tilda, grimjaw]`
+2. GM output `[JOURNAL_UPDATE: corwin-ashford, tilda-brannock, grimjaw-ironforge]`
 3. **You spawn ai-player agents** (in parallel):
    ```
    Task: ai-player (for each character)
@@ -62,10 +62,12 @@ The GM agent outputs signals when it needs AI player input:
 When multiple characters are listed, spawn ALL agents in a single message with multiple Task tool calls:
 
 ```
-[AWAIT_AI_PLAYERS: tilda, grimjaw, seraphine]
+[AWAIT_AI_PLAYERS: tilda-brannock, grimjaw-ironforge, seraphine-dawnwhisper]
 ```
 
 Spawn three ai-player Tasks simultaneously - do NOT spawn sequentially.
+
+**Character naming**: Always use full hyphenated names matching the character sheet filename (e.g., `tilda-brannock` not `tilda`).
 
 ### Task Parameters
 
@@ -73,7 +75,7 @@ Spawn three ai-player Tasks simultaneously - do NOT spawn sequentially.
 subagent_type: ai-player
 prompt: |
   Campaign: the-rot-beneath
-  Character: tilda
+  Character: tilda-brannock
   Mode: action
 ```
 
@@ -83,14 +85,17 @@ The ai-player agent will:
 3. Respond or update journal
 4. Complete
 
-### Resuming the GM
+### Spawning a Fresh GM
 
-After all AI player agents complete, resume the GM:
+After all AI player agents complete, spawn a **fresh** GM agent (do NOT resume):
 
 ```yaml
 subagent_type: gm
 prompt: |
   Continue the session for {campaign}.
+
+  **First**: Read your context notes from campaigns/{campaign}/tmp/gm-context.md
+  to restore continuity from before the handoff.
 
   Mode: {action or journal} complete.
   Response files are ready in tmp/ (if action mode).
@@ -98,14 +103,17 @@ prompt: |
   Read responses if applicable, incorporate into narrative, and continue.
 ```
 
+**Why spawn fresh instead of resume?** The GM agent doesn't properly "complete" before yielding control - the "STOP" instruction is just prompt text, not an API-level mechanism. Resuming incomplete agents causes 400 errors. The architecture already supports fresh spawns via `gm-context.md`, which the GM writes before signaling.
+
 ## Handling Vetoes
 
 In action mode, an AI player may veto with `[VETO - reason]` in their response file.
 
-When you resume the GM, it will:
-1. Detect the veto in the response file
-2. Write a new full-context prompt for that character
-3. Signal `[AWAIT_AI_PLAYERS: {character}]` again
+When you spawn a fresh GM, it will:
+1. Read gm-context.md to restore continuity
+2. Detect the veto in the response file
+3. Write a new full-context prompt for that character
+4. Signal `[AWAIT_AI_PLAYERS: {character}]` again
 
 Just follow the normal flow - the GM handles veto logic.
 
@@ -129,7 +137,7 @@ GM narrates, human acts                             │
 Spawn AI players (action mode)                      │
     │                                               │
     ▼                                               │
-Resume GM                                           │
+Spawn fresh GM (reads gm-context.md)                │
     │                                               │
     ▼                                               │
 GM narrates outcome                                 │
@@ -141,7 +149,7 @@ GM narrates outcome                                 │
 Spawn AI players (journal mode)                     │
     │                                               │
     ▼                                               │
-Resume GM ─────────────────────────────────────────┘
+Spawn fresh GM (reads gm-context.md) ──────────────┘
     │
     ▼
 Loop until session ends

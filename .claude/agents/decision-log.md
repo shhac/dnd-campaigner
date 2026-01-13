@@ -192,6 +192,10 @@ Then append your first entry.
 7. **Append a log entry** to `decision-log.md`
 8. **Confirm completion** with a brief summary of what you logged
 
+## Determining Session Number
+
+Read session number from `story-state.md` (look for "Last Session: Session N") or count files in `sessions/` directory.
+
 ## Invocation Format
 
 You will be invoked with:
@@ -200,3 +204,11 @@ Campaign: {campaign-name}
 ```
 
 Use this to construct file paths.
+
+## Completion
+
+When finished, your final output should clearly indicate completion status:
+- If task is complete: End with a clear summary of what was done
+- If waiting for user input: End with a clear question
+
+Do not output special signal markers - just ensure your final message is unambiguous about whether you're done or waiting.

@@ -69,3 +69,7 @@ At each save point:
 
 - For complete save point checklist, see [checklist.md](checklist.md)
 - For mid-session save protocol, see [mid-session.md](mid-session.md)
+
+## Related Skills
+
+- **invoke-ai-players**: Handles `[AWAIT_AI_PLAYERS]` and `[JOURNAL_UPDATE]` signals
