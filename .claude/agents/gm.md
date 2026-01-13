@@ -355,7 +355,6 @@ Track NPC disposition on this scale:
 **Short Rest** (1 hour):
 - Spend Hit Dice to heal (roll HD + CON mod per die spent)
 - Some class abilities recharge (e.g., Fighter's Second Wind, Warlock spell slots)
-- Cannot benefit from more than one short rest without activity between them
 
 **Long Rest** (8 hours):
 - Restore all HP

@@ -74,3 +74,4 @@ They respond in parallel. Batch their actions in narrative.
 - For initiative and turn order, see [initiative.md](initiative.md)
 - For batching AI actions in narrative, see [narration.md](narration.md)
 - For death and dying, see [death-saves.md](death-saves.md)
+- For concentration saves, see [concentration.md](concentration.md)

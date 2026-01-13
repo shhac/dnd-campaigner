@@ -59,7 +59,12 @@ If no destination is provided, you'll be asked where to put it.
 │   ├── dice-roll/SKILL.md
 │   ├── ability-check/SKILL.md
 │   ├── name-generator/SKILL.md
-│   └── random-events/SKILL.md  # Weather, encounters, rumors
+│   ├── random-events/SKILL.md  # Weather, encounters, rumors
+│   ├── ask-user-orchestration/SKILL.md  # GM question handling
+│   ├── save-point/SKILL.md     # Session state persistence
+│   ├── quick-or-veto/SKILL.md  # AI player reaction pattern
+│   ├── combat-orchestration/SKILL.md    # Combat management
+│   └── invoke-ai-players/SKILL.md       # AI player spawning
 └── commands/
     ├── play.md                 # Modified for standalone use
     └── new-character.md        # Modified for standalone use
@@ -128,6 +133,11 @@ mkdir -p {destination}/.claude/skills/dice-roll
 mkdir -p {destination}/.claude/skills/ability-check
 mkdir -p {destination}/.claude/skills/name-generator
 mkdir -p {destination}/.claude/skills/random-events
+mkdir -p {destination}/.claude/skills/ask-user-orchestration
+mkdir -p {destination}/.claude/skills/save-point
+mkdir -p {destination}/.claude/skills/quick-or-veto
+mkdir -p {destination}/.claude/skills/combat-orchestration
+mkdir -p {destination}/.claude/skills/invoke-ai-players
 mkdir -p {destination}/.claude/commands
 mkdir -p {destination}/templates
 ```
@@ -151,6 +161,11 @@ Copy skills (no modification needed):
 - `.claude/skills/ability-check/SKILL.md`
 - `.claude/skills/name-generator/SKILL.md`
 - `.claude/skills/random-events/SKILL.md`
+- `.claude/skills/ask-user-orchestration/SKILL.md`
+- `.claude/skills/save-point/SKILL.md`
+- `.claude/skills/quick-or-veto/SKILL.md`
+- `.claude/skills/combat-orchestration/SKILL.md`
+- `.claude/skills/invoke-ai-players/SKILL.md`
 
 Copy templates for ongoing content creation:
 - `templates/npc.md`

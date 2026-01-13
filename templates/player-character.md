@@ -149,6 +149,18 @@ This section helps the GM know when to check if this character wants to contribu
 **Veto Likelihood** - How often they'll want extended input vs quick reactions:
 {High/Medium/Low} - {Brief explanation, e.g., "High - Grimjaw has strong opinions on everything"}
 
+## Secret Action Triggers (for AI Players)
+
+Situations where this character might act privately if given the opportunity:
+- {e.g., "Sees valuable small items unattended"}
+- {e.g., "Overhears information about their past"}
+- {e.g., "Has a chance to contact old associates"}
+- {Trigger 4}
+
+**Secrecy Style**: {How they handle covert actions - sneaky and subtle, brazenly when no one's looking, elaborate cover stories}
+
+**Moral Limits**: {Lines they won't cross even in secret, e.g., "Won't steal from party members", "Would never betray the group"}
+
 ## Notes
 
 {Any additional notes, character development, etc.}
