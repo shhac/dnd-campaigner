@@ -107,115 +107,47 @@ This ensures AI players can't metagame.
 
 ## Instructions for Claude
 
-You are the **orchestrator** for the D&D session. Your job is to:
-1. Spawn the GM agent
-2. Watch for AI player signals
-3. Spawn AI players when signaled (using the **invoke-ai-players skill**)
-4. Resume the GM
-5. Relay narrative to the player
+You are the **orchestrator** for the D&D session. Your job is to manage the flow between GM, players, and AI party members.
 
-### Step 1: Spawn the GM
+### Initial Setup
 
-```
-Task: gm agent
-Prompt: Run a D&D session for the {campaign} campaign. First read:
-- campaigns/{campaign}/overview.md
-- campaigns/{campaign}/story-state.md
-- campaigns/{campaign}/party-knowledge.md
-- All files in campaigns/{campaign}/party/
-- Relevant NPCs from campaigns/{campaign}/npcs/
+1. **Verify the campaign exists**:
+   - Check `campaigns/{campaign}/` directory exists
+   - Read `campaigns/{campaign}/overview.md` to confirm it's valid
 
-Then:
-1. Summarize where we left off
-2. Ask which character the player is controlling
-3. Begin running the session
+2. **Check for party members**:
+   - List files in `campaigns/{campaign}/party/`
+   - Confirm at least one character exists
 
-When you need AI player input:
-1. Write prompt files to campaigns/{campaign}/tmp/
-2. Output [AWAIT_AI_PLAYERS: char1, char2] and STOP
+3. **Start the session using the play-orchestration skill**
 
-When you want to trigger journaling:
-1. Write journal prompt files to campaigns/{campaign}/tmp/
-2. Output [JOURNAL_UPDATE: char1, char2, char3] and STOP
-```
+### Use the Play-Orchestration Skill
 
-### Step 2: Orchestration Loop
+**IMPORTANT**: After initial setup, use the **play-orchestration skill** for all session orchestration.
 
-**Use the invoke-ai-players skill** for AI player orchestration.
+The skill handles:
+- Spawning and resuming the GM agent
+- Relaying narrative to the player (show everything, summarize nothing)
+- Detecting and handling `[AWAIT_AI_PLAYERS]` and `[JOURNAL_UPDATE]` signals
+- Using AskUserQuestion for player decision points
+- Post-compaction recovery (the skill can be re-triggered to restore orchestration)
 
-Monitor GM output for signals:
-- `[AWAIT_AI_PLAYERS: char1, char2]` → Spawn AI players in action mode
-- `[JOURNAL_UPDATE: char1, char2, char3]` → Spawn AI players in journal mode for ALL listed characters
-- No signal → Relay narrative to player, await input, resume GM
+Simply invoke the skill with the campaign name to begin orchestration.
 
-Key rules:
-- **Spawn in parallel** when multiple characters are listed
-- **Don't pass campaign content** - all context flows through files
-- **Human character gets journaling** - when `[JOURNAL_UPDATE]` is signaled, spawn ai-player in journal mode for ALL listed characters including the human's. The human's character gets the same journal treatment as AI characters.
+### Quick Reference
 
-### Scene Flow: Show PC Dialogue Before NPC Responses
+| Task | How |
+|------|-----|
+| Start session | Spawn GM with campaign context |
+| GM returns narrative | Relay FULL content, use AskUserQuestion if there's a choice |
+| `[AWAIT_AI_PLAYERS: ...]` | Use invoke-ai-players skill (action mode) |
+| `[JOURNAL_UPDATE: ...]` | Use invoke-ai-players skill (journal mode) |
+| Player responds | Resume GM with player's response |
+| Context compacted | Re-invoke play-orchestration skill |
 
-When the player chooses an action or dialogue approach, the GM narrates what the PC says/does BEFORE showing NPC responses:
+### Related Skills
 
-1. **Player chooses approach** → "I'll try flattery"
-2. **GM shows PC's actual words/actions** → *"Your reputation precedes you, Captain..."*
-3. **Then NPC responds** → The captain's weathered face creases into a half-smile...
-
-## Orchestration: Handling GM Questions
-
-**IMPORTANT**: When the GM agent returns output containing a question for the player, you MUST use the **AskUserQuestion** tool rather than just relaying text and waiting for input.
-
-### When to Use AskUserQuestion
-
-| GM Output Contains | Action |
-|-------------------|--------|
-| "Which character are you playing?" | AskUserQuestion with PC names as options |
-| "What do you do?" | AskUserQuestion with common actions + "Other" for free text |
-| "Do you want to [X] or [Y]?" | AskUserQuestion with X and Y as options |
-| "Would you like to play out combat or resolve quickly?" | AskUserQuestion with both options |
-| Any decision point or choice | AskUserQuestion with the choices as options |
-
-### Example: Character Selection
-
-When the GM asks which character the player is controlling:
-
-```
-AskUserQuestion:
-  question: "Which character are you playing?"
-  header: "Character"
-  options:
-    - label: "Corwin"
-      description: "Human fighter, former city guard"
-    - label: "Tilda"
-      description: "Half-elf rogue, ex-Flaming Fist"
-    - label: "Grimjaw"
-      description: "Dwarf barbarian, mountain clan exile"
-```
-
-### Example: Action Decision
-
-When the GM asks "What do you do?":
-
-```
-AskUserQuestion:
-  question: "What do you do?"
-  header: "Action"
-  options:
-    - label: "Investigate"
-      description: "Look around, search for clues"
-    - label: "Talk"
-      description: "Speak to someone present"
-    - label: "Attack"
-      description: "Initiate combat"
-    - label: "Move"
-      description: "Go somewhere else"
-```
-
-The player can always select "Other" for custom input.
-
-### Why This Matters
-
-1. **Cleaner UX** - Structured choices are easier to interact with
-2. **Faster input** - Click vs type for common actions
-3. **Context preserved** - Options remind player of available choices
-4. **Consistent experience** - Every decision point feels the same
+- **play-orchestration**: Core orchestration loop (use this)
+- **invoke-ai-players**: Spawns AI player agents
+- **save-point**: Session state persistence
+- **combat-orchestration**: Combat encounter handling
