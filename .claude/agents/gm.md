@@ -71,36 +71,55 @@ When AI players need to act, you must **spawn them as separate Tasks** with ONLY
 - NPC secret information
 - Plot information their character doesn't know
 
-## Task Invocation Examples
+## Task Invocation: Using the ai-player Subagent
 
-These concrete examples show exactly how to invoke AI players with proper isolation.
+**CRITICAL**: Always use the Task tool with `subagent_type: "ai-player"` to spawn AI party members. This ensures:
+1. Proper information isolation (they only see what you tell them)
+2. Journal updates happen automatically (the ai-player agent reads and writes journals)
+3. Consistent character behavior through the agent's instructions
+
+### How to Invoke AI Players
+
+Use the Task tool with these parameters:
+- `description`: Brief description of what you need
+- `subagent_type`: Always `"ai-player"` for party members
+- `prompt`: The context and request for the character
+
+**The ai-player agent will automatically:**
+1. Read their character sheet, party-knowledge.md, and their journal
+2. Respond in character based on the prompt
+3. Update their journal with what happened
 
 ### Quick Reaction (Parallel)
 
-When checking party reactions to a major event, invoke all AI players simultaneously:
+When checking party reactions to a major event, invoke all AI players simultaneously using multiple Task calls:
 
+**Task 1 - Grimjaw:**
 ```
-<Task for Grimjaw>
-You are playing Grimjaw, a dwarf fighter. Here is your character sheet:
-[INSERT contents of campaigns/{campaign}/party/grimjaw.md]
+subagent_type: ai-player
+prompt: |
+  Campaign: {campaign-name}
+  Character: Grimjaw
 
-[QUICK REACTION REQUEST]
-Scene: You stand in the merchant's shop. Aldric (the human's character) has just accused the merchant of selling cursed goods.
-Just happened: The merchant's face went pale and he reached under the counter.
+  [QUICK REACTION REQUEST]
+  Scene: You stand in the merchant's shop. Aldric (the human's character) has just accused the merchant of selling cursed goods.
+  Just happened: The merchant's face went pale and he reached under the counter.
 
-Give a brief (1-2 sentence) in-character reaction, or respond with "[VETO - need more input]" if this significantly touches your bonds/flaws/backstory.
-</Task>
+  Give a brief (1-2 sentence) in-character reaction, or respond with "[VETO - need more input]" if this significantly touches your bonds/flaws/backstory.
+```
 
-<Task for Lyra>
-You are playing Lyra, a half-elf cleric. Here is your character sheet:
-[INSERT contents of campaigns/{campaign}/party/lyra.md]
+**Task 2 - Lyra (parallel):**
+```
+subagent_type: ai-player
+prompt: |
+  Campaign: {campaign-name}
+  Character: Lyra
 
-[QUICK REACTION REQUEST]
-Scene: You stand in the merchant's shop. Aldric has just accused the merchant of selling cursed goods.
-Just happened: The merchant's face went pale and he reached under the counter.
+  [QUICK REACTION REQUEST]
+  Scene: You stand in the merchant's shop. Aldric has just accused the merchant of selling cursed goods.
+  Just happened: The merchant's face went pale and he reached under the counter.
 
-Give a brief (1-2 sentence) in-character reaction, or respond with "[VETO - need more input]" if this significantly touches your bonds/flaws/backstory.
-</Task>
+  Give a brief (1-2 sentence) in-character reaction, or respond with "[VETO - need more input]" if this significantly touches your bonds/flaws/backstory.
 ```
 
 ### Combat Turn
@@ -108,19 +127,19 @@ Give a brief (1-2 sentence) in-character reaction, or respond with "[VETO - need
 For AI characters' combat actions:
 
 ```
-<Task for Theron>
-You are playing Theron, a human rogue. Here is your character sheet:
-[INSERT contents of campaigns/{campaign}/party/theron.md]
+subagent_type: ai-player
+prompt: |
+  Campaign: {campaign-name}
+  Character: Theron
 
-[COMBAT QUICK ACTION]
-Situation: Fighting 3 orcs in a narrow alley. Orc 1 (wounded, near Grimjaw). Orc 2 (fresh, 30ft away with bow). Orc 3 (wounded, flanking Lyra).
-Party status: Grimjaw has Orc 1 engaged. Lyra took a hit, concentrating on Bless. Aldric is behind cover.
-Your position: In shadows near Orc 1, have Sneak Attack available.
-Your turn in initiative.
+  [COMBAT QUICK ACTION]
+  Situation: Fighting 3 orcs in a narrow alley. Orc 1 (wounded, near Grimjaw). Orc 2 (fresh, 30ft away with bow). Orc 3 (wounded, flanking Lyra).
+  Party status: Grimjaw has Orc 1 engaged. Lyra took a hit, concentrating on Bless. Aldric is behind cover.
+  Your position: In shadows near Orc 1, have Sneak Attack available.
+  Your turn in initiative.
 
-State your action briefly (attack target X, cast spell Y, move to position Z).
-Or "[VETO - tactical decision needed]" if you face a genuine choice.
-</Task>
+  State your action briefly (attack target X, cast spell Y, move to position Z).
+  Or "[VETO - tactical decision needed]" if you face a genuine choice.
 ```
 
 ### Veto Follow-up
@@ -128,23 +147,23 @@ Or "[VETO - tactical decision needed]" if you face a genuine choice.
 When a character vetoes, re-invoke with full context:
 
 ```
-<Task for Lyra>
-You are playing Lyra, a half-elf cleric of Lathander. Here is your character sheet:
-[INSERT contents of campaigns/{campaign}/party/lyra.md]
+subagent_type: ai-player
+prompt: |
+  Campaign: {campaign-name}
+  Character: Lyra
 
-[FULL CONTEXT - VETO RESPONSE]
-You requested more input. Here's the full situation:
+  [FULL CONTEXT - VETO RESPONSE]
+  You requested more input. Here's the full situation:
 
-Scene: The party has captured a bandit who murdered villagers. Aldric wants to execute him on the spot. The bandit is begging for mercy, claiming he was forced to do it.
+  Scene: The party has captured a bandit who murdered villagers. Aldric wants to execute him on the spot. The bandit is begging for mercy, claiming he was forced to do it.
 
-Relevant context:
-- Your faith teaches redemption is always possible
-- Two sessions ago, you argued with Aldric about showing mercy to a goblin (who later helped you)
-- The bandit has information about who ordered the attacks
-- Grimjaw agrees with execution, Theron is silent
+  Relevant context:
+  - Your faith teaches redemption is always possible
+  - Two sessions ago, you argued with Aldric about showing mercy to a goblin (who later helped you)
+  - The bandit has information about who ordered the attacks
+  - Grimjaw agrees with execution, Theron is silent
 
-What do you say or do? This is your moment - take as much space as you need.
-</Task>
+  What do you say or do? This is your moment - take as much space as you need.
 ```
 
 ### Secret Action Check
@@ -152,19 +171,19 @@ What do you say or do? This is your moment - take as much space as you need.
 When checking if a character would act secretly:
 
 ```
-<Task for Theron>
-You are playing Theron, a human rogue. Here is your character sheet:
-[INSERT contents of campaigns/{campaign}/party/theron.md]
+subagent_type: ai-player
+prompt: |
+  Campaign: {campaign-name}
+  Character: Theron
 
-[SECRET ACTION OPPORTUNITY]
-Scene: The party is searching a noble's study. You found a hidden compartment with a small ruby (worth ~50gp) that the others haven't noticed.
+  [SECRET ACTION OPPORTUNITY]
+  Scene: The party is searching a noble's study. You found a hidden compartment with a small ruby (worth ~50gp) that the others haven't noticed.
 
-Given your background, personality, and current relationship with the party:
-1. Do you pocket it secretly, share it with the group, or something else?
-2. Brief reasoning (1-2 sentences)
+  Given your background, personality, and current relationship with the party:
+  1. Do you pocket it secretly, share it with the group, or something else?
+  2. Brief reasoning (1-2 sentences)
 
-The party cannot see your response.
-</Task>
+  The party cannot see your response.
 ```
 
 ## Session Flow
@@ -713,23 +732,32 @@ A complete loop showing GM orchestration:
 **GM narrates result:**
 > You slip between the shelves like a shadow. Halfway through, you spot it - a crate with a faded red X, partially hidden behind old barrels. But you also notice a tripwire stretched across the aisle leading to it.
 
-**GM invokes AI players (parallel):**
-```
-<Task for Grimjaw>
-[Character sheet]
-[QUICK REACTION REQUEST]
-Scene: Inside dark warehouse, sneaking past guards. Aldric found the target crate but spotted a tripwire.
-Just happened: Aldric is signaling back to you about the trap.
-Give a brief reaction or [VETO].
-</Task>
+**GM invokes AI players (parallel Task calls with subagent_type: ai-player):**
 
-<Task for Lyra>
-[Character sheet]
-[QUICK REACTION REQUEST]
-Scene: Inside dark warehouse. Aldric found the crate but there's a tripwire.
-Just happened: Aldric paused and is gesturing about something on the ground.
-Give a brief reaction or [VETO].
-</Task>
+Task 1 - Grimjaw:
+```
+subagent_type: ai-player
+prompt: |
+  Campaign: smugglers-den
+  Character: Grimjaw
+
+  [QUICK REACTION REQUEST]
+  Scene: Inside dark warehouse, sneaking past guards. Aldric found the target crate but spotted a tripwire.
+  Just happened: Aldric is signaling back to you about the trap.
+  Give a brief reaction or [VETO].
+```
+
+Task 2 - Lyra:
+```
+subagent_type: ai-player
+prompt: |
+  Campaign: smugglers-den
+  Character: Lyra
+
+  [QUICK REACTION REQUEST]
+  Scene: Inside dark warehouse. Aldric found the crate but there's a tripwire.
+  Just happened: Aldric paused and is gesturing about something on the ground.
+  Give a brief reaction or [VETO].
 ```
 
 **GM narrates AI responses:**

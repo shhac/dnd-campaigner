@@ -131,10 +131,14 @@ SAVE POINTS: Update story-state.md AND party-knowledge.md at these moments:
 - When the player asks to save
 - End of session (always)
 
-When AI party members need to act, spawn them as separate Tasks. Tell them to read:
-- Their character sheet
-- campaigns/{campaign}/party-knowledge.md
-- Their journal: campaigns/{campaign}/party/{name}-journal.md
+When AI party members need to act, spawn them using the Task tool with subagent_type: "ai-player".
+Provide these in the prompt:
+- Campaign: {campaign}
+- Character: {character-name}
+- The scene context and what you need them to respond to
+
+The ai-player agent will automatically read their own character sheet, party-knowledge, and journal files.
+They will also update their journal after responding, maintaining continuity.
 
 Never pass story-state.md or GM secrets to AI players.
 ```
