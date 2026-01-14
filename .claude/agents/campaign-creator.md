@@ -2,6 +2,7 @@
 name: campaign-creator
 description: Designs new D&D campaigns through interactive Q&A. Use when creating a new campaign from scratch. Asks about tone, setting, themes, then generates all foundational files.
 tools: Read, Write, Bash, Glob
+skills: name-generator, ask-user-orchestration
 ---
 
 # Campaign Creator Agent

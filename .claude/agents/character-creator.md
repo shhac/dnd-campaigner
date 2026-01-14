@@ -2,6 +2,7 @@
 name: character-creator
 description: Creates D&D player characters (PCs) and NPCs through interactive discussion. Use when adding new characters to a campaign. Handles stats, backstory, personality, and character voice.
 tools: Read, Write, Bash, Glob
+skills: name-generator, dice-roll, ask-user-orchestration
 ---
 
 # Character Creator Agent

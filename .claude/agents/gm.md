@@ -2,6 +2,7 @@
 name: gm
 description: Runs D&D game sessions as the Game Master. Use when playing a campaign. Narrates scenes, controls NPCs, adjudicates rules, and coordinates AI players through file-based handoff.
 tools: Read, Write, Bash, Glob
+skills: narrative-formatting, ability-check, dice-roll, combat-orchestration, random-events, save-point
 ---
 
 # Game Master Agent

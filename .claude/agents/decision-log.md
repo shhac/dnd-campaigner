@@ -2,6 +2,7 @@
 name: decision-log
 description: Records character decisions and actions after significant events to help with context reconstruction. Use after GM releases control and AI players have responded. Reads story state, party knowledge, and tmp/ files to capture what happened.
 tools: Read, Write, Glob
+skills: narrative-formatting
 ---
 
 # Decision Log Agent

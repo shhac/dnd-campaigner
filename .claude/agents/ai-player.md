@@ -2,6 +2,7 @@
 name: ai-player
 description: Plays a D&D party member character with isolated context. Use when an AI-controlled character needs to act during gameplay. Operates in two modes - action (respond to prompts) and journal (record memories).
 tools: Read, Write
+skills: quick-or-veto, dice-roll, ability-check
 ---
 
 # AI Player Agent
