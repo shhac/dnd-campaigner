@@ -55,9 +55,12 @@ If no destination is provided, you'll be asked where to put it.
 │   ├── gm.md
 │   ├── ai-player-action.md
 │   ├── ai-player-journal.md
-│   ├── narrative-writer.md     # Utility for writing narrative files
-│   ├── character-creator.md    # For adding new characters
-│   └── dnd-enthusiast.md       # For rules/design feedback
+│   ├── narrative-writer.md        # Utility for writing narrative files
+│   ├── decision-log.md            # Records character decisions
+│   ├── state-delta-writer.md      # Writes story state updates
+│   ├── knowledge-delta-writer.md  # Writes party knowledge updates
+│   ├── character-creator.md       # For adding new characters
+│   └── dnd-enthusiast.md          # For rules/design feedback
 ├── skills/
 │   ├── dice-roll/SKILL.md
 │   ├── ability-check/SKILL.md
@@ -165,8 +168,11 @@ Copy these agents (no modification needed):
 - `.claude/agents/ai-player-action.md`
 - `.claude/agents/ai-player-journal.md`
 - `.claude/agents/narrative-writer.md`
+- `.claude/agents/decision-log.md`
 - `.claude/agents/character-creator.md`
 - `.claude/agents/dnd-enthusiast.md`
+- `.claude/agents/state-delta-writer.md`
+- `.claude/agents/knowledge-delta-writer.md`
 
 Copy skills (no modification needed):
 - `.claude/skills/dice-roll/SKILL.md`

@@ -15,6 +15,15 @@ AI players are spawned as fresh Tasks with no memory. They rely on:
 
 **If you don't save, AI players won't know what happened.**
 
+## Automatic State Updates
+
+Most state updates now happen automatically via the **auto-journal** flow:
+- When the GM closes a narrative beat, delta files are written to `tmp/`
+- Background agents (`state-delta-writer`, `knowledge-delta-writer`) merge changes into `story-state.md` and `party-knowledge.md`
+- This happens alongside character journaling, without blocking play
+
+**Manual saves are still available** for situations where you need immediate updates or want to save outside the normal flow. The triggers below remain valid for manual intervention.
+
 ## Mandatory Save Triggers
 
 You MUST save at these moments:

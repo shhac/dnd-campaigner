@@ -19,5 +19,6 @@ Thumbs.db
 CLAUDE.local.md
 
 # Project specific
+.ai-cache/
 campaigns/*/tmp/
 

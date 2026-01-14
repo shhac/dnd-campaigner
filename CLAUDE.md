@@ -122,6 +122,7 @@ Exports a campaign as a standalone project with all necessary agents, skills, an
 |------|---------|--------------|
 | `overview.md` | World setting, themes, major factions | GM, reference |
 | `story-state.md` | Current situation, active quests, secrets | GM only |
+| `party-knowledge.md` | Shared knowledge for AI players (no secrets) | GM, AI players |
 | `party/{name}.md` | Character sheet | GM, that character's agent |
 | `npcs/{name}.md` | NPC details + secrets | GM only |
 | `items/{name}.md` | Notable items, artifacts, equipment | GM, reference |

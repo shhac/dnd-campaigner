@@ -22,6 +22,9 @@ Use this skill when:
 /play {campaign}
     |
     v
+Clean up orphaned delta files (rm -f tmp/*-delta.md)
+    |
+    v
 Load Preferences (or ask player)
     |
     v
@@ -46,9 +49,12 @@ Spawn fresh GM (reads gm-context.md)             |
     |                                            |
     v                                            |
 GM narrates with AI player actions               |
+GM writes delta files (if state changed)         |
     |                                            |
     +---> auto-journal (background, don't wait)  |
-    |     (ALL chars including human player)     |
+    |     - Journal agents (ALL chars)           |
+    |     - state-delta-writer                   |
+    |     - knowledge-delta-writer               |
     |                                            |
     v                                            |
 Relay to player ----------------- ---------------+
@@ -57,7 +63,18 @@ Relay to player ----------------- ---------------+
 Loop until session ends
 ```
 
-## Step 0: Load Preferences
+## Step 0: Session Start Cleanup
+
+Before loading preferences, clean up any orphaned delta files from previous sessions:
+
+```bash
+# Delete any orphaned delta files from previous sessions
+rm -f campaigns/{campaign}/tmp/*-delta.md 2>/dev/null || true
+```
+
+**Rationale**: Stale deltas from previous sessions may contain outdated information. Processing them could introduce inconsistencies, so we delete them without processing at session start.
+
+## Step 1: Load Preferences
 
 Before spawning the GM, check for and load player preferences.
 
@@ -115,7 +132,7 @@ narrative_style: hybrid
 player_character: Corwin
 ```
 
-## Step 1: Spawning the GM
+## Step 2: Spawning the GM
 
 When starting a session, spawn the GM agent with this prompt:
 
@@ -143,7 +160,7 @@ When you need AI player input:
 2. Output [AWAIT_AI_PLAYERS: char1, char2] and STOP
 ```
 
-## Step 2: Signal Detection
+## Step 3: Signal Detection
 
 Monitor GM output for these signals:
 
@@ -153,7 +170,7 @@ Monitor GM output for these signals:
 | No signal, narrative output | Relay to player, await input, resume GM | - |
 | No signal, question for player | Use AskUserQuestion, then resume GM | - |
 
-## Step 3: Relaying GM Narrative
+## Step 4: Relaying GM Narrative
 
 **CRITICAL**: Show everything, summarize nothing.
 
@@ -197,7 +214,7 @@ The four of you settle into the corner booth, tankards between you.
 > **Gideon-Harrowmoor**: "Shall we go see what's rotting in Warehouse 7?"
 ```
 
-## Step 4: Handling Player Questions with AskUserQuestion
+## Step 5: Handling Player Questions with AskUserQuestion
 
 When the GM output contains a question for the player, use AskUserQuestion rather than plain text.
 
@@ -244,7 +261,7 @@ AskUserQuestion:
 
 The player can always type a custom response instead of selecting an option.
 
-## Step 5: Spawning a Fresh GM (After Signals)
+## Step 6: Spawning a Fresh GM (After Signals)
 
 After handling signals or player input, spawn a **fresh** GM agent (do NOT resume):
 
@@ -338,9 +355,11 @@ Prompt: |
 
 Wait for this to complete before Step 2.
 
-**Step 2: Spawn Journal Agents (Background, Parallel)**
+**Step 2: Spawn Background Agents (Parallel)**
 
-For each character, spawn an `ai-player-journal` agent:
+Spawn all background agents in a single message:
+
+**Journal Agents** (for each character):
 
 ```
 Task: ai-player-journal
@@ -350,16 +369,36 @@ Prompt: |
   Character: {character}
 ```
 
+**State Delta Writer** (updates story-state.md):
+
+```
+Task: state-delta-writer
+run_in_background: true
+Prompt: |
+  Campaign: {campaign}
+```
+
+**Knowledge Delta Writer** (updates party-knowledge.md):
+
+```
+Task: knowledge-delta-writer
+run_in_background: true
+Prompt: |
+  Campaign: {campaign}
+```
+
 **Critical**:
-- Use `run_in_background: true` for all journal agents
+- Use `run_in_background: true` for all agents
 - Spawn all agents in parallel (single message with multiple Task calls)
-- Include ALL party members (both AI-controlled and human-controlled characters)
+- Include ALL party members for journaling (both AI-controlled and human-controlled characters)
+- Delta writers skip gracefully if no delta files exist
 
 This approach:
 - Token efficient (narrative passed once, not 4 times)
 - No verbose Write diffs (foreground task shows brief summary)
 - Proper ordering (file written before agents read)
-- Parallel execution (all journals run concurrently)
+- Parallel execution (all journals and delta writers run concurrently)
+- Automatic state updates when GM writes delta files
 
 ## Decision-Log Integration
 
@@ -447,6 +486,7 @@ Understanding what can run in parallel vs. sequentially is critical for efficien
 | **AI player actions** | All AI players in an AWAIT_AI_PLAYERS batch spawn simultaneously |
 | **Auto-journal** | All characters (AI + human) journal simultaneously via auto-journal skill |
 | **Decision-log** | Runs in background while GM continues (fire-and-forget) |
+| **Delta writers** | state-delta-writer and knowledge-delta-writer run in parallel with journals |
 
 ### What Must Be Sequential
 
@@ -462,6 +502,7 @@ Understanding what can run in parallel vs. sequentially is critical for efficien
 These tasks can run in background without waiting:
 - **Decision-log**: Reads response files and appends to log - no conflict with GM
 - **Auto-journal**: Always runs in background - journal agents don't block story progression
+- **Delta writers**: Skip gracefully if no delta files exist; delete delta files after processing
 
 ### Parallelization Flow Example
 
@@ -479,9 +520,12 @@ These tasks can run in background without waiting:
                                             |
                                             v
                                    GM narrates results
+                                   GM writes delta files (if state changed)
                                             |
                                             +---> auto-journal skill (background)
-                                            |     All chars: gideon, mira, tilda, corwin
+                                            |     - Journal agents (all chars)
+                                            |     - state-delta-writer
+                                            |     - knowledge-delta-writer
                                             |
                                             v
                                     Relay to player

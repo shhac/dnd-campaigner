@@ -237,6 +237,108 @@ When an AI player vetoes (response contains `[VETO`):
 3. Signal `[AWAIT_AI_PLAYERS: {character}]` for just that character
 4. After resumption, read their full response
 
+## Writing Delta Files (Automatic State Updates)
+
+After the AI player cycle completes and you narrate the results ("closing the beat"), write delta files to enable automatic state updates. These files are processed by background agents to keep `story-state.md` and `party-knowledge.md` current.
+
+### When to Write Delta Files
+
+**Write deltas when meaningful state changes occur:**
+- HP/resources change meaningfully (combat damage, spell slots used)
+- The party learns something new (information, secrets revealed)
+- NPC relationships shift (hostile to friendly, new alliances)
+- Location changes (party moves to a new area)
+- Quest progress happens (objectives completed, new leads found)
+- Secrets are revealed or new GM-only information emerges
+
+**Skip deltas for:**
+- Pure roleplay/banter with no mechanical or story impact
+- Movement within an already-described area
+- Failed checks that reveal nothing
+- Scenes that are purely atmospheric
+
+**When in doubt, write the delta.** It's better to have slightly redundant updates than to lose important information.
+
+### Delta File Format
+
+Write simple append-only files with keyword prefixes. Each line must start with a recognized keyword.
+
+**`tmp/gm-state-delta.md`** (secrets OK - for story-state.md):
+```markdown
+# What Changed (GM State)
+
+- Party HP: Corwin took 5 damage (now 3/8)
+- SECRET: The cultist recognized Tilda from her Fist days
+- NPC: Merchant is actually a cult informant
+- QUEST: Found evidence linking warehouse to cult
+- UPCOMING: Cult will send assassin in 2 days
+- LOCATION: Discovered hidden basement under tavern
+- SITUATION: Party is now resting at the Copper Kettle inn
+```
+
+**`tmp/party-knowledge-delta.md`** (no secrets - for party-knowledge.md):
+```markdown
+# What Changed (Party Knowledge)
+
+- LEARNED: The warehouse connects to ancient tunnels
+- NPC: Guard captain Harwick - suspicious of us
+- QUEST: Need to find the tunnel entrance
+- LOCATION: Warehouse has three exits - front, back, cellar
+- SITUATION: Currently hiding in the warehouse rafters
+```
+
+### Keyword Reference
+
+| Keyword | Routes To | Notes |
+|---------|-----------|-------|
+| `SECRET:` | Secrets section | GM-only info (gm-state-delta only) |
+| `NPC:` | NPC status section | Add/update NPC entry |
+| `QUEST:` | Quest progress section | Update quest status |
+| `UPCOMING:` | Upcoming events section | GM-planned future events |
+| `LOCATION:` | Locations section | New/updated location info |
+| `SITUATION:` | Current Situation section | **Full replace** - be comprehensive |
+| `Party HP:` | Party status section | Resource/HP tracking |
+| `LEARNED:` | Knowledge gained | What party discovered |
+
+**SITUATION Warning**: The `SITUATION:` keyword performs a **full replace** of the Current Situation section. Include all relevant context - details not included will be lost.
+
+### Information Isolation (CRITICAL)
+
+- **`gm-state-delta.md`**: Can include secrets, hidden NPC motivations, upcoming plot events
+- **`party-knowledge-delta.md`**: Only what the party actually knows or witnessed
+
+Never put secrets in `party-knowledge-delta.md`. AI players read `party-knowledge.md`, so leaked secrets break the knowledge boundary.
+
+### Combat Exception
+
+During combat, do NOT write delta files per-round. Write **one comprehensive delta at combat end** covering all changes:
+
+```markdown
+# What Changed (GM State)
+
+- Party HP: Corwin 3/8, Tilda 12/15, Mira 8/10, Kira 10/10
+- NPC: Three cultists defeated, one fled
+- SECRET: Fleeing cultist will report party's abilities to leader
+- UPCOMING: Cult knows party is combat-capable now
+- SITUATION: Combat ended. Party stands in warehouse, wounded but victorious.
+```
+
+### Example Flow with Delta Files
+
+```
+1. GM narrates scene, writes AI player prompts
+2. GM signals: [AWAIT_AI_PLAYERS: tilda-brannock, grimjaw-ironforge]
+3. (Orchestrator spawns AI players - they respond)
+4. GM resumed, reads responses
+5. GM narrates outcome ("closing the beat")
+6. GM writes tmp/gm-state-delta.md and tmp/party-knowledge-delta.md
+7. GM deletes prompt/response files (NOT delta files)
+8. (Orchestrator triggers auto-journal, including delta writers in background)
+9. GM continues session
+```
+
+The delta files are automatically processed and deleted by background agents. You don't need to manually update `story-state.md` or `party-knowledge.md` during play - just write the deltas.
+
 ## Session Flow
 
 ### Opening

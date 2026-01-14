@@ -46,9 +46,11 @@ This agent has `tools: Write` and will write to `campaigns/{campaign}/tmp/narrat
 
 **Wait for this to complete** before proceeding to Step 2.
 
-### Step 2: Spawn Journal Agents (Background, Parallel)
+### Step 2: Spawn Background Agents (Parallel)
 
-For each character in the comma-separated list, spawn an `ai-player-journal` agent:
+After the narrative file is written, spawn all background agents in a single message.
+
+**Journal Agents** (for each character in the comma-separated list):
 
 ```
 Task: ai-player-journal
@@ -58,9 +60,37 @@ Prompt: |
   Character: {character}
 ```
 
+**Decision Log Agent**:
+
+```
+Task: decision-log
+run_in_background: true
+Prompt: |
+  Campaign: {campaign}
+```
+
+**State Delta Writer** (updates story-state.md):
+
+```
+Task: state-delta-writer
+run_in_background: true
+Prompt: |
+  Campaign: {campaign}
+```
+
+**Knowledge Delta Writer** (updates party-knowledge.md):
+
+```
+Task: knowledge-delta-writer
+run_in_background: true
+Prompt: |
+  Campaign: {campaign}
+```
+
 **Critical**:
 - Use `run_in_background: true` for all spawns
 - Spawn all agents in parallel (single message with multiple Task calls)
+- Delta writers will skip gracefully if no delta files exist
 
 ### Step 3: Continue Immediately
 
@@ -79,9 +109,13 @@ After spawning all journal agents, continue with player interaction. Do not wait
 |------|------------|---------|-----------|
 | `tmp/narrative-for-journal.md` | narrative-writer | All journal agents | Overwritten each cycle |
 | `tmp/{char}-notes-for-journal.md` | Action agent | Journal agent (then deletes) | Consumed once per action |
+| `tmp/gm-state-delta.md` | GM (when closing beat) | state-delta-writer | Deleted after processing |
+| `tmp/party-knowledge-delta.md` | GM (when closing beat) | knowledge-delta-writer | Deleted after processing |
 
 ## Notes
 
 - Journal agents handle their own file reading and cleanup
 - If a character has no action notes file, the journal agent still processes the narrative
 - Background execution means journal quality doesn't affect story pacing
+- Delta writers skip gracefully if no delta files exist (the GM only writes deltas when meaningful state changes occur)
+- Delta files are deleted immediately after successful processing to prevent duplicate updates
