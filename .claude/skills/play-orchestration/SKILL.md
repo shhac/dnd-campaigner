@@ -282,17 +282,13 @@ Read any response files if applicable and continue.
 
 **CRITICAL**: After the GM narrates the results of an `[AWAIT_AI_PLAYERS]` cycle, you MUST:
 
-1. Write the GM's narrative to `campaigns/{campaign}/tmp/narrative-for-journal.md`
-2. Invoke the auto-journal skill with ALL party members
+1. Spawn `narrative-writer` agent (foreground) with the narrative content
+2. Spawn journal agents (background, parallel) for ALL party members
 3. Then continue with player interaction
 
 **Detection**: If you just spawned a fresh GM after AI players responded, and the GM returned narrative (not another signal), this is a journaling checkpoint.
 
-**Invocation**:
-```
-Skill: auto-journal
-Args: {campaign} {char1},{char2},{char3},{char4}
-```
+**Invocation**: See "How to Invoke Auto-Journal" below for the two-step process.
 
 **Do NOT skip this step.** AI player memories depend on journaling.
 
@@ -324,30 +320,46 @@ Auto-journal runs after the GM narrates the results of an `[AWAIT_AI_PLAYERS]` c
 
 ### How to Invoke Auto-Journal
 
-After receiving GM narrative that includes AI player action results:
+After receiving GM narrative that includes AI player action results, use a two-step process to avoid verbose file-writing output.
 
-1. **Write the narrative** to `campaigns/{campaign}/tmp/narrative-for-journal.md`
-2. **Invoke the auto-journal skill** with all party characters:
+**Step 1: Write Narrative File (Foreground)**
 
-```
-Skill: auto-journal
-Args: {campaign} {char1},{char2},{char3},{char4}
-```
-
-Include ALL party members (both AI-controlled and human-controlled characters).
-
-### Example Invocation
+Spawn a `narrative-writer` agent (NOT in background):
 
 ```
-Skill: auto-journal
-Args: the-rot-beneath tilda-brannock,brother-aldric,mira-thornwood,korvin-blackwood
+Task: narrative-writer
+Prompt: |
+  Campaign: {campaign}
+
+  ## Narrative
+
+  {paste the full GM narrative here}
 ```
 
-The auto-journal skill handles:
-- Spawning journal agents for each character in background
-- Reading the shared narrative file
-- Each agent reads their own action notes if available
-- All journaling completes without blocking story progression
+Wait for this to complete before Step 2.
+
+**Step 2: Spawn Journal Agents (Background, Parallel)**
+
+For each character, spawn an `ai-player-journal` agent:
+
+```
+Task: ai-player-journal
+run_in_background: true
+Prompt: |
+  Campaign: {campaign}
+  Character: {character}
+```
+
+**Critical**:
+- Use `run_in_background: true` for all journal agents
+- Spawn all agents in parallel (single message with multiple Task calls)
+- Include ALL party members (both AI-controlled and human-controlled characters)
+
+This approach:
+- Token efficient (narrative passed once, not 4 times)
+- No verbose Write diffs (foreground task shows brief summary)
+- Proper ordering (file written before agents read)
+- Parallel execution (all journals run concurrently)
 
 ## Decision-Log Integration
 

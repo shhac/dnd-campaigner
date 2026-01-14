@@ -55,6 +55,7 @@ If no destination is provided, you'll be asked where to put it.
 │   ├── gm.md
 │   ├── ai-player-action.md
 │   ├── ai-player-journal.md
+│   ├── narrative-writer.md     # Utility for writing narrative files
 │   ├── character-creator.md    # For adding new characters
 │   └── dnd-enthusiast.md       # For rules/design feedback
 ├── skills/
@@ -68,6 +69,7 @@ If no destination is provided, you'll be asked where to put it.
 │   ├── combat-orchestration/SKILL.md    # Combat management
 │   ├── invoke-ai-players/SKILL.md       # AI player spawning
 │   ├── play-orchestration/SKILL.md      # Session orchestration
+│   ├── auto-journal/SKILL.md            # Automatic character journaling
 │   └── narrative-formatting/            # Scene formatting styles
 └── commands/
     ├── play.md                 # Modified for standalone use
@@ -144,6 +146,7 @@ mkdir -p {destination}/.claude/skills/quick-or-veto
 mkdir -p {destination}/.claude/skills/combat-orchestration
 mkdir -p {destination}/.claude/skills/invoke-ai-players
 mkdir -p {destination}/.claude/skills/play-orchestration
+mkdir -p {destination}/.claude/skills/auto-journal
 mkdir -p {destination}/.claude/skills/narrative-formatting/conversation
 mkdir -p {destination}/.claude/commands
 mkdir -p {destination}/templates
@@ -161,6 +164,7 @@ Copy these agents (no modification needed):
 - `.claude/agents/gm.md`
 - `.claude/agents/ai-player-action.md`
 - `.claude/agents/ai-player-journal.md`
+- `.claude/agents/narrative-writer.md`
 - `.claude/agents/character-creator.md`
 - `.claude/agents/dnd-enthusiast.md`
 
@@ -175,6 +179,7 @@ Copy skills (no modification needed):
 - `.claude/skills/combat-orchestration/SKILL.md`
 - `.claude/skills/invoke-ai-players/SKILL.md`
 - `.claude/skills/play-orchestration/SKILL.md`
+- `.claude/skills/auto-journal/SKILL.md`
 - `.claude/skills/narrative-formatting/SKILL.md` (and all subdirectory files)
 
 Copy templates for ongoing content creation:

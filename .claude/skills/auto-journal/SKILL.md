@@ -26,22 +26,27 @@ Args: the-rot-beneath tilda-brannock,brother-aldric,mira-thornwood,korvin-blackw
 
 ## Implementation Steps
 
-When this skill is invoked, the orchestrator must:
+When this skill is invoked, the orchestrator follows a two-step process to avoid verbose file-writing output.
 
-### 1. Write Narrative to Shared File
+### Step 1: Write Narrative File (Foreground)
 
-Write the current GM narrative (already in orchestrator context) to the campaign's temp directory:
+Spawn a `narrative-writer` agent (NOT in background) to write the narrative:
 
 ```
-campaigns/{campaign}/tmp/narrative-for-journal.md
+Task: narrative-writer
+Prompt: |
+  Campaign: {campaign}
+
+  ## Narrative
+
+  {paste the full GM narrative here}
 ```
 
-This file is:
-- Written fresh each cycle (overwrite existing)
-- Read by all journal agents spawned in step 2
-- Contains the scene description the characters just experienced
+This agent has `tools: Write` and will write to `campaigns/{campaign}/tmp/narrative-for-journal.md`.
 
-### 2. Spawn Journal Agents (Background, Parallel)
+**Wait for this to complete** before proceeding to Step 2.
+
+### Step 2: Spawn Journal Agents (Background, Parallel)
 
 For each character in the comma-separated list, spawn an `ai-player-journal` agent:
 
@@ -53,17 +58,26 @@ Prompt: |
   Character: {character}
 ```
 
-**Critical**: Use `run_in_background: true` for all spawns. These agents run independently and the orchestrator does not wait for them.
+**Critical**:
+- Use `run_in_background: true` for all spawns
+- Spawn all agents in parallel (single message with multiple Task calls)
 
-### 3. Continue Immediately
+### Step 3: Continue Immediately
 
 After spawning all journal agents, continue with player interaction. Do not wait for journals to complete.
+
+## Why This Approach
+
+- **Token efficient**: Narrative is passed once (to narrative-writer), not 4 times
+- **No verbose Write output**: The foreground task shows a brief summary, not diffs
+- **Proper ordering**: File is written before journal agents try to read it
+- **Parallel journals**: All journal agents run concurrently in background
 
 ## File Lifecycle
 
 | File | Written By | Read By | Lifecycle |
 |------|------------|---------|-----------|
-| `tmp/narrative-for-journal.md` | Orchestrator | All journal agents | Overwritten each cycle |
+| `tmp/narrative-for-journal.md` | narrative-writer | All journal agents | Overwritten each cycle |
 | `tmp/{char}-notes-for-journal.md` | Action agent | Journal agent (then deletes) | Consumed once per action |
 
 ## Notes
