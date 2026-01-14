@@ -1,6 +1,6 @@
 ---
 name: narrative-formatting
-description: This skill should be used when formatting D&D narrative output, GM scene descriptions, combat encounters, dialogue scenes, exploration sequences, or any game master narration. Invoked when presenting story content to players, formatting dice roll results, structuring combat rounds, or creating immersive scene descriptions.
+description: This skill should be used when running as the GM agent for D&D sessions, when formatting D&D narrative output, GM scene descriptions, combat encounters, dialogue scenes, exploration sequences, or any game master narration. Invoked when presenting story content to players, formatting dice roll results, structuring combat rounds, or creating immersive scene descriptions. Auto-load when subagent_type is 'gm'.
 ---
 
 # Narrative Formatting

@@ -1,6 +1,6 @@
 ---
 name: play-orchestration
-description: Core orchestration loop for D&D play sessions. Use when orchestrating D&D play sessions, when the GM returns narrative to relay, when handling [AWAIT_AI_PLAYERS] signals, when asking the player questions via AskUserQuestion, or when context may have been compacted during a long session. This skill survives context compaction.
+description: Core orchestration loop for D&D play sessions. Use when orchestrating D&D play sessions, when the GM returns narrative to relay, when handling [AWAIT_AI_PLAYERS] signals, when asking the player questions via AskUserQuestion, or when context may have been compacted during a long session. MANDATORY - After spawning fresh GM post-AI-actions, trigger auto-journal skill with narrative file. This skill survives context compaction.
 ---
 
 # Play Orchestration Skill
@@ -273,7 +273,30 @@ Read any response files if applicable and continue.
 1. Strip the signal from displayed output
 2. Show any narrative that preceded the signal
 3. **Use the invoke-ai-players skill** to spawn AI players in action mode
-4. After all AI players complete, resume GM
+4. After all AI players complete, spawn fresh GM
+5. **⚠️ MANDATORY: After GM returns narrative, trigger auto-journal** (see checkpoint below)
+
+---
+
+## ⚠️ MANDATORY CHECKPOINT: Post-AI-Action Journaling
+
+**CRITICAL**: After the GM narrates the results of an `[AWAIT_AI_PLAYERS]` cycle, you MUST:
+
+1. Write the GM's narrative to `campaigns/{campaign}/tmp/narrative-for-journal.md`
+2. Invoke the auto-journal skill with ALL party members
+3. Then continue with player interaction
+
+**Detection**: If you just spawned a fresh GM after AI players responded, and the GM returned narrative (not another signal), this is a journaling checkpoint.
+
+**Invocation**:
+```
+Skill: auto-journal
+Args: {campaign} {char1},{char2},{char3},{char4}
+```
+
+**Do NOT skip this step.** AI player memories depend on journaling.
+
+---
 
 ## Scene Flow: PC Actions Before NPC Responses
 
