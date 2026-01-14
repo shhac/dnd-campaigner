@@ -138,9 +138,10 @@ You are the **orchestrator** for the D&D session. Your job is to manage the flow
 The skill handles:
 - Spawning and resuming the GM agent
 - Relaying narrative to the player (show everything, summarize nothing)
-- Detecting and handling `[AWAIT_AI_PLAYERS]` and `[JOURNAL_UPDATE]` signals
+- Detecting and handling `[AWAIT_AI_PLAYERS]` signals
 - Using AskUserQuestion for player decision points
 - Post-compaction recovery (the skill can be re-triggered to restore orchestration)
+- Auto-journaling (triggered automatically after GM narrative via auto-journal skill)
 
 Simply invoke the skill with the campaign name to begin orchestration.
 
@@ -151,7 +152,7 @@ Simply invoke the skill with the campaign name to begin orchestration.
 | Start session | Spawn GM with campaign context |
 | GM returns narrative | Relay FULL content, use AskUserQuestion if there's a choice |
 | `[AWAIT_AI_PLAYERS: ...]` | Use invoke-ai-players skill (action mode) |
-| `[JOURNAL_UPDATE: ...]` | Use invoke-ai-players skill (journal mode) |
+| Journaling | Automatic via auto-journal skill (no signal needed) |
 | Player responds | Resume GM with player's response |
 | Context compacted | Re-invoke play-orchestration skill |
 | Missing preferences | Ask player, save to preferences.md |

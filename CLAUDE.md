@@ -132,7 +132,8 @@ Exports a campaign as a standalone project with all necessary agents, skills, an
 - **campaign-creator**: Designs new campaigns through interactive Q&A
 - **character-creator**: Builds PCs/NPCs with proper D&D 5e stats
 - **gm**: Runs the game - narrates, controls NPCs, adjudicates rules
-- **ai-player**: Plays a single party member (isolated context, quick-or-veto system)
+- **ai-player-action**: Plays a party member during action scenes (isolated context, quick-or-veto system)
+- **ai-player-journal**: Records character reflections and memories after events
 - **dnd-enthusiast**: Experienced D&D player/DM offering feedback on campaign design, rules, and player experience
 - **decision-log**: Records character decisions and actions after significant events to help with context reconstruction
 

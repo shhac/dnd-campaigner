@@ -1,58 +1,41 @@
 ---
 name: invoke-ai-players
-description: Orchestrates AI player agent spawning for D&D sessions. Use when the GM signals [AWAIT_AI_PLAYERS] or [JOURNAL_UPDATE] to spawn ai-player agents in action or journal mode. Handles file-based communication between GM and AI players.
+description: Orchestrates AI player agent spawning for D&D sessions. Use when the GM signals [AWAIT_AI_PLAYERS] to spawn ai-player-action agents. Handles file-based communication between GM and AI players.
 ---
 
 # Invoke AI Players Skill
 
-Orchestrates spawning of ai-player agents during D&D sessions. The GM agent cannot spawn subagents directly, so this skill guides the main conversation (orchestrator) through the process.
+Orchestrates spawning of ai-player-action agents during D&D sessions. The GM agent cannot spawn subagents directly, so this skill guides the main conversation (orchestrator) through the process.
+
+**Note**: This skill handles ACTION mode only. Journaling is handled automatically by the `auto-journal` skill after GM narrative returns.
 
 ## When This Skill Activates
 
-The GM agent outputs signals when it needs AI player input:
+The GM agent outputs this signal when it needs AI player input:
 
-| Signal | Mode | Purpose |
-|--------|------|---------|
-| `[AWAIT_AI_PLAYERS: char1, char2]` | Action | Get character actions/responses |
-| `[JOURNAL_UPDATE: char1, char2]` | Journal | Update character journals |
+| Signal | Purpose |
+|--------|---------|
+| `[AWAIT_AI_PLAYERS: char1, char2]` | Get character actions/responses |
 
-## Quick Reference
-
-### Action Mode Flow
+## Quick Reference: Action Mode Flow
 
 1. GM wrote context notes to `campaigns/{campaign}/tmp/gm-context.md` (for its own continuity)
 2. GM wrote prompt files to `campaigns/{campaign}/tmp/{character}-prompt.md`
 3. GM output `[AWAIT_AI_PLAYERS: tilda-brannock, grimjaw-ironforge]`
-4. **You spawn ai-player agents** (in parallel):
+4. **You spawn ai-player-action agents** (in parallel):
    ```
-   Task: ai-player (for each character)
+   Task: ai-player-action (for each character)
    Prompt: |
      Campaign: {campaign}
      Character: {character}
-     Mode: action
    ```
 5. AI players read prompts, write responses to `tmp/{character}-response.md`
-6. Resume GM to continue (GM reads its context notes, then responses)
-
-### Journal Mode Flow
-
-1. GM wrote journal prompts to `campaigns/{campaign}/tmp/{character}-journal-prompt.md`
-2. GM output `[JOURNAL_UPDATE: corwin-ashford, tilda-brannock, grimjaw-ironforge]`
-3. **You spawn ai-player agents** (in parallel):
-   ```
-   Task: ai-player (for each character)
-   Prompt: |
-     Campaign: {campaign}
-     Character: {character}
-     Mode: journal
-   ```
-4. AI players update their journals
-5. Resume GM to continue
+6. AI players also write `tmp/{character}-notes-for-journal.md` (for later journaling)
+7. Resume GM to continue (GM reads its context notes, then responses)
 
 ## Detailed Patterns
 
 - For action mode details, see [action-mode.md](action-mode.md)
-- For journal mode details, see [journal-mode.md](journal-mode.md)
 - For file format specifications, see [file-formats.md](file-formats.md)
 
 ## Spawning AI Players
@@ -65,25 +48,25 @@ When multiple characters are listed, spawn ALL agents in a single message with m
 [AWAIT_AI_PLAYERS: tilda-brannock, grimjaw-ironforge, seraphine-dawnwhisper]
 ```
 
-Spawn three ai-player Tasks simultaneously - do NOT spawn sequentially.
+Spawn three ai-player-action Tasks simultaneously - do NOT spawn sequentially.
 
 **Character naming**: Always use full hyphenated names matching the character sheet filename (e.g., `tilda-brannock` not `tilda`).
 
 ### Task Parameters
 
 ```yaml
-subagent_type: ai-player
+subagent_type: ai-player-action
 prompt: |
   Campaign: the-rot-beneath
   Character: tilda-brannock
-  Mode: action
 ```
 
-The ai-player agent will:
-1. Parse campaign, character, and mode from the prompt
-2. Read appropriate files based on mode
-3. Respond or update journal
-4. Complete
+The ai-player-action agent will:
+1. Parse campaign and character from the prompt
+2. Read prompt file, character sheet, party-knowledge, own journal
+3. Write response file (`tmp/{character}-response.md`)
+4. Write notes for journal file (`tmp/{character}-notes-for-journal.md`)
+5. Complete
 
 ### Spawning a Fresh GM
 
@@ -97,10 +80,9 @@ prompt: |
   **First**: Read your context notes from campaigns/{campaign}/tmp/gm-context.md
   to restore continuity from before the handoff.
 
-  Mode: {action or journal} complete.
-  Response files are ready in tmp/ (if action mode).
+  AI player responses are ready in tmp/.
 
-  Read responses if applicable, incorporate into narrative, and continue.
+  Read responses, incorporate into narrative, and continue.
 ```
 
 **Why spawn fresh instead of resume?** The GM agent doesn't properly "complete" before yielding control - the "STOP" instruction is just prompt text, not an API-level mechanism. Resuming incomplete agents causes 400 errors. The architecture already supports fresh spawns via `gm-context.md`, which the GM writes before signaling.
@@ -134,25 +116,19 @@ GM narrates, human acts                             │
 [AWAIT_AI_PLAYERS: ...] ◄──── Action needed         │
     │                                               │
     ▼                                               │
-Spawn AI players (action mode)                      │
+Spawn AI players (ai-player-action)                 │
     │                                               │
     ▼                                               │
 Spawn fresh GM (reads gm-context.md)                │
     │                                               │
     ▼                                               │
-GM narrates outcome                                 │
+GM narrates outcome ────────────────────────────────┤
+    │                                               │
+    ├──→ auto-journal (background, fire-and-forget) │
+    │    (journals all characters including human)  │
     │                                               │
     ▼                                               │
-[JOURNAL_UPDATE: ...] ◄──── Record memories         │
-    │                                               │
-    ▼                                               │
-Spawn AI players (journal mode)                     │
-    │                                               │
-    ▼                                               │
-Spawn fresh GM (reads gm-context.md) ──────────────┘
-    │
-    ▼
-Loop until session ends
+Continue session (don't wait for journals) ─────────┘
 ```
 
 ## Error Handling
@@ -167,11 +143,12 @@ If some AI players complete but others fail, resume the GM anyway. The GM can ch
 
 ### Stale Files
 
-The GM is responsible for cleaning up tmp/ files after incorporating responses. If stale files exist, the GM should delete them before writing new prompts.
+The GM is responsible for cleaning up tmp/ prompt and response files after incorporating responses. The GM does NOT clean up `*-notes-for-journal.md` files - those are handled by the auto-journal system.
 
 ## Important Notes
 
 1. **Never pass campaign content through the orchestrator** - all context goes through files
 2. **Always spawn in parallel** when multiple characters are listed
-3. **Journal mode includes human player's character** - they get a journal too
-4. **The GM handles all game logic** - you just orchestrate spawning
+3. **Use ai-player-action agent** - NOT ai-player (which is deprecated)
+4. **Journaling is automatic** - handled by auto-journal skill after GM returns narrative
+5. **The GM handles all game logic** - you just orchestrate spawning

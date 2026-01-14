@@ -10,7 +10,8 @@ campaigns/{campaign}/
 │   ├── gm-context.md                 # GM's own notes for continuity across handoffs
 │   ├── {character}-prompt.md         # GM → AI player (action mode)
 │   ├── {character}-response.md       # AI player → GM (action mode)
-│   └── {character}-journal-prompt.md # GM → AI player (journal mode)
+│   ├── narrative-for-journal.md      # Shared narrative for auto-journal
+│   └── {character}-notes-for-journal.md # Character's action notes for journaling
 ├── party/
 │   ├── {character}.md                # Character sheet (read by AI player)
 │   ├── {character}-journal.md        # Character journal (updated by AI player)
@@ -94,33 +95,39 @@ Written by AI player after reading prompt.
 [Reason why more context is needed - reference character sheet elements]
 ```
 
-## Journal Mode Files
+## Auto-Journal Files
 
-### Journal Prompt: `tmp/{character}-journal-prompt.md`
+Journaling happens automatically in the background after GM narrative returns. See the `auto-journal` skill for orchestration details.
 
-Written by GM before signaling `[JOURNAL_UPDATE]`.
+### Narrative File: `tmp/narrative-for-journal.md`
+
+Written by orchestrator before spawning journal agents. Contains the scene description all characters just experienced.
 
 ```markdown
----
-mode: journal
----
-
-## Scene Before
-[Context before the action]
-
-## Your Action
-[What this character did]
-
-## What Happened
-[Outcome as narrated by GM]
-
-## Update Your Journal
-Record this from your perspective. What did you learn? How do you feel?
+[The GM's narrative for this scene - what all characters witnessed]
 ```
+
+**Lifecycle:**
+- Overwritten each time auto-journal is triggered
+- Read by all journal agents spawned for that cycle
+- Not deleted (overwritten on next cycle)
+
+### Action Notes: `tmp/{character}-notes-for-journal.md`
+
+Written by AI player action agent during their turn. Contains first-person notes about what the character did and their internal thoughts.
+
+```markdown
+[Character's internal notes about their actions and thoughts during this scene]
+```
+
+**Lifecycle:**
+- Written by action agent during `[AWAIT_AI_PLAYERS]` cycle
+- Read and deleted by journal agent when processing
+- If missing, journal agent uses only the shared narrative
 
 ### Character Journal: `party/{character}-journal.md`
 
-Appended by AI player. Each entry:
+Appended by journal agent. Each entry:
 
 ```markdown
 ---
@@ -149,24 +156,27 @@ Appended by AI player. Each entry:
 8. GM deletes tmp/gm-context.md, tmp/{character}-prompt.md, and tmp/{character}-response.md
 ```
 
-### Journal Mode
+### Auto-Journal Mode
 
 ```
-1. GM creates tmp/{character}-journal-prompt.md
-2. GM signals [JOURNAL_UPDATE: ...]
-3. AI player reads journal prompt
-4. AI player appends to party/{character}-journal.md
-5. GM deletes tmp/{character}-journal-prompt.md
+1. Orchestrator writes tmp/narrative-for-journal.md (shared narrative)
+2. Orchestrator spawns ai-player-journal agents in background for each character
+3. Each journal agent reads narrative + their action notes (if exists)
+4. Each journal agent appends to party/{character}-journal.md
+5. Each journal agent deletes their tmp/{character}-notes-for-journal.md (if it existed)
 ```
 
 ## Cleanup Rules
 
-The GM is responsible for cleanup:
+The GM is responsible for action mode cleanup:
 
 - **After incorporating action responses:** Delete `gm-context.md`, prompt files, and response files
-- **After journal updates complete:** Delete journal prompt files
 - **Before writing new prompts:** Check for and delete any stale files
-- **At session end:** Ensure tmp/ is empty
+- **At session end:** Ensure tmp/ is empty (except `narrative-for-journal.md` which is overwritten each cycle)
+
+Auto-journal cleanup is handled by the journal agents themselves:
+- Each journal agent deletes its own `{character}-notes-for-journal.md` after processing
+- `narrative-for-journal.md` is overwritten each cycle (not deleted)
 
 ## Character Name Convention
 

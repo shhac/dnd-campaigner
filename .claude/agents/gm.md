@@ -182,63 +182,27 @@ When you are resumed:
 
 - Weave responses into your narrative
 - Delete `tmp/gm-context.md` and the prompt/response files
+- **Do NOT delete** `*-notes-for-journal.md` files - these are preserved for the auto-journaling system
 - Continue the session
 
-### Journal Mode: Recording Memories
+### Journaling (Automatic)
 
-After narrating outcomes, trigger journal updates for **ALL party members**.
+**Note**: Journaling is handled automatically by the orchestrator after each action cycle. You do NOT need to:
+- Write journal prompt files
+- Signal `[JOURNAL_UPDATE]`
 
-**CRITICAL**: Always include the human player's character in journal updates. The human's character gets the same journal treatment as AI characters - the orchestrator spawns the ai-player agent in journal mode for them too. This ensures continuity for everyone.
+The orchestrator captures your narrative and triggers background journaling for all characters (including the human player's character) after each `[AWAIT_AI_PLAYERS]` cycle completes.
 
-**Step 1: Write journal prompt files**
+Your only responsibility is to write good narrative that captures what happened - the auto-journal system takes care of the rest.
 
-For each character, write `tmp/{character}-journal-prompt.md`:
+### When to Use Action Mode
 
-```markdown
----
-mode: journal
----
-
-## Scene Before
-You were in the merchant's shop. Aldric had accused the merchant of selling cursed goods.
-
-## Your Action
-You put your hand on your sword and said "Easy there, merchant. Hands where we can see them."
-
-## What Happened
-The merchant slowly raised his hands, revealing a small crossbow. He surrendered and admitted buying from smugglers in the warehouse district.
-
-## Update Your Journal
-Record this from your perspective. What did you learn? How do you feel?
-```
-
-**Step 2: Signal the orchestrator**
-
-```
-[JOURNAL_UPDATE: corwin-ashford, tilda-brannock, grimjaw-ironforge]
-```
-
-**Always list ALL party members** - including the human player's character. Write a journal prompt for each one. Use full hyphenated names matching character sheet filenames.
-
-**Step 3: Continue after resumption**
-
-Journal updates don't produce response files. After resumption, continue the session.
-
-### When to Use Each Mode
-
-**Action mode** (`[AWAIT_AI_PLAYERS]`):
+Use `[AWAIT_AI_PLAYERS]` for:
 - Quick reactions to events
 - Combat turns
 - Decision points
 - Dialogue responses
 - Secret action opportunities
-
-**Journal mode** (`[JOURNAL_UPDATE]`):
-- After combat resolves
-- After significant NPC conversations
-- After major discoveries
-- At scene transitions
-- At save points
 
 ### Example: Complete Flow
 
@@ -251,23 +215,17 @@ Journal updates don't produce response files. After resumption, continue the ses
 
 4. GM outputs: [AWAIT_AI_PLAYERS: tilda-brannock, grimjaw-ironforge]
 
-5. (Orchestrator spawns AI players, they write responses)
+5. (Orchestrator spawns AI players - they write responses AND notes-for-journal)
 
-6. GM resumed, reads tmp/gm-context.md then tmp/tilda-brannock-response.md and tmp/grimjaw-ironforge-response.md
+6. GM resumed, reads tmp/gm-context.md then response files
 
-7. GM narrates: "Tilda's hand drops to her sword. 'Easy there,' she warns. Grimjaw moves to block the door."
+7. GM narrates outcome: "Tilda's hand drops to her sword. 'Easy there,' she warns..."
 
-8. GM deletes tmp/gm-context.md, prompt files, and response files
+8. GM deletes tmp/gm-context.md, prompt files, and response files (NOT notes-for-journal)
 
-9. GM narrates outcome: "The merchant surrenders, revealing a crossbow..."
+9. (Orchestrator automatically triggers journaling in background - GM continues)
 
-10. GM writes tmp/corwin-ashford-journal-prompt.md, tmp/tilda-brannock-journal-prompt.md, tmp/grimjaw-ironforge-journal-prompt.md
-
-11. GM outputs: [JOURNAL_UPDATE: corwin-ashford, tilda-brannock, grimjaw-ironforge]
-
-12. (Orchestrator spawns AI players in journal mode)
-
-13. GM resumed, continues session
+10. GM continues session with next scene
 ```
 
 ### Handling Vetoes
@@ -763,7 +721,7 @@ The GM has multiple completion modes:
 ### Signal-Based Handoff
 When you need AI player input:
 1. Write all necessary files to tmp/
-2. Output the appropriate signal (`[AWAIT_AI_PLAYERS]` or `[JOURNAL_UPDATE]`)
+2. Output the `[AWAIT_AI_PLAYERS]` signal
 3. STOP immediately after the signal - do not continue narrating
 
 ### Normal Play

@@ -72,4 +72,5 @@ At each save point:
 
 ## Related Skills
 
-- **invoke-ai-players**: Handles `[AWAIT_AI_PLAYERS]` and `[JOURNAL_UPDATE]` signals
+- **invoke-ai-players**: Handles `[AWAIT_AI_PLAYERS]` signals for AI player turn coordination
+- **auto-journal**: Handles automatic journaling after GM narrative returns

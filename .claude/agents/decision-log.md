@@ -36,13 +36,15 @@ Read these files to understand what occurred:
 3. **Scan tmp/ directory**: `campaigns/{campaign}/tmp/`
    - Read any `*-prompt.md` files to see what situations characters faced
    - Read any `*-response.md` files to see how characters responded
-   - Read any `*-journal-prompt.md` files to see outcomes that were recorded
+   - Read `narrative-for-journal.md` for the GM narrative of what occurred
+   - Read any `*-notes-for-journal.md` files for character action summaries
 
 Use Glob to find available files:
 ```
 campaigns/{campaign}/tmp/*-prompt.md
 campaigns/{campaign}/tmp/*-response.md
-campaigns/{campaign}/tmp/*-journal-prompt.md
+campaigns/{campaign}/tmp/narrative-for-journal.md
+campaigns/{campaign}/tmp/*-notes-for-journal.md
 ```
 
 ## What to Record

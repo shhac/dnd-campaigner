@@ -53,7 +53,8 @@ If no destination is provided, you'll be asked where to put it.
 {destination}/.claude/
 ├── agents/
 │   ├── gm.md
-│   ├── ai-player.md
+│   ├── ai-player-action.md
+│   ├── ai-player-journal.md
 │   ├── character-creator.md    # For adding new characters
 │   └── dnd-enthusiast.md       # For rules/design feedback
 ├── skills/
@@ -158,7 +159,8 @@ cp -r campaigns/{campaign}/* {destination}/
 
 Copy these agents (no modification needed):
 - `.claude/agents/gm.md`
-- `.claude/agents/ai-player.md`
+- `.claude/agents/ai-player-action.md`
+- `.claude/agents/ai-player-journal.md`
 - `.claude/agents/character-creator.md`
 - `.claude/agents/dnd-enthusiast.md`
 

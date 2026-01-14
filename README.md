@@ -99,7 +99,8 @@ dnd-campaigner/
 ├── .claude/
 │   ├── agents/           # AI agent definitions
 │   │   ├── gm.md         # Game Master
-│   │   ├── ai-player.md  # Party member template
+│   │   ├── ai-player-action.md   # Party member during scenes
+│   │   ├── ai-player-journal.md  # Character memory recording
 │   │   ├── campaign-creator.md
 │   │   ├── character-creator.md
 │   │   └── dnd-enthusiast.md

@@ -1,6 +1,6 @@
 ---
 name: play-orchestration
-description: Core orchestration loop for D&D play sessions. Use when orchestrating D&D play sessions, when the GM returns narrative to relay, when handling [AWAIT_AI_PLAYERS] or [JOURNAL_UPDATE] signals, when asking the player questions via AskUserQuestion, or when context may have been compacted during a long session. This skill survives context compaction.
+description: Core orchestration loop for D&D play sessions. Use when orchestrating D&D play sessions, when the GM returns narrative to relay, when handling [AWAIT_AI_PLAYERS] signals, when asking the player questions via AskUserQuestion, or when context may have been compacted during a long session. This skill survives context compaction.
 ---
 
 # Play Orchestration Skill
@@ -12,7 +12,7 @@ Core orchestration logic for running D&D sessions. This skill guides the main co
 Use this skill when:
 - Starting a new D&D play session
 - The GM agent returns narrative to relay to the player
-- The GM outputs `[AWAIT_AI_PLAYERS: ...]` or `[JOURNAL_UPDATE: ...]` signals
+- The GM outputs `[AWAIT_AI_PLAYERS: ...]` signal
 - The GM asks a question that requires AskUserQuestion
 - Context has been compacted during a long session (re-invoke to restore orchestration patterns)
 
@@ -42,14 +42,19 @@ AI players respond                               |
     +---> decision-log (background, don't wait)  |
     |                                            |
     v                                            |
-[JOURNAL_UPDATE] -> invoke-ai-players skill      |
-    |               (ALL chars parallel,         |
-    |                including human player)     |
+Spawn fresh GM (reads gm-context.md)             |
+    |                                            |
     v                                            |
-Spawn fresh GM (reads gm-context.md) ------------+
+GM narrates with AI player actions               |
+    |                                            |
+    +---> auto-journal (background, don't wait)  |
+    |     (ALL chars including human player)     |
+    |                                            |
+    v                                            |
+Relay to player ----------------- ---------------+
     |
     v
-Loop until session ends (track significant interactions)
+Loop until session ends
 ```
 
 ## Step 0: Load Preferences
@@ -136,10 +141,6 @@ Then:
 When you need AI player input:
 1. Write prompt files to campaigns/{campaign}/tmp/
 2. Output [AWAIT_AI_PLAYERS: char1, char2] and STOP
-
-When you want to trigger journaling:
-1. Write journal prompt files to campaigns/{campaign}/tmp/
-2. Output [JOURNAL_UPDATE: char1, char2, char3] and STOP
 ```
 
 ## Step 2: Signal Detection
@@ -149,7 +150,6 @@ Monitor GM output for these signals:
 | Signal | Action | Skill to Use |
 |--------|--------|--------------|
 | `[AWAIT_AI_PLAYERS: char1, char2]` | Spawn AI players in action mode | invoke-ai-players |
-| `[JOURNAL_UPDATE: char1, char2]` | Spawn AI players in journal mode | invoke-ai-players |
 | No signal, narrative output | Relay to player, await input, resume GM | - |
 | No signal, question for player | Use AskUserQuestion, then resume GM | - |
 
@@ -262,7 +262,6 @@ Use {narrative_style} formatting style for dialogue and scenes.
 [Include context based on what happened:]
 - If player responded: "Player said: {response}"
 - If action mode complete: "AI player responses ready in tmp/"
-- If journal mode complete: "Journal updates complete"
 
 Read any response files if applicable and continue.
 ```
@@ -276,13 +275,6 @@ Read any response files if applicable and continue.
 3. **Use the invoke-ai-players skill** to spawn AI players in action mode
 4. After all AI players complete, resume GM
 
-### [JOURNAL_UPDATE] Signal
-
-1. Strip the signal from displayed output
-2. **Use the invoke-ai-players skill** to spawn AI players in journal mode
-3. **Handle human player's character journaling** (see Human Player Journal section below)
-4. After all journaling complete, resume GM
-
 ## Scene Flow: PC Actions Before NPC Responses
 
 When the player chooses an action or dialogue approach:
@@ -293,41 +285,46 @@ When the player chooses an action or dialogue approach:
 
 Always show what the PC says/does before showing NPC reactions.
 
-## Auto-Journal Reminders
+## Automatic Journaling
 
-The orchestrator should track significant interactions and trigger journal updates at natural breakpoints.
+Journaling is now automatic via the `auto-journal` skill. The orchestrator triggers journaling after the GM returns narrative following an AI action cycle.
 
-### What Counts as a Significant Interaction
+### When Auto-Journal Triggers
 
-| Interaction Type | Examples |
-|-----------------|----------|
-| Combat encounters | Any fight, regardless of outcome |
-| Major revelations | Plot secrets revealed, NPC motives uncovered |
-| Scene changes | Moving to new location, time jumps |
-| NPC conversations with new info | Learning lore, receiving quests, key dialogue |
-| Character moments | Personal growth, relationship changes, moral choices |
+Auto-journal runs after the GM narrates the results of an `[AWAIT_AI_PLAYERS]` cycle:
 
-### When to Trigger Journal Updates
+1. GM signals `[AWAIT_AI_PLAYERS: char1, char2]`
+2. AI players respond with actions
+3. GM resumes and narrates what happened
+4. **Orchestrator triggers auto-journal** (background, don't wait)
+5. Continue with player interaction
 
-If it's been **2-3 significant interactions** since the last journal update:
+### How to Invoke Auto-Journal
 
-1. Wait for a **natural breakpoint** (scene transition, rest, travel)
-2. Note to yourself: "Journal update due - several significant events since last update"
-3. Ask the GM to trigger `[JOURNAL_UPDATE]` or trigger it directly
+After receiving GM narrative that includes AI player action results:
 
-### Tracking Approach
+1. **Write the narrative** to `campaigns/{campaign}/tmp/narrative-for-journal.md`
+2. **Invoke the auto-journal skill** with all party characters:
 
-Mentally track (or note in context):
-- Last journal update point
-- Count of significant interactions since then
-- Type of interactions (for journal richness)
-
-Example internal note:
 ```
-Journal tracking: Last update after warehouse exploration.
-Since then: 1) Combat with fungal creatures, 2) Found Rina's body, 3) Discovered smuggling ledger
--> 3 significant events, trigger journal at next natural break
+Skill: auto-journal
+Args: {campaign} {char1},{char2},{char3},{char4}
 ```
+
+Include ALL party members (both AI-controlled and human-controlled characters).
+
+### Example Invocation
+
+```
+Skill: auto-journal
+Args: the-rot-beneath tilda-brannock,brother-aldric,mira-thornwood,korvin-blackwood
+```
+
+The auto-journal skill handles:
+- Spawning journal agents for each character in background
+- Reading the shared narrative file
+- Each agent reads their own action notes if available
+- All journaling completes without blocking story progression
 
 ## Decision-Log Integration
 
@@ -375,51 +372,34 @@ Record these for session reconstruction.
 
 The decision-log agent handles file management and formatting.
 
-## Human Player Journal
+## Human Player Character Journaling
 
-The human player's character (from `preferences.md`) should also get journal entries during `[JOURNAL_UPDATE]` triggers.
+The human player's character is included in automatic journaling alongside AI characters.
 
-### Why Human Player Journals Matter
+### How It Works
 
-- Maintains parity with AI character journals
-- Creates a complete party journal record
-- Captures the human player's character's perspective on events
-- Useful for session recaps and long-term continuity
+When invoking the auto-journal skill, include ALL party members in the character list:
 
-### How Human Player Journaling Works
-
-**The GM includes the human player's character in the JOURNAL_UPDATE signal.** All characters (both AI-controlled and human-controlled) are journaled in the same parallel batch.
-
-When the GM triggers `[JOURNAL_UPDATE: gideon-harrowmoor, mira-thornwood, corwin-ashford]` (where `corwin-ashford` is the human player's character):
-- The invoke-ai-players skill spawns journal agents for ALL listed characters
-- The human player's character is treated the same as AI characters for journaling
-- All journal writes happen in parallel
-
-### Journal Update Sequence
-
-1. GM triggers `[JOURNAL_UPDATE: char1, char2, player_char]` (includes ALL characters)
-2. Spawn journal agents for ALL listed characters in parallel (via invoke-ai-players skill)
-3. All journals complete
-4. Resume GM
-
-**Note**: There is no separate step for human player journaling. The GM is responsible for including the human player's character name in the JOURNAL_UPDATE signal, and invoke-ai-players handles the entire batch.
-
-### Example Journal Entry (Human Character)
-
-If the human plays Corwin (pragmatic fighter):
-```markdown
-## Session Entry - The Warehouse
-
-We found what we came for, and more besides. Rina didn't make it—body
-was in the basement, looked like she'd been dead for days. The fungal
-growth down there... unnatural. Mira seemed shaken. Can't blame her.
-
-The ledger we found names names. Councilman Vance's seal was on half
-those shipping manifests. Whatever's growing in that warehouse, someone
-in the Hall of Lords paid to put it there.
-
-Tomorrow we dig into Vance's business dealings. Tonight, I need ale.
 ```
+Skill: auto-journal
+Args: {campaign} {ai-char1},{ai-char2},{ai-char3},{human-player-char}
+```
+
+The human player's character is treated identically to AI characters for journaling purposes:
+- Same journal agent spawns for all characters
+- Same narrative file is read by all
+- All journals are written in parallel
+
+### Example
+
+If the human plays `korvin-blackwood` and the AI controls `tilda-brannock`, `brother-aldric`, and `mira-thornwood`:
+
+```
+Skill: auto-journal
+Args: the-rot-beneath tilda-brannock,brother-aldric,mira-thornwood,korvin-blackwood
+```
+
+All four characters get journal entries capturing the scene from their perspectives.
 
 ## Parallelization Guidelines
 
@@ -430,7 +410,7 @@ Understanding what can run in parallel vs. sequentially is critical for efficien
 | Task Type | Details |
 |-----------|---------|
 | **AI player actions** | All AI players in an AWAIT_AI_PLAYERS batch spawn simultaneously |
-| **AI player journals** | All characters (AI + human) in a JOURNAL_UPDATE batch spawn simultaneously |
+| **Auto-journal** | All characters (AI + human) journal simultaneously via auto-journal skill |
 | **Decision-log** | Runs in background while GM continues (fire-and-forget) |
 
 ### What Must Be Sequential
@@ -440,13 +420,13 @@ Understanding what can run in parallel vs. sequentially is critical for efficien
 | **Prompt files before spawn** | GM must write prompts before AI players can read them |
 | **AI responses before GM resume** | GM needs the response content to continue narration |
 | **Player input before GM resume** | GM waits for human player's chosen action |
-| **Journals before resume** (usually) | Optional - can fire-and-forget if not blocking |
+| **Narrative file before auto-journal** | Orchestrator writes narrative before invoking auto-journal skill |
 
 ### Fire-and-Forget Tasks
 
 These tasks can run in background without waiting:
 - **Decision-log**: Reads response files and appends to log - no conflict with GM
-- **Journals** (optional): If you don't need confirmation, journals can fire-and-forget
+- **Auto-journal**: Always runs in background - journal agents don't block story progression
 
 ### Parallelization Flow Example
 
@@ -461,16 +441,15 @@ These tasks can run in background without waiting:
                                             |
                                             v
                                        Resume GM
-
-[JOURNAL_UPDATE: gideon-harrowmoor, mira-thornwood, tilda-brannock, corwin-ashford]  (corwin-ashford = human player)
-    |
-    +---> Journal gideon-harrowmoor --------+
-    +---> Journal mira-thornwood -----------+
-    +---> Journal tilda-brannock -----------+---> All complete (or fire-and-forget)
-    +---> Journal corwin-ashford -----------+
-                                 |
-                                 v
-                            Resume GM
+                                            |
+                                            v
+                                   GM narrates results
+                                            |
+                                            +---> auto-journal skill (background)
+                                            |     All chars: gideon, mira, tilda, corwin
+                                            |
+                                            v
+                                    Relay to player
 ```
 
 ### Key Principle
@@ -510,7 +489,8 @@ If prompt/response files are missing:
 
 ## Related Skills
 
-- **invoke-ai-players**: Handles actual AI player spawning (action and journal modes)
+- **invoke-ai-players**: Handles AI player spawning for action mode
+- **auto-journal**: Triggers automatic journaling for all characters after AI action cycles
 - **save-point**: Manages session state persistence
 - **combat-orchestration**: Special handling for combat encounters
 - **decision-log** (agent): Records AI player decisions for session reconstruction

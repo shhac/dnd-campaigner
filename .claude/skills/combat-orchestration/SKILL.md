@@ -87,9 +87,7 @@ Post-combat checklist:
    - [ ] Combat outcome summary
    - [ ] Loot acquired
 3. **Update party-knowledge.md** with combat results
-4. **Trigger journal updates** for all characters (including human's):
-   - Write journal prompts to `tmp/`
-   - Signal `[JOURNAL_UPDATE: all-characters]`
+4. **Journal updates**: Journaling is automatic - the orchestrator invokes the `auto-journal` skill after GM narrative returns
 5. **Clean up** any combat-related tmp files
 
 ## Detailed Procedures
@@ -101,4 +99,5 @@ Post-combat checklist:
 
 ## Related Skills
 
-- **invoke-ai-players**: Handles `[AWAIT_AI_PLAYERS]` and `[JOURNAL_UPDATE]` signals
+- **invoke-ai-players**: Handles `[AWAIT_AI_PLAYERS]` signals
+- **auto-journal**: Handles journaling (invoked automatically after GM narrative)
