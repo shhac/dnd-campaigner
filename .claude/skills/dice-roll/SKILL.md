@@ -91,7 +91,7 @@ Full notation supported:
 - `k`, `kh<N>` - Keep highest N
 - `kl<N>` - Keep lowest N
 - `d`, `dl<N>` - Drop lowest N
-- `!` - Explode on max
+- Explode on max: use exclamation mark suffix (e.g., `1d6!`)
 - `r`, `r<N>` - Reroll (default 1s)
 - `+`, `-`, `*`, `/` - Arithmetic
 
