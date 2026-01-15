@@ -22,3 +22,7 @@ CLAUDE.local.md
 .ai-cache/
 campaigns/*/tmp/
 
+# Piper TTS
+.piper-venv/
+.piper-voices/
+

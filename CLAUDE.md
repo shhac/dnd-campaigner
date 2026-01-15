@@ -144,6 +144,14 @@ Converts campaign sessions into episodic novel chapters with editorial review.
 - Continuity Review (after full check)
 - Publisher Review (skippable with `--skip-publisher`)
 
+### Setting Up TTS Voices
+```
+/setup-voices {campaign-name}
+```
+Generates `voices.yaml` for text-to-speech novel reading. Maps POV characters to Piper TTS voices based on gender detection from character sheets.
+
+After running, use `source scripts/piper-env.sh` to enable `read-chapter` and `read-novel` commands.
+
 ## Campaign File Purposes
 
 | File | Purpose | Who Reads It |
@@ -168,6 +176,7 @@ Converts campaign sessions into episodic novel chapters with editorial review.
 | `metadata.yaml` | Final novel metadata |
 | `table-of-contents.md` | Final TOC |
 | `novelization-state.yaml` | Progress tracking for resume |
+| `voices.yaml` | POV character to TTS voice mapping (created by `/setup-voices`) |
 | `drafts/` | Archived intermediate files (drafts, fix-requests) |
 
 ## Agent Descriptions
