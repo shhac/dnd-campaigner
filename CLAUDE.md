@@ -116,6 +116,34 @@ Shows all available campaigns and their status.
 ```
 Exports a campaign as a standalone project with all necessary agents, skills, and commands. The ejected campaign can be played independently of this repository.
 
+### Novelizing a Campaign
+```
+/novelize {campaign-name} [options]
+```
+Converts campaign sessions into episodic novel chapters with editorial review.
+
+**Options:**
+- `--auto`: Automatic mode - pause only for voice lock and blocking issues
+- `--resume`: Continue from last checkpoint
+- `--fresh`: Start over, archiving any existing novel
+- `--skip-publisher`: Skip the publisher review phase
+- `--review-each`: Pause after each chapter for user review
+- `--dry-run`: Show plan without writing files
+
+**Pipeline Phases:**
+1. Planning - Outline creation with tone selection
+2. Writing + Editing - Chapter drafts with prose improvements
+3. Full Continuity - Consistency checking across all chapters
+4. Fixing - Addressing blocking issues
+5. Publisher Review - Reader experience assessment
+6. Final Assembly - Metadata and table of contents
+
+**Checkpoints:**
+- Outline Approval (after planning)
+- Voice Lock (after Chapter 1 edited - critical)
+- Continuity Review (after full check)
+- Publisher Review (skippable with `--skip-publisher`)
+
 ## Campaign File Purposes
 
 | File | Purpose | Who Reads It |
@@ -128,8 +156,23 @@ Exports a campaign as a standalone project with all necessary agents, skills, an
 | `items/{name}.md` | Notable items, artifacts, equipment | GM, reference |
 | `decision-log.md` | Character decisions and actions for context reconstruction | GM, reference |
 
+### Novel Directory (`novel/`)
+
+| File | Purpose |
+|------|---------|
+| `outline.md` | Chapter plan with POV assignments and progress tracking |
+| `chapter-NN.md` | Final edited chapter versions |
+| `continuity-manifest.md` | Running tracker of names, descriptions, timeline |
+| `continuity-notes.md` | Full continuity report |
+| `publisher-feedback.md` | Reader experience assessment |
+| `metadata.yaml` | Final novel metadata |
+| `table-of-contents.md` | Final TOC |
+| `novelization-state.yaml` | Progress tracking for resume |
+| `drafts/` | Archived intermediate files (drafts, fix-requests) |
+
 ## Agent Descriptions
 
+### Gameplay Agents
 - **campaign-creator**: Designs new campaigns through interactive Q&A
 - **character-creator**: Builds PCs/NPCs with proper D&D 5e stats
 - **gm**: Runs the game - narrates, controls NPCs, adjudicates rules
@@ -137,6 +180,12 @@ Exports a campaign as a standalone project with all necessary agents, skills, an
 - **ai-player-journal**: Records character reflections and memories after events
 - **dnd-enthusiast**: Experienced D&D player/DM offering feedback on campaign design, rules, and player experience
 - **decision-log**: Records character decisions and actions after significant events to help with context reconstruction
+
+### Novelization Agents
+- **novelizer**: Creates outlines (PLAN), writes chapter drafts (WRITE), and applies fixes (FIX). Self-sufficient - reads source files, writes directly, returns status only.
+- **novelizer-editor**: Improves prose mechanics (clarity, flow, engagement) without changing plot. Reads drafts, writes edited versions.
+- **novelizer-continuity**: Checks consistency across chapters. INCREMENTAL mode for quick checks every 2-3 chapters, FULL mode for complete analysis. Maintains continuity-manifest.md.
+- **novelizer-publisher**: Evaluates reader experience - "Is this worth reading?" Provides feedback on engagement, pacing, and what might make readers put the book down.
 
 ## Skills
 
