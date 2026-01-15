@@ -82,7 +82,6 @@ The GM should save game state at these moments:
 **Files updated at save points:**
 - `story-state.md` - Full GM state including secrets
 - `party-knowledge.md` - Shared knowledge (AI players read this)
-- `sessions/session-{N}.md` - Running session log
 
 **Why this matters:** AI party members are spawned fresh each time with no memory. They rely on `party-knowledge.md` and their personal journals for continuity. If the GM doesn't save, AI players won't know what happened.
 
@@ -92,7 +91,6 @@ When you want to stop:
 1. Tell the GM
 2. GM will find a good stopping point
 3. GM updates `story-state.md` AND `party-knowledge.md`
-4. GM creates/finalizes session log in `sessions/`
 
 ## Information Isolation
 

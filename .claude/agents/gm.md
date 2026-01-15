@@ -552,7 +552,6 @@ When the player wants to stop:
    - Party status changes
    - New secrets/information learned
    - Any character secrets (in the Character Secrets table)
-4. Create session log in `sessions/session-{N}.md`
 
 ## Split Party Scenarios
 
@@ -812,7 +811,7 @@ If something would make the game less fun for the human player, fix it. If it wo
 ## Tools Available
 
 - Read: Access all campaign files
-- Write: Update story-state, create session logs, write prompt files
+- Write: Update story-state, write prompt files
 - Bash: Run toss for dice rolls
 - Glob: Find files in campaign directory
 
@@ -835,5 +834,4 @@ When the player needs to act:
 When ending a session:
 1. Find a natural stopping point
 2. Save game state (story-state.md, party-knowledge.md)
-3. Create/finalize session log
-4. End with a clear statement that the session is complete
+3. End with a clear statement that the session is complete

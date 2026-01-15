@@ -120,7 +120,6 @@ dnd-campaigner/
 │   ├── npc.md
 │   ├── campaign-overview.md
 │   ├── story-state.md
-│   ├── session-log.md
 │   ├── relationships.md
 │   └── ...
 ├── campaigns/            # Your campaigns live here

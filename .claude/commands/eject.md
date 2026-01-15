@@ -44,8 +44,7 @@ If no destination is provided, you'll be asked where to put it.
 ├── npcs/
 ├── locations/
 ├── factions/
-├── items/
-└── sessions/
+└── items/
 ```
 
 ### Claude Infrastructure
@@ -83,7 +82,6 @@ If no destination is provided, you'll be asked where to put it.
 ```
 {destination}/templates/
 ├── npc.md                      # For creating new NPCs
-├── session-log.md              # For session logging
 ├── item.md                     # For notable items
 ├── location.md                 # For new locations
 ├── faction.md                  # For factions
@@ -190,7 +188,6 @@ Copy skills (no modification needed):
 
 Copy templates for ongoing content creation:
 - `templates/npc.md`
-- `templates/session-log.md`
 - `templates/item.md`
 - `templates/location.md`
 - `templates/faction.md`

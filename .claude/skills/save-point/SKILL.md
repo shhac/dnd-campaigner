@@ -71,7 +71,6 @@ At each save point:
 ```
 [ ] story-state.md updated
 [ ] party-knowledge.md updated
-[ ] Session log appended (if significant event)
 ```
 
 ## Detailed Procedures

@@ -126,7 +126,7 @@ Exports a campaign as a standalone project with all necessary agents, skills, an
 | `party/{name}.md` | Character sheet | GM, that character's agent |
 | `npcs/{name}.md` | NPC details + secrets | GM only |
 | `items/{name}.md` | Notable items, artifacts, equipment | GM, reference |
-| `sessions/session-*.md` | What happened (shared knowledge) | Everyone |
+| `decision-log.md` | Character decisions and actions for context reconstruction | GM, reference |
 
 ## Agent Descriptions
 
