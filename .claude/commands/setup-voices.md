@@ -87,25 +87,42 @@ Create `campaigns/{campaign}/novel/voices.yaml` with this format:
 
 ```yaml
 # Voice mapping for novel reading
-# Maps POV character names to Piper voice models with per-voice settings
+# Maps POV character names to TTS engine-specific voice settings
 #
-# Available voices (after running: source scripts/piper-env.sh):
+# Namespaced format supports multiple TTS engines:
+#   - piper: Piper TTS settings (voice name, speed, pauses)
+#   - chatterbox: Chatterbox TTS settings (voice sample, gender)
+#
+# Available Piper voices (after running: source scripts/piper-env.sh):
 #   - en_US-ryan-high (male, natural, 114MB)
 #   - en_US-amy-medium (female, professional, 63MB)
 #
-# Settings:
+# Piper Settings:
+#   - voice: Piper voice model name
 #   - length_scale: Speech speed (1.0 = default, higher = slower)
 #   - sentence_silence: Pause between sentences in seconds
+#
+# Chatterbox Settings:
+#   - voice: Voice sample name (e.g., narrator-male, narrator-female)
+#   - gender: male or female (used for narrator selection)
 
 {character-1}:
-  voice: {voice}
-  length_scale: {length_scale}
-  sentence_silence: {sentence_silence}
+  piper:
+    voice: {piper_voice}
+    length_scale: {length_scale}
+    sentence_silence: {sentence_silence}
+  chatterbox:
+    voice: narrator-{gender}
+    gender: {gender}
 
 {character-2}:
-  voice: {voice}
-  length_scale: {length_scale}
-  sentence_silence: {sentence_silence}
+  piper:
+    voice: {piper_voice}
+    length_scale: {length_scale}
+    sentence_silence: {sentence_silence}
+  chatterbox:
+    voice: narrator-{gender}
+    gender: {gender}
 ```
 
 ### Step 5: Report Results

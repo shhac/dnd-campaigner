@@ -172,25 +172,45 @@ parse_yaml_value() {
         tr -d '"'"'"
 }
 
-# Parse a nested YAML value (e.g., get "voice" from under "corwin-voss:")
-# Usage: parse_nested_yaml "file" "parent_key" "child_key"
+# Parse a nested YAML value under a namespace (e.g., get "voice" from "corwin-voss.piper.voice")
+# Usage: parse_nested_yaml "file" "parent_key" "namespace" "child_key"
+# For backwards compatibility, if namespace is a child_key (no 4th arg), use old behavior
 parse_nested_yaml() {
     local file="$1"
     local parent="$2"
-    local child="$3"
+    local namespace="$3"
+    local child="${4:-}"
 
-    # Find the parent block and extract the child value
-    awk -v parent="$parent" -v child="$child" '
-        $0 ~ "^" parent ":" { in_block = 1; next }
-        in_block && /^[^ ]/ { in_block = 0 }
-        in_block && $0 ~ "^  " child ":" {
-            sub(/^  [^:]+:[[:space:]]*/, "")
-            sub(/[[:space:]]*#.*/, "")
-            gsub(/["'"'"']/, "")
-            print
-            exit
-        }
-    ' "$file" 2>/dev/null
+    if [[ -z "$child" ]]; then
+        # Backwards-compatible 3-arg mode: parent.child (no namespace)
+        child="$namespace"
+        awk -v parent="$parent" -v child="$child" '
+            $0 ~ "^" parent ":" { in_block = 1; next }
+            in_block && /^[^ ]/ { in_block = 0 }
+            in_block && $0 ~ "^  " child ":" {
+                sub(/^  [^:]+:[[:space:]]*/, "")
+                sub(/[[:space:]]*#.*/, "")
+                gsub(/["'"'"']/, "")
+                print
+                exit
+            }
+        ' "$file" 2>/dev/null
+    else
+        # New 4-arg mode: parent.namespace.child
+        awk -v parent="$parent" -v namespace="$namespace" -v child="$child" '
+            $0 ~ "^" parent ":" { in_parent = 1; next }
+            in_parent && /^[^ ]/ { in_parent = 0; in_namespace = 0 }
+            in_parent && $0 ~ "^  " namespace ":" { in_namespace = 1; next }
+            in_namespace && /^  [^ ]/ && !/^    / { in_namespace = 0 }
+            in_namespace && $0 ~ "^    " child ":" {
+                sub(/^    [^:]+:[[:space:]]*/, "")
+                sub(/[[:space:]]*#.*/, "")
+                gsub(/["'"'"']/, "")
+                print
+                exit
+            }
+        ' "$file" 2>/dev/null
+    fi
 }
 
 # Check if running interactively (stdin is a terminal)
@@ -522,21 +542,31 @@ EOF
                 # 1. Check for campaign voice mapping file
                 local voice_map="$PIPER_REPO_ROOT/campaigns/$campaign/novel/voices.yaml"
                 if [[ -f "$voice_map" ]]; then
-                    # Try nested format first (new format with per-voice settings)
+                    # Try namespaced format first (new format: character.piper.voice)
                     local mapped
-                    mapped=$(parse_nested_yaml "$voice_map" "$pov" "voice")
+                    mapped=$(parse_nested_yaml "$voice_map" "$pov" "piper" "voice")
                     if [[ -n "$mapped" ]]; then
                         voice="$mapped"
-                        # Also read per-voice settings
-                        voice_length_scale=$(parse_nested_yaml "$voice_map" "$pov" "length_scale")
-                        voice_sentence_silence=$(parse_nested_yaml "$voice_map" "$pov" "sentence_silence")
-                        log_info "POV: $pov -> Voice: $voice (from voices.yaml)"
+                        # Also read per-voice settings from piper namespace
+                        voice_length_scale=$(parse_nested_yaml "$voice_map" "$pov" "piper" "length_scale")
+                        voice_sentence_silence=$(parse_nested_yaml "$voice_map" "$pov" "piper" "sentence_silence")
+                        log_info "POV: $pov -> Voice: $voice (from voices.yaml piper config)"
                     else
-                        # Fall back to simple format (backwards compatibility)
-                        mapped=$(parse_yaml_value "$voice_map" "$pov")
+                        # Fall back to legacy flat format (backwards compatibility)
+                        # Try nested without namespace first (character.voice)
+                        mapped=$(parse_nested_yaml "$voice_map" "$pov" "voice")
                         if [[ -n "$mapped" ]]; then
                             voice="$mapped"
-                            log_info "POV: $pov -> Voice: $voice (from voices.yaml)"
+                            voice_length_scale=$(parse_nested_yaml "$voice_map" "$pov" "length_scale")
+                            voice_sentence_silence=$(parse_nested_yaml "$voice_map" "$pov" "sentence_silence")
+                            log_info "POV: $pov -> Voice: $voice (from voices.yaml legacy format)"
+                        else
+                            # Try simple key: value format
+                            mapped=$(parse_yaml_value "$voice_map" "$pov")
+                            if [[ -n "$mapped" ]]; then
+                                voice="$mapped"
+                                log_info "POV: $pov -> Voice: $voice (from voices.yaml simple format)"
+                            fi
                         fi
                     fi
                 fi
@@ -873,9 +903,10 @@ Examples:
 Voice Configuration:
   Create campaigns/{campaign}/novel/voices.yaml to map characters to voices:
     corwin-voss:
-      voice: en_US-ryan-high
-      length_scale: 1.1
-      sentence_silence: 0.4
+      piper:
+        voice: en_US-ryan-high
+        length_scale: 1.1
+        sentence_silence: 0.4
 
 Requirements:
   - bash or zsh (not sh, dash, or fish)

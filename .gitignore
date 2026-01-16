@@ -22,7 +22,14 @@ CLAUDE.local.md
 .ai-cache/
 campaigns/*/tmp/
 
+# Python
+__pycache__/
+*.pyc
+
 # Piper TTS
 .piper-venv/
 .piper-voices/
+
+# Chatterbox TTS
+.chatterbox-venv/
 
