@@ -31,9 +31,11 @@ You verify internal consistency across novel chapters. You catch errors that wou
 
 Your prompt will include a mode header:
 ```
-MODE: {mode_name}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MODE: {INCREMENTAL|FULL}
 CAMPAIGN: {campaign}
-CHAPTERS: {chapter_list}  # INCREMENTAL mode only
+CHAPTERS: [{list}]        # For INCREMENTAL only
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 Modes: INCREMENTAL, FULL

@@ -297,15 +297,13 @@ Read any response files if applicable and continue.
 
 ## ⚠️ MANDATORY CHECKPOINT: Post-AI-Action Journaling
 
-**CRITICAL**: After the GM narrates the results of an `[AWAIT_AI_PLAYERS]` cycle, you MUST:
+**CRITICAL**: After the GM narrates the results of an `[AWAIT_AI_PLAYERS]` cycle, you MUST trigger auto-journaling.
 
-1. Spawn `narrative-writer` agent (foreground) with the narrative content
-2. Spawn journal agents (background, parallel) for ALL party members
-3. Then continue with player interaction
+**MUST load**: `auto-journal/when-to-invoke` for detection rules and trigger conditions.
+
+**MUST load**: `auto-journal/implementation` for the two-step journaling process.
 
 **Detection**: If you just spawned a fresh GM after AI players responded, and the GM returned narrative (not another signal), this is a journaling checkpoint.
-
-**Invocation**: See "How to Invoke Auto-Journal" below for the two-step process.
 
 **Do NOT skip this step.** AI player memories depend on journaling.
 
@@ -325,7 +323,11 @@ Always show what the PC says/does before showing NPC reactions.
 
 Journaling is now automatic via the `auto-journal` skill. The orchestrator triggers journaling after the GM returns narrative following an AI action cycle.
 
-### When Auto-Journal Triggers
+**REQUIRED**: Load the `auto-journal/when-to-invoke` skill for checkpoint/trigger rules.
+
+**REQUIRED**: Load the `auto-journal/implementation` skill for the two-step journaling process.
+
+### Quick Reference
 
 Auto-journal runs after the GM narrates the results of an `[AWAIT_AI_PLAYERS]` cycle:
 
@@ -335,70 +337,14 @@ Auto-journal runs after the GM narrates the results of an `[AWAIT_AI_PLAYERS]` c
 4. **Orchestrator triggers auto-journal** (background, don't wait)
 5. Continue with player interaction
 
-### How to Invoke Auto-Journal
-
-After receiving GM narrative that includes AI player action results, use a two-step process to avoid verbose file-writing output.
-
-**Step 1: Write Narrative File (Foreground)**
-
-Spawn a `narrative-writer` agent (NOT in background):
+### Invocation
 
 ```
-Task: narrative-writer
-Prompt: |
-  Campaign: {campaign}
-
-  ## Narrative
-
-  {paste the full GM narrative here}
+Skill: auto-journal
+Args: {campaign} {char1},{char2},{char3},{char4}
 ```
 
-Wait for this to complete before Step 2.
-
-**Step 2: Spawn Background Agents (Parallel)**
-
-Spawn all background agents in a single message:
-
-**Journal Agents** (for each character):
-
-```
-Task: ai-player-journal
-run_in_background: true
-Prompt: |
-  Campaign: {campaign}
-  Character: {character}
-```
-
-**State Delta Writer** (updates story-state.md):
-
-```
-Task: state-delta-writer
-run_in_background: true
-Prompt: |
-  Campaign: {campaign}
-```
-
-**Knowledge Delta Writer** (updates party-knowledge.md):
-
-```
-Task: knowledge-delta-writer
-run_in_background: true
-Prompt: |
-  Campaign: {campaign}
-```
-
-**Critical**:
-- Use `run_in_background: true` for all agents
-- Spawn all agents in parallel (single message with multiple Task calls)
-- Include ALL party members for journaling (both AI-controlled and human-controlled characters)
-- Delta writers skip gracefully if no delta files exist
-
-This approach:
-- Token efficient (narrative passed once, not 4 times)
-- No verbose Write diffs (foreground task shows brief summary)
-- Proper ordering (file written before agents read)
-- Parallel execution (all journals and delta writers run concurrently)
-- Automatic state updates when GM writes delta files
+Include ALL party members (both AI-controlled and human-controlled characters).
 
 ## Decision-Log Integration
 
@@ -450,30 +396,7 @@ The decision-log agent handles file management and formatting.
 
 The human player's character is included in automatic journaling alongside AI characters.
 
-### How It Works
-
-When invoking the auto-journal skill, include ALL party members in the character list:
-
-```
-Skill: auto-journal
-Args: {campaign} {ai-char1},{ai-char2},{ai-char3},{human-player-char}
-```
-
-The human player's character is treated identically to AI characters for journaling purposes:
-- Same journal agent spawns for all characters
-- Same narrative file is read by all
-- All journals are written in parallel
-
-### Example
-
-If the human plays `korvin-blackwood` and the AI controls `tilda-brannock`, `brother-aldric`, and `mira-thornwood`:
-
-```
-Skill: auto-journal
-Args: the-rot-beneath tilda-brannock,brother-aldric,mira-thornwood,korvin-blackwood
-```
-
-All four characters get journal entries capturing the scene from their perspectives.
+**Key point**: Include ALL party members (AI + human) in the auto-journal invocation. See `auto-journal/implementation` for details and examples.
 
 ## Parallelization Guidelines
 

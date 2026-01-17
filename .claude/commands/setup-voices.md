@@ -1,5 +1,6 @@
 ---
 description: Generate voices.yaml for novel TTS reading
+argument-hint: <campaign-name>
 ---
 
 # /setup-voices

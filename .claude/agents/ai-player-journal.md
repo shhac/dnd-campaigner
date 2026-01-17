@@ -2,6 +2,7 @@
 name: ai-player-journal
 description: Records a D&D character's memories and reflections after events. Reads narrative context and personal notes, then updates the character's journal.
 tools: Read, Write
+skills: narrative-formatting
 ---
 
 # AI Player Journal Agent

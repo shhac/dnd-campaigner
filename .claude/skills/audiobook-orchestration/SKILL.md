@@ -1,6 +1,6 @@
 ---
 name: audiobook-orchestration
-description: Orchestrates audiobook generation from novel chapters. Entry point for /audiobook command. Tracks progress, spawns agents for segmentation/generation/assembly phases, handles user confirmations, and survives context compaction by reading state from files.
+description: Use when generating audiobooks from novel chapters via the /audiobook command. Tracks progress, spawns agents for segmentation/generation/assembly phases, handles user confirmations, and survives context compaction by reading state from files.
 ---
 
 # Audiobook Orchestration Skill

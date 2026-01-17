@@ -214,25 +214,7 @@ After running, use `source scripts/piper-env.sh` to enable `read-chapter` and `r
 
 ### Voice Samples (`.chatterbox-voices/`)
 
-Chatterbox TTS uses voice samples for cloning. Available samples:
-
-| File | Source | Use Case |
-|------|--------|----------|
-| `narrator-male.wav` | Custom | Male narration |
-| `narrator-female.wav` | Custom | Female narration |
-| `ryan-internal.wav` | Piper (Ryan) | Male internal thoughts |
-| `amy-internal.wav` | Piper (Amy) | Female internal thoughts |
-| `evan-sample.wav` | macOS (Evan Enhanced) | US male character voice |
-| `ava-sample.wav` | macOS (Ava Premium) | US female character voice |
-| `jamie-sample.wav` | macOS (Jamie Premium) | British character voice |
-| `matilda-sample.wav` | macOS (Matilda Premium) | Australian female voice |
-| `zoe-sample.wav` | macOS (Zoe Premium) | US female character voice |
-| `isha-sample.wav` | macOS (Isha Premium) | Indian English female voice |
-
-**Creating new samples:**
-- Piper voices: `source .piper-venv/bin/activate && echo "text" | piper --model .piper-voices/en_US-ryan-high.onnx -o output.wav`
-- macOS voices: `say -v "Zoe (Premium)" -o output.aiff "text" && ffmpeg -i output.aiff -ar 24000 -ac 1 output.wav`
-- Samples should be 10-30 seconds of natural speech
+Chatterbox TTS voice samples for cloning. See **audiobook-orchestration/voice-samples** skill for full reference including available samples, creation commands, and guidelines.
 
 ## Agent Descriptions
 
