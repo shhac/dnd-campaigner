@@ -33,3 +33,6 @@ __pycache__/
 # Chatterbox TTS
 .chatterbox-venv/
 
+# Intermediate Files
+campaigns/*/novel/**/*.wav
+
