@@ -76,6 +76,9 @@ MIN_SEGMENT_WORDS = {
 }
 MAX_SEGMENT_WORDS = 150
 
+# Minimum words for valid segment (excluding punctuation)
+MIN_VALID_SEGMENT_WORDS = 2
+
 # Pause timing (seconds)
 PAUSE_RULES = {
     ('narration', 'dialogue'): (0.3, 0.5),
@@ -92,6 +95,37 @@ PARALINGUISTIC_PATTERNS = {
     r'\bchuckled\b|\bchuckling\b': '[chuckle]',
     r'\bcoughed\b|\bcoughing\b': '[cough]',
     r'\bsighed\b|\bsighing\b': '[sigh]',
+}
+
+# Words that look like names (capitalized) but are not speaker names
+# These should not be extracted as dialogue attribution subjects
+NON_NAME_WORDS = {
+    # Personal pronouns (critical - these appear capitalized at sentence start)
+    'he', 'she', 'they', 'it', 'him', 'her', 'them', 'his', 'hers', 'its',
+    'i', 'me', 'my', 'mine', 'we', 'us', 'our', 'ours', 'you', 'your', 'yours',
+    # Demonstratives and interrogatives
+    'there', 'that', 'what', 'when', 'where', 'this', 'these', 'those',
+    'here', 'then', 'thus', 'such', 'which', 'while', 'though', 'through',
+    # Prepositions and positional
+    'after', 'before', 'above', 'below', 'between', 'beyond', 'until',
+    # Adverbs of degree and frequency
+    'still', 'just', 'only', 'even', 'also', 'both', 'each', 'every',
+    'never', 'always', 'often', 'sometimes', 'usually', 'once', 'twice',
+    # Quantifiers and pronouns
+    'some', 'many', 'much', 'more', 'most', 'other', 'another', 'either',
+    'neither', 'nothing', 'something', 'everything', 'anything', 'someone',
+    'everyone', 'anyone', 'nobody', 'everybody', 'anybody', 'somewhere',
+    'everywhere', 'anywhere', 'nowhere', 'somehow', 'perhaps', 'maybe',
+    # Time words
+    'now', 'today', 'tomorrow', 'yesterday', 'soon', 'later',
+    # Comparison words
+    'rather', 'better', 'worse', 'less', 'fewer',
+    # Modal verbs
+    'would', 'could', 'should', 'might', 'must',
+    # Common adverbs
+    'suddenly', 'finally', 'really', 'quite', 'very', 'too',
+    # Narrative transitions
+    'meanwhile', 'however', 'therefore', 'otherwise', 'nonetheless',
 }
 
 
@@ -288,6 +322,73 @@ def load_voices_yaml(campaign: str) -> dict:
     return {}
 
 
+def resolve_voice_alias(voice: str, voices_yaml: dict) -> tuple[str, dict]:
+    """Resolve a voice name to its canonical name and character info.
+
+    Supports aliases defined in character entries:
+        characters:
+          seraphine-duskhollow:
+            aliases: [seraphine, sera]
+            chatterbox:
+              voice: narrator-female
+
+    Returns (canonical_name, char_info) or (voice, {}) if not found.
+    """
+    # Try direct match at root level first
+    if voice in voices_yaml:
+        char_info = voices_yaml[voice]
+        if isinstance(char_info, dict):
+            return voice, char_info
+
+    # Try direct match in characters wrapper
+    characters = voices_yaml.get('characters', {})
+    if voice in characters:
+        char_info = characters[voice]
+        if isinstance(char_info, dict):
+            return voice, char_info
+
+    # Search for alias matches at root level
+    for char_name, char_info in voices_yaml.items():
+        if char_name in ('narrator', 'characters', 'npcs'):
+            continue
+        if isinstance(char_info, dict):
+            aliases = char_info.get('aliases', [])
+            if voice in aliases:
+                return char_name, char_info
+
+    # Search for alias matches in characters wrapper
+    for char_name, char_info in characters.items():
+        if isinstance(char_info, dict):
+            aliases = char_info.get('aliases', [])
+            if voice in aliases:
+                return char_name, char_info
+
+    # Search for alias matches in npcs wrapper
+    npcs = voices_yaml.get('npcs', {})
+    for npc_name, npc_info in npcs.items():
+        if isinstance(npc_info, dict):
+            aliases = npc_info.get('aliases', [])
+            if voice in aliases or voice == npc_name:
+                return npc_name, npc_info
+
+    return voice, {}
+
+
+def is_voice_recognized(voice: str, voices_yaml: dict) -> tuple[bool, str]:
+    """Check if a voice is recognized in voices.yaml.
+
+    Returns (is_recognized, canonical_name_or_voice).
+    """
+    # Skip special cases
+    if voice in ('narration', 'narrator-male', 'narrator-female'):
+        return True, voice
+
+    canonical_name, char_info = resolve_voice_alias(voice, voices_yaml)
+    if char_info:
+        return True, canonical_name
+    return False, voice
+
+
 def get_voice_sample_path(voice: str, voices_yaml: dict) -> Path:
     """Get the path to a voice sample file.
 
@@ -302,29 +403,25 @@ def get_voice_sample_path(voice: str, voices_yaml: dict) -> Path:
           corwin-voss:
             chatterbox:
               voice: narrator-male
-    """
-    # Try new format first: character directly at root level
-    if voice in voices_yaml:
-        char_info = voices_yaml[voice]
-        if isinstance(char_info, dict):
-            chatterbox_info = char_info.get('chatterbox', {})
-            if chatterbox_info:
-                voice_name = chatterbox_info.get('voice', voice)
-                sample_path = VOICES_DIR / f'{voice_name}.wav'
-                if sample_path.exists():
-                    return sample_path
 
-    # Fall back to legacy format: characters wrapper
-    characters = voices_yaml.get('characters', {})
-    if voice in characters:
-        char_info = characters[voice]
-        if isinstance(char_info, dict):
-            chatterbox_info = char_info.get('chatterbox', {})
-            if chatterbox_info:
-                voice_name = chatterbox_info.get('voice', voice)
-                sample_path = VOICES_DIR / f'{voice_name}.wav'
-                if sample_path.exists():
-                    return sample_path
+    Also supports aliases:
+        characters:
+          seraphine-duskhollow:
+            aliases: [seraphine, sera]
+            chatterbox:
+              voice: narrator-female
+    """
+    # Resolve any aliases first
+    canonical_name, char_info = resolve_voice_alias(voice, voices_yaml)
+
+    # If we found character info, use it
+    if char_info:
+        chatterbox_info = char_info.get('chatterbox', {})
+        if chatterbox_info:
+            voice_name = chatterbox_info.get('voice', canonical_name)
+            sample_path = VOICES_DIR / f'{voice_name}.wav'
+            if sample_path.exists():
+                return sample_path
 
     # Check for character-specific sample
     char_sample = VOICES_DIR / f'{voice}.wav'
@@ -357,7 +454,7 @@ def get_narrator_voice(pov: str, voices_yaml: dict) -> str:
             voice: narrator-male
             gender: male
 
-    Also supports legacy format with 'characters' wrapper for backwards compatibility.
+    Also supports legacy format with 'characters' wrapper and aliases.
     """
     # Check for explicit narrator voice in voices.yaml
     narrator_config = voices_yaml.get('narrator', {})
@@ -366,32 +463,86 @@ def get_narrator_voice(pov: str, voices_yaml: dict) -> str:
         if chatterbox_narrator.get('voice'):
             return chatterbox_narrator['voice']
 
-    # Try new format first: character directly at root level
-    if pov in voices_yaml:
-        char_info = voices_yaml[pov]
-        if isinstance(char_info, dict):
-            chatterbox_info = char_info.get('chatterbox', {})
-            if chatterbox_info.get('gender'):
-                gender = chatterbox_info['gender'].lower()
-                return f'narrator-{gender}'
-
-    # Fall back to legacy format: characters wrapper
-    characters = voices_yaml.get('characters', {})
-    if pov in characters:
-        char_info = characters[pov]
-        if isinstance(char_info, dict):
-            chatterbox_info = char_info.get('chatterbox', {})
-            if chatterbox_info.get('gender'):
-                gender = chatterbox_info['gender'].lower()
-                return f'narrator-{gender}'
+    # Use alias resolution to find character info
+    canonical_name, char_info = resolve_voice_alias(pov, voices_yaml)
+    if char_info:
+        chatterbox_info = char_info.get('chatterbox', {})
+        if chatterbox_info.get('gender'):
+            gender = chatterbox_info['gender'].lower()
+            return f'narrator-{gender}'
 
     # Default to male narrator
     return 'narrator-male'
 
 
+def get_internal_thought_voice(pov: str, voices_yaml: dict) -> str:
+    """Get the internal thought voice for a POV character based on their gender.
+
+    Uses the internal_thoughts section of voices.yaml keyed by gender.
+    Falls back to narrator voice if internal_thoughts not configured.
+    """
+    # First determine the POV character's gender
+    canonical_name, char_info = resolve_voice_alias(pov, voices_yaml)
+    gender = 'male'  # default
+    if char_info:
+        chatterbox_info = char_info.get('chatterbox', {})
+        if chatterbox_info.get('gender'):
+            gender = chatterbox_info['gender'].lower()
+
+    # Look up internal thought voice by gender
+    internal_thoughts = voices_yaml.get('internal_thoughts', {})
+    if gender in internal_thoughts:
+        thought_config = internal_thoughts[gender]
+        if isinstance(thought_config, dict):
+            chatterbox_config = thought_config.get('chatterbox', {})
+            if chatterbox_config.get('voice'):
+                return chatterbox_config['voice']
+
+    # Fall back to narrator voice
+    return get_narrator_voice(pov, voices_yaml)
+
+
 # ============================================================================
 # Segmentation Logic
 # ============================================================================
+
+def is_valid_segment(text: str) -> bool:
+    """Check if a segment has enough meaningful content to generate audio.
+
+    Filters out:
+    - Empty or whitespace-only segments
+    - Punctuation-only segments (e.g., just "." or "?")
+    - Segments with fewer than MIN_VALID_SEGMENT_WORDS actual words
+    - Orphaned action phrases (e.g., ", meeting her eyes.")
+
+    This prevents issues like:
+    - Segments that are just "." after dialogue tag stripping
+    - Orphaned fragments like ", meeting her eyes." becoming bad segments
+    """
+    if not text or not text.strip():
+        return False
+
+    stripped = text.strip()
+
+    # Check for orphaned action phrases that start with comma or punctuation
+    # These are narrative beats that got separated from dialogue
+    # Pattern: starts with comma, has a gerund (-ing word)
+    if re.match(r'^[,;]\s*(?:\w+\s+)*\w+ing\b', stripped, re.IGNORECASE):
+        return False
+
+    # Pattern: starts with comma and possessive action phrase
+    # e.g., ", her voice soft." or ", his eyes narrowed."
+    if re.match(r'^[,;]\s*(?:her|his|their|its)\s+(?:voice|eyes|face|hands?|tone|gaze)', stripped, re.IGNORECASE):
+        return False
+
+    # Remove punctuation and check remaining content
+    # Keep alphanumeric characters and spaces only
+    words_only = re.sub(r'[^\w\s]', '', stripped)
+    words = words_only.split()
+
+    # Must have at least MIN_VALID_SEGMENT_WORDS actual words
+    return len(words) >= MIN_VALID_SEGMENT_WORDS
+
 
 def is_scene_break(paragraph: str) -> bool:
     """Check if paragraph is a scene break marker."""
@@ -434,20 +585,235 @@ def detect_paralinguistic_tags(text: str, context: str = '') -> list[str]:
     return tags
 
 
-def detect_voice_boundaries(paragraph: str, pov: str, last_speakers: list[str]) -> list[Chunk]:
-    """Detect voice boundaries within a paragraph."""
+def extract_speaker_from_context(text: str, last_named_speakers: dict) -> Optional[str]:
+    """Extract a speaker name from narrative context.
+
+    Looks for patterns like:
+    - "Name's eyes narrowed" -> Name
+    - "Name leaned forward" -> Name
+    - "Name said" -> Name
+    - References to track gender for pronoun resolution
+    """
+    # Pattern for names doing actions (Name + possessive or Name + verb)
+    name_action_pattern = re.compile(
+        r'\b([A-Z][a-z]+(?:[-\s][A-Z][a-z]+)?)'  # Name (possibly hyphenated or two words)
+        r"(?:'s\s+\w+|\s+(?:said|asked|replied|leaned|turned|looked|smiled|frowned|nodded|shook|gestured|whispered|shouted|muttered|stepped|moved|reached|paused))"
+    )
+
+    match = name_action_pattern.search(text)
+    if match:
+        name = match.group(1).lower().replace(' ', '-')
+        # Check if this is a non-name word (e.g., "There", "That", "What")
+        if name in NON_NAME_WORDS:
+            return None
+        # Track gender based on surrounding pronouns
+        if ' she ' in text.lower() or " her " in text.lower():
+            last_named_speakers[name] = 'female'
+        elif ' he ' in text.lower() or " his " in text.lower() or " him " in text.lower():
+            last_named_speakers[name] = 'male'
+        return name
+    return None
+
+
+def resolve_pronoun_to_speaker(pronoun: str, last_named_speakers: dict, recent_speakers: list) -> Optional[str]:
+    """Resolve a pronoun to a speaker based on tracked gender."""
+    pronoun = pronoun.lower()
+
+    if pronoun in ('she', 'her'):
+        # Find most recent female speaker
+        for speaker in reversed(recent_speakers):
+            if last_named_speakers.get(speaker) == 'female':
+                return speaker
+    elif pronoun in ('he', 'him', 'his'):
+        # Find most recent male speaker
+        for speaker in reversed(recent_speakers):
+            if last_named_speakers.get(speaker) == 'male':
+                return speaker
+
+    return None
+
+
+def strip_dialogue_tag(text: str) -> str:
+    """Strip dialogue attribution tags from text for cleaner audiobook output.
+
+    Removes patterns like:
+    - ", she said" / ", he replied"
+    - "she said," at start
+    - Trailing attribution after dialogue
+    - Trailing action phrases: ", meeting her eyes." / ", her voice soft."
+
+    This prevents orphaned fragments like ", meeting her eyes." from becoming
+    separate narration segments after dialogue is extracted.
+    """
+    # Common speech verbs for attribution
+    speech_verbs = (
+        r'said|asked|replied|whispered|shouted|muttered|exclaimed|murmured|'
+        r'grumbled|drawled|droned|hissed|yelled|screamed|answered|stated|added'
+    )
+
+    # Remove trailing attribution: ", she said" or ", Name replied"
+    text = re.sub(
+        r',?\s*(?:she|he|they|it|[A-Z][a-z]+)\s+'
+        r'(?:' + speech_verbs + r')'
+        r'\.?\s*$',
+        '',
+        text,
+        flags=re.IGNORECASE
+    )
+
+    # Remove trailing attribution with action phrase:
+    # ", she said, meeting her eyes." or ", he replied, his voice soft."
+    # Pattern: , [subject] [speech verb], [action phrase].
+    text = re.sub(
+        r',?\s*(?:she|he|they|it|[A-Z][a-z]+)\s+'
+        r'(?:' + speech_verbs + r')'
+        r',\s*[^"]+\.\s*$',
+        '',
+        text,
+        flags=re.IGNORECASE
+    )
+
+    # Remove standalone trailing action phrases after dialogue extraction:
+    # These are narrative beats that got orphaned, like ", meeting her eyes."
+    # Pattern: starts with comma, has a gerund (-ing word), ends with period
+    text = re.sub(
+        r'^,\s*(?:her|his|their|its)?\s*\w+ing\s+[^"]*\.\s*$',
+        '',
+        text,
+        flags=re.IGNORECASE
+    )
+
+    # Remove simple trailing action phrases: ", her voice soft." / ", eyes narrowed."
+    text = re.sub(
+        r',\s*(?:her|his|their|its)\s+(?:voice|eyes|face|hands?|tone|gaze)\s+\w+\.\s*$',
+        '',
+        text,
+        flags=re.IGNORECASE
+    )
+
+    return text.strip()
+
+
+def split_multi_speaker_paragraph(paragraph: str) -> list[str]:
+    """Split a paragraph that contains multiple speakers into separate chunks.
+
+    Detects patterns like:
+    - "You up for it?" "Always." (two speakers, no attribution)
+    - "First quote," she said. "Second quote," he replied. (two attributed quotes)
+
+    This prevents issues like merging "You up for it? Always." into one segment
+    when they're from different speakers.
+
+    Returns a list of paragraph chunks to be processed separately.
+    """
+    # Speech verbs for detection
+    speech_verbs = (
+        r'said|asked|replied|whispered|shouted|muttered|exclaimed|murmured|'
+        r'grumbled|drawled|droned|hissed|yelled|screamed|answered|stated|added'
+    )
+
+    # Find all quoted sections with their attributions
+    # Pattern captures: "text" [, subject verb]
+    quote_pattern = re.compile(
+        r'"([^"]+)"'  # Quoted text
+        r'(?:\s*,?\s*'  # Optional comma and space
+        r'([A-Z][a-z]+(?:[-\s][A-Z][a-z]+)?|[Hh]e|[Ss]he|[Tt]hey|[Ii]t)\s+'  # Subject
+        r'(' + speech_verbs + r')'  # Verb
+        r')?'
+    )
+
+    quotes = list(quote_pattern.finditer(paragraph))
+
+    # If fewer than 2 quotes, no multi-speaker issue
+    if len(quotes) < 2:
+        return [paragraph]
+
+    # Check for adjacent quotes from different speakers
+    # Look for patterns where quotes are close together and have different attributions
+    chunks = []
+    last_end = 0
+
+    for i, match in enumerate(quotes):
+        # Check if this quote and the next one appear to be from different speakers
+        if i < len(quotes) - 1:
+            next_match = quotes[i + 1]
+            # Get attributions
+            this_subject = match.group(2).lower() if match.group(2) else None
+            next_subject = next_match.group(2).lower() if next_match.group(2) else None
+
+            # Check for back-to-back quotes (very little text between them)
+            text_between = paragraph[match.end():next_match.start()].strip()
+
+            # If quotes are adjacent (< 3 chars between, like just punctuation/space)
+            # and they have different explicit attributions, split them
+            if len(text_between) < 3 and this_subject and next_subject:
+                if this_subject != next_subject:
+                    # Different speakers - split here
+                    chunk_text = paragraph[last_end:match.end()].strip()
+                    if chunk_text:
+                        chunks.append(chunk_text)
+                    last_end = next_match.start()
+
+            # Also detect: "Quote" "Quote" pattern (adjacent quotes with no attribution)
+            # These are often rapid exchanges between two characters
+            elif len(text_between) == 0 or text_between in ('.', ',', '!', '?'):
+                # Back-to-back quotes without text between - likely different speakers
+                chunk_text = paragraph[last_end:match.end()].strip()
+                if chunk_text:
+                    chunks.append(chunk_text)
+                last_end = next_match.start()
+
+    # Add remaining text
+    remaining = paragraph[last_end:].strip()
+    if remaining:
+        chunks.append(remaining)
+
+    # If we only got one chunk, return original
+    if len(chunks) <= 1:
+        return [paragraph]
+
+    return chunks
+
+
+def detect_voice_boundaries(paragraph: str, pov: str, last_speakers: list[str],
+                           speaker_genders: dict = None) -> list[Chunk]:
+    """Detect voice boundaries within a paragraph.
+
+    Improved speaker detection:
+    - Extracts names from narrative context before dialogue
+    - Resolves pronouns (he/she) to recent named speakers
+    - Tracks speaker gender for pronoun resolution
+    - Strips dialogue tags for cleaner audiobook output
+    - Handles multi-speaker paragraphs by splitting them first
+    """
+    if speaker_genders is None:
+        speaker_genders = {}
+
     chunks = []
     position = 0
 
-    # Pattern for dialogue with attribution
-    # Matches: "text" or "text," followed by optional attribution
-    dialogue_pattern = re.compile(
+    # Speech verbs for detection
+    speech_verbs = (
+        'said|asked|replied|whispered|shouted|muttered|exclaimed|murmured|'
+        'grumbled|drawled|droned|hissed|yelled|screamed|answered|stated|added'
+    )
+
+    # Pattern for dialogue with optional attribution after
+    # Captures: "dialogue text" [, subject verb]
+    dialogue_with_attr_pattern = re.compile(
         r'"([^"]+)"'  # Quoted text
         r'(?:'  # Optional attribution group
         r'\s*,?\s*'  # Optional comma and space
-        r'(?:([A-Z][a-z]+|he|she|they|it)\s+)?'  # Optional subject
-        r'(said|asked|replied|whispered|shouted|muttered|exclaimed|murmured|grumbled|drawled|droned|hissed|yelled|screamed|answered|stated|added)'  # Verb
+        r'([A-Z][a-z]+(?:[-\s][A-Z][a-z]+)?|[Hh]e|[Ss]he|[Tt]hey|[Ii]t)\s+'  # Subject (name or pronoun)
+        r'(' + speech_verbs + r')'  # Verb
         r')?'
+    )
+
+    # Pattern for attribution before dialogue: She said, "text"
+    attr_before_pattern = re.compile(
+        r'([A-Z][a-z]+(?:[-\s][A-Z][a-z]+)?|[Hh]e|[Ss]he|[Tt]hey)\s+'
+        r'(' + speech_verbs + r')\s*,?\s*'
+        r'"([^"]+)"'
     )
 
     # Pattern for internal thoughts (italics)
@@ -456,8 +822,20 @@ def detect_voice_boundaries(paragraph: str, pov: str, last_speakers: list[str]) 
     # Find all matches and sort by position
     all_matches = []
 
-    for match in dialogue_pattern.finditer(paragraph):
-        all_matches.append(('dialogue', match))
+    # Check for attribution-before patterns first
+    for match in attr_before_pattern.finditer(paragraph):
+        all_matches.append(('dialogue_attr_before', match))
+
+    for match in dialogue_with_attr_pattern.finditer(paragraph):
+        # Skip if this overlaps with an attr_before match
+        overlaps = False
+        for mt, m in all_matches:
+            if mt == 'dialogue_attr_before':
+                if not (match.end() <= m.start() or match.start() >= m.end()):
+                    overlaps = True
+                    break
+        if not overlaps:
+            all_matches.append(('dialogue', match))
 
     for match in thought_pattern.finditer(paragraph):
         all_matches.append(('thought', match))
@@ -469,31 +847,61 @@ def detect_voice_boundaries(paragraph: str, pov: str, last_speakers: list[str]) 
         if match.start() > position:
             narration_text = paragraph[position:match.start()].strip()
             if narration_text:
-                chunks.append(Chunk(
-                    text=narration_text,
-                    voice='narration',
-                    segment_type='narration'
-                ))
+                # Check narration for speaker context
+                context_speaker = extract_speaker_from_context(narration_text, speaker_genders)
+                if context_speaker and context_speaker not in last_speakers:
+                    last_speakers.append(context_speaker)
+
+                if narration_text:
+                    chunks.append(Chunk(
+                        text=narration_text,
+                        voice='narration',
+                        segment_type='narration'
+                    ))
 
         if match_type == 'dialogue':
             dialogue_text = match.group(1)
-            subject = match.group(2) if len(match.groups()) > 1 else None
-            verb = match.group(3) if len(match.groups()) > 2 else None
+            subject = match.group(2) if len(match.groups()) > 1 and match.group(2) else None
+            verb = match.group(3) if len(match.groups()) > 2 and match.group(3) else None
 
             # Determine speaker
-            if subject and subject.lower() not in ('he', 'she', 'they', 'it'):
-                speaker = subject.lower()
-            elif last_speakers:
-                # Alternate between last two speakers
-                if len(last_speakers) >= 2:
-                    speaker = last_speakers[-2] if last_speakers[-1] else last_speakers[-1]
+            speaker = None
+
+            if subject:
+                subject_lower = subject.lower()
+                # Check if this is a non-name word (e.g., "There", "That", "What")
+                if subject_lower in NON_NAME_WORDS:
+                    # Not a valid speaker name, treat as if no attribution
+                    subject = None
+                elif subject_lower in ('he', 'she', 'they', 'it', 'him', 'her'):
+                    # Try to resolve pronoun
+                    speaker = resolve_pronoun_to_speaker(subject_lower, speaker_genders, last_speakers)
                 else:
-                    speaker = last_speakers[-1]
-            else:
-                speaker = pov
+                    # Use the name directly
+                    speaker = subject_lower.replace(' ', '-')
+                    # Track gender from context
+                    if subject_lower in ('he', 'him', 'his'):
+                        speaker_genders[speaker] = 'male'
+                    elif subject_lower in ('she', 'her'):
+                        speaker_genders[speaker] = 'female'
+
+            if not speaker:
+                # Look at preceding narration for context
+                preceding_text = paragraph[:match.start()]
+                context_speaker = extract_speaker_from_context(preceding_text, speaker_genders)
+                if context_speaker:
+                    speaker = context_speaker
+                elif last_speakers:
+                    # Alternate between last speakers
+                    if len(last_speakers) >= 2:
+                        speaker = last_speakers[-2] if last_speakers[-1] == pov else last_speakers[-1]
+                    else:
+                        speaker = last_speakers[-1]
+                else:
+                    speaker = pov
 
             chunks.append(Chunk(
-                text=dialogue_text,
+                text=strip_dialogue_tag(dialogue_text),
                 voice=speaker,
                 segment_type='dialogue',
                 speaker=speaker,
@@ -501,9 +909,40 @@ def detect_voice_boundaries(paragraph: str, pov: str, last_speakers: list[str]) 
             ))
 
             # Update speaker tracking
-            if speaker not in last_speakers[-2:]:
+            if speaker and speaker not in last_speakers[-3:]:
                 last_speakers.append(speaker)
-                if len(last_speakers) > 2:
+                if len(last_speakers) > 5:
+                    last_speakers.pop(0)
+
+        elif match_type == 'dialogue_attr_before':
+            # Attribution before dialogue: She said, "text"
+            subject = match.group(1)
+            verb = match.group(2)
+            dialogue_text = match.group(3)
+
+            subject_lower = subject.lower()
+            # Check if this is a non-name word (e.g., "There", "That", "What")
+            if subject_lower in NON_NAME_WORDS:
+                # Not a valid speaker name, fall back to context
+                speaker = last_speakers[-1] if last_speakers else pov
+            elif subject_lower in ('he', 'she', 'they', 'it'):
+                speaker = resolve_pronoun_to_speaker(subject_lower, speaker_genders, last_speakers)
+                if not speaker:
+                    speaker = last_speakers[-1] if last_speakers else pov
+            else:
+                speaker = subject_lower.replace(' ', '-')
+
+            chunks.append(Chunk(
+                text=strip_dialogue_tag(dialogue_text),
+                voice=speaker,
+                segment_type='dialogue',
+                speaker=speaker,
+                speech_verb=verb
+            ))
+
+            if speaker and speaker not in last_speakers[-3:]:
+                last_speakers.append(speaker)
+                if len(last_speakers) > 5:
                     last_speakers.pop(0)
 
         elif match_type == 'thought':
@@ -636,6 +1075,7 @@ def segment_chapter(chapter_text: str, pov: str, voices_yaml: dict) -> list[Segm
     segments = []
     last_speakers = []
     narrator_voice = get_narrator_voice(pov, voices_yaml)
+    internal_thought_voice = get_internal_thought_voice(pov, voices_yaml)
 
     # Remove frontmatter
     if chapter_text.startswith('---'):
@@ -659,41 +1099,52 @@ def segment_chapter(chapter_text: str, pov: str, voices_yaml: dict) -> list[Segm
             ))
             continue
 
-        # Detect voice boundaries within paragraph
-        chunks = detect_voice_boundaries(paragraph, pov, last_speakers)
+        # Split multi-speaker paragraphs before processing
+        # This handles cases like "You up for it?" "Always." from different speakers
+        para_chunks = split_multi_speaker_paragraph(paragraph)
 
-        for chunk in chunks:
-            # Get base profile
-            profile = SEGMENT_TYPE_PROFILES.get(chunk.segment_type, SEGMENT_TYPE_PROFILES['narration'])
-            base_exag = profile.get('exaggeration', 0.5)
-            base_cfg = profile.get('cfg_weight', 0.5)
+        for para_chunk in para_chunks:
+            # Detect voice boundaries within paragraph chunk
+            chunks = detect_voice_boundaries(para_chunk, pov, last_speakers)
 
-            # Apply speech verb modifiers
-            final_type, final_exag, final_cfg = apply_speech_verb_modifier(
-                chunk.segment_type, chunk.speech_verb, base_exag, base_cfg
-            )
+            for chunk in chunks:
+                # Skip invalid segments (punctuation-only, too short, etc.)
+                if not is_valid_segment(chunk.text):
+                    continue
 
-            # Determine voice
-            if chunk.voice == 'narration':
-                voice = narrator_voice
-            else:
-                voice = chunk.voice
+                # Get base profile
+                profile = SEGMENT_TYPE_PROFILES.get(chunk.segment_type, SEGMENT_TYPE_PROFILES['narration'])
+                base_exag = profile.get('exaggeration', 0.5)
+                base_cfg = profile.get('cfg_weight', 0.5)
 
-            # Detect paralinguistic tags
-            tags = detect_paralinguistic_tags(chunk.text)
+                # Apply speech verb modifiers
+                final_type, final_exag, final_cfg = apply_speech_verb_modifier(
+                    chunk.segment_type, chunk.speech_verb, base_exag, base_cfg
+                )
 
-            segment = Segment(
-                number=0,
-                segment_type=final_type,
-                text=chunk.text,
-                voice=voice,
-                speaker=chunk.speaker,
-                speech_verb=chunk.speech_verb,
-                exaggeration=final_exag,
-                cfg_weight=final_cfg,
-                paralinguistic_tags=tags
-            )
-            segments.append(segment)
+                # Determine voice
+                if chunk.segment_type == 'internal_thought':
+                    voice = internal_thought_voice
+                elif chunk.voice == 'narration':
+                    voice = narrator_voice
+                else:
+                    voice = chunk.voice
+
+                # Detect paralinguistic tags
+                tags = detect_paralinguistic_tags(chunk.text)
+
+                segment = Segment(
+                    number=0,
+                    segment_type=final_type,
+                    text=chunk.text,
+                    voice=voice,
+                    speaker=chunk.speaker,
+                    speech_verb=chunk.speech_verb,
+                    exaggeration=final_exag,
+                    cfg_weight=final_cfg,
+                    paralinguistic_tags=tags
+                )
+                segments.append(segment)
 
     # Merge short segments
     merged = []
@@ -748,6 +1199,7 @@ def write_segment_files(segments: list[Segment], chapter_dir: Path, voices_yaml:
 
     segments_detail = []
     voices_used = set()
+    unrecognized_voices = {}  # voice -> list of segment numbers
 
     for segment in segments:
         seg_num = segment.number
@@ -768,6 +1220,13 @@ def write_segment_files(segments: list[Segment], chapter_dir: Path, voices_yaml:
                 'retries': 0,
             })
         else:
+            # Check if voice is recognized
+            is_recognized, canonical_name = is_voice_recognized(segment.voice, voices_yaml)
+            if not is_recognized and segment.segment_type == 'dialogue':
+                if segment.voice not in unrecognized_voices:
+                    unrecognized_voices[segment.voice] = []
+                unrecognized_voices[segment.voice].append(seg_num)
+
             # Get audio prompt path
             audio_prompt_path = get_voice_sample_path(segment.voice, voices_yaml)
             if audio_prompt_path:
@@ -810,10 +1269,18 @@ def write_segment_files(segments: list[Segment], chapter_dir: Path, voices_yaml:
                 'retries': 0,
             })
 
+    # Warn about unrecognized voices (they'll fallback to narrator)
+    if unrecognized_voices:
+        print(f"\n⚠️  WARNING: {len(unrecognized_voices)} unrecognized voice(s) detected:")
+        for voice, seg_nums in sorted(unrecognized_voices.items()):
+            print(f"   - '{voice}' in segments: {seg_nums[:5]}{'...' if len(seg_nums) > 5 else ''}")
+        print("   These will use fallback narrator voice. Add aliases to voices.yaml to fix.\n")
+
     return {
         'total': len(segments),
         'segments_detail': segments_detail,
         'voices_used': list(voices_used),
+        'unrecognized_voices': unrecognized_voices,
     }
 
 
@@ -904,6 +1371,13 @@ def generate_segment(seg_yaml: Path, output_wav: Path, model) -> dict:
         text = ' '.join(tags) + ' ' + text
 
     try:
+        # Debug: Show voice assignment before generation
+        voice_name = config.get('voice', 'unknown')
+        speaker = config.get('speaker', 'narrator')
+        seg_num = config.get('segment', '?')
+        prompt_file = Path(audio_prompt_path).name if audio_prompt_path else 'none'
+        print(f"  Segment {seg_num}: {speaker or 'narrator'} -> {prompt_file}")
+
         # Generate audio - Chatterbox API handles file loading internally
         wav = model.generate(
             text,
@@ -1114,7 +1588,7 @@ def assemble_chapter(chapter_dir: Path, output_mp3: Path, chapter_num: int,
         'ffmpeg', '-y',
         '-f', 'concat', '-safe', '0',
         '-i', str(concat_file),
-        '-af', 'aresample=44100:resampler=soxr:precision=28,loudnorm=I=-16:TP=-1.5:LRA=11,highpass=f=80',
+        '-af', 'aresample=44100,loudnorm=I=-16:TP=-1.5:LRA=11,highpass=f=80',
         '-c:a', 'libmp3lame',
         '-q:a', quality_value,
         '-id3v2_version', '3',
