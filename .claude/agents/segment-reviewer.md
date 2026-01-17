@@ -52,9 +52,44 @@ pause_sec: 1.5
 
 ## Reference Files
 
-Before processing, load these reference files:
+Before processing, load these reference files in this order:
 
-### 1. voices.yaml (`campaigns/{campaign}/novel/voices.yaml`)
+### 1. Campaign State Files (for character validation)
+
+Load these files first to build a character registry for speaker validation:
+
+#### party-knowledge.md (`campaigns/{campaign}/party-knowledge.md`)
+
+Contains the "## NPCs We've Met" table with character information:
+
+```markdown
+## NPCs We've Met
+
+| NPC | Who They Are | Our Relationship | Last Interaction |
+|-----|--------------|------------------|------------------|
+| Lysara Vendrath | Runs Vendrath Holdings, our employer | Hired us, professional | Gave us the job |
+| Joral (not met yet) | Foreman at Warehouse 7 | **CONFIRMED CULT COLLABORATOR** | Suspicious meetings |
+| Old Wenna | Information broker | Contact (Corwin) | Corwin gathered intel |
+```
+
+**Extract from each row:**
+- Name (first column) - the character name
+- Role/description (second column) - for context
+- Gender - infer from description or pronouns if present (e.g., "her employer" suggests female)
+
+#### Character Sheets (`campaigns/{campaign}/party/*.md`)
+
+Load all non-journal files (exclude `*-journal.md`). Extract:
+- Character name (from filename and `# {Name}` header)
+- Gender - infer from pronouns in "Character Voice" and "Personality" sections (look for "he/him", "she/her", etc.)
+- Aliases - full name and first name (e.g., `corwin-voss` and `corwin`)
+
+**Gender inference patterns:**
+- "he", "him", "his" in character description -> male
+- "she", "her", "hers" in character description -> female
+- Use voice.yaml as authoritative source if gender is specified there
+
+### 2. voices.yaml (`campaigns/{campaign}/novel/voices.yaml`)
 
 Structure:
 ```yaml
@@ -91,14 +126,14 @@ npcs:
 - Gender: found at `{section}.{character}.chatterbox.gender`
 - Audio file: found at `{section}.{character}.chatterbox.voice` -> `.chatterbox-voices/{voice}.wav`
 
-### 2. manifest.yaml (in chapter directory)
+### 3. manifest.yaml (in chapter directory)
 
 Contains `pov:` field identifying the POV character, used for:
 - Determining narrator voice gender (from POV character's gender)
 - Determining internal_thoughts voice
 - Default speaker for ambiguous "he"/"she" when only one character matches gender
 
-### 3. Chapter source (`campaigns/{campaign}/novel/chapter-{NN}.md`)
+### 4. Chapter source (`campaigns/{campaign}/novel/chapter-{NN}.md`)
 
 Original text for context when resolving speakers. Read relevant sections when disambiguation is needed.
 
@@ -112,6 +147,33 @@ The Python segmenter sometimes assigns pronouns as voice names instead of resolv
 - `voice: he` / `speaker: he`
 - `voice: she` / `speaker: she`
 - `voice: there` (from "There was...")
+
+### Building the Character Registry
+
+Before processing segments, build a character registry from campaign state files:
+
+1. **From party-knowledge.md** - Parse the "## NPCs We've Met" table:
+   - Extract NPC name from first column
+   - Note role/description from second column
+   - Infer gender from description or pronouns if present
+
+2. **From character sheets** (`campaigns/{campaign}/party/*.md`, excluding journals):
+   - Extract PC name from header
+   - Infer gender from pronouns in "Character Voice" section
+   - Generate aliases (full name + first name)
+
+3. **From voices.yaml** - Use as authoritative source:
+   - Gender explicitly defined in `chatterbox.gender` takes precedence
+   - Aliases explicitly defined take precedence
+
+**Character Registry Structure:**
+```
+{
+  "corwin-voss": { gender: "male", aliases: ["corwin"], source: "party", role: "PC" },
+  "lysara-vendrath": { gender: "female", aliases: ["lysara"], source: "voices", role: "NPC" },
+  "old-wenna": { gender: "female", aliases: ["wenna"], source: "party-knowledge", role: "NPC" }
+}
+```
 
 ### Building the Valid Voice List
 
@@ -136,6 +198,7 @@ For each unresolved segment:
 1. **Build context**: Read 2-3 surrounding segment .txt files
 2. **Find named characters**: Look for character names in nearby narration
 3. **Track recent speakers**: Note the most recent male and female speakers
+4. **Cross-reference with character registry**: Validate resolved speaker exists in campaign
 
 ### Resolution Rules
 
@@ -182,6 +245,29 @@ Example: If segment is at `campaigns/the-rot-beneath/novel/chatterbox/chapter-1/
 - Audio prompt: `/Users/paul/projects-personal/dnd-campaigner/.chatterbox-voices/zoe-sample.wav`
 
 **Tip:** Extract the repo root from any existing segment's `settings.audio_prompt` path.
+
+### Speaker Validation Criteria
+
+After resolving a speaker, validate against the character registry:
+
+| Check | Pass | Fail Action |
+|-------|------|-------------|
+| Is speaker a known character (PC or NPC)? | Name exists in character registry | Flag for manual review - may be new/unnamed NPC |
+| Does speaker's gender match the pronoun used? | "he" -> male, "she" -> female | Flag as potential misattribution |
+| Was this character present in this chapter? | Character named in nearby narration | Flag as potential error - character may not be in scene |
+
+**Validation Workflow:**
+
+1. **Known Character Check**: After resolving "he" to "corwin-voss", verify `corwin-voss` exists in the character registry
+2. **Gender Consistency**: If resolving "she", verify the resolved character has `gender: female` in the registry
+3. **Scene Presence Check**: Search the chapter source for the resolved character's name within reasonable proximity (same scene)
+
+**Handling Unknown Speakers:**
+
+If the resolved speaker doesn't exist in the character registry:
+- Check if it's a generic descriptor (e.g., "the guard", "a voice")
+- If it's a proper name not in the registry, flag for review with note: "Speaker '{name}' not found in campaign characters"
+- Consider if this is a new NPC introduced in this chapter that should be added to `party-knowledge.md`
 
 ---
 
@@ -298,6 +384,13 @@ For each non-scene_break segment, verify:
 - [ ] No pronouns remain as voice values (he, she, they, there, etc.)
 - [ ] Audio prompt path exists (file check not required, but path format valid)
 
+### Character Registry Validation
+
+For each dialogue segment, verify speaker against campaign characters:
+- [ ] Speaker is a known character (exists in character registry from party/*.md or party-knowledge.md)
+- [ ] Speaker's gender matches the original pronoun (if resolved from "he"/"she")
+- [ ] Speaker appears in this chapter (name mentioned in nearby segments)
+
 ### Content Validation
 
 - [ ] No segment has empty or whitespace-only .txt content
@@ -311,6 +404,7 @@ Flag for manual review:
 - Dialogue where speaker seems inconsistent with surrounding context
 - Very short dialogue (< 3 words) that might be misattributed
 - Multiple speakers referenced in nearby narration (ambiguous resolution)
+- Speaker not found in character registry (possible new NPC or error)
 
 ---
 
@@ -350,7 +444,14 @@ Write `review-notes.md` in the chapter directory:
 - [x] All voices valid
 - [x] No unresolved pronouns
 - [x] No empty segments
+- [x] All speakers in character registry
 - [ ] Manual review needed: 2 segments
+
+## Character Registry
+
+Loaded {N} characters from campaign state:
+- PCs: corwin-voss (male), tilda-brannock (female), gideon-harrowmoor (male), seraphine-duskhollow (female)
+- NPCs: lysara-vendrath (female), joral (male), old-wenna (female), petyr (male)
 
 ## Manual Review Required
 
@@ -358,6 +459,7 @@ Write `review-notes.md` in the chapter directory:
 |---------|-------|---------|
 | 089 | Ambiguous speaker | Could be Gideon or Tilda - both present |
 | 102 | Very long (145 words) | Consider manual split |
+| 115 | Unknown speaker | "the guard" - not in character registry |
 
 ## Summary
 
@@ -365,6 +467,7 @@ Write `review-notes.md` in the chapter directory:
 - Tags stripped: {N}
 - Segments merged: {N}
 - Issues flagged: {N}
+- Unknown speakers: {N}
 ```
 
 ---
@@ -375,51 +478,60 @@ Write `review-notes.md` in the chapter directory:
 
 For chapters with many segments (100+), process in batches to manage context:
 
-1. **Load references once**: voices.yaml, manifest.yaml
+1. **Load references once**: campaign state files, voices.yaml, manifest.yaml
 2. **Process in windows**: Handle segments 1-50, then 51-100, etc.
 3. **Maintain context across batches**: Track last few speakers from previous batch
 4. **Execute merges carefully**: Process merge candidates within each batch, noting cross-batch candidates for final pass
 
 ### Process Steps
 
-1. **Load references**
+1. **Load campaign state** (do this FIRST)
+   - Read `campaigns/{campaign}/party-knowledge.md` - parse NPCs table
+   - Read `campaigns/{campaign}/party/*.md` (excluding journals) - extract PC info
+   - Build character registry with names, genders, aliases, and roles
+
+2. **Load voice configuration**
    - Read `voices.yaml` - build valid voice list
    - Read `manifest.yaml` - get POV character and segment count
    - Determine narrator voice from POV character's gender
+   - Merge voice.yaml character info into character registry (voice.yaml is authoritative)
 
-2. **First pass: Speaker resolution**
+3. **First pass: Speaker resolution**
    - Scan all segment YAMLs for unresolved voices
    - Build context by reading surrounding segments
    - Resolve each pronoun to a character name
+   - Validate resolved speaker against character registry
    - Update YAML files
 
-3. **Second pass: Dialogue tag handling**
+4. **Second pass: Dialogue tag handling**
    - For each dialogue segment, check .txt for trailing tags
    - Extract speech_verb and update YAML
    - Strip tag from .txt file
 
-4. **Third pass: Identify merge candidates**
+5. **Third pass: Identify merge candidates**
    - Find adjacent same-voice segments where first is short
    - Verify merge criteria
    - Record merge plan (don't execute yet)
 
-5. **Execute merges**
+6. **Execute merges**
    - Apply merges in reverse order (highest segment numbers first)
    - This prevents renumbering issues during processing
    - Combine texts, update YAMLs, delete merged files
 
-6. **Renumber segments**
+7. **Renumber segments**
    - Rename files to be contiguous
    - Update internal segment numbers
    - Update manifest.yaml
 
-7. **Validate**
+8. **Validate**
    - Run all validation checks
+   - Verify all speakers exist in character registry
    - Flag issues for manual review
 
-8. **Write review notes**
+9. **Write review notes**
    - Document all changes
    - List validation results
+   - Note any speakers not in character registry
    - Flag unresolved issues
 
 ---

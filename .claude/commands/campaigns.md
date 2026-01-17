@@ -41,6 +41,11 @@ For each campaign found, collect:
    - Session files follow pattern `session-*.md`
    - Extract date from filename or file content if available
 3. **Overview snippet**: Read first few lines of `campaigns/{name}/overview.md` if it exists
+4. **Novelization status**: Check if `campaigns/{name}/novel/` directory exists
+   - If exists, note "Novel available"
+   - Check for `outline.md` to see chapter count/progress
+5. **Audiobook status**: Check if `campaigns/{name}/novel/chatterbox/` directory exists
+   - If exists, note "Audiobook available"
 
 ### Step 3: Display Results
 
@@ -52,6 +57,8 @@ Present campaigns in a clean format:
 ### {Campaign Name}
 - **Last Session**: {date or "No sessions yet"}
 - **Setting**: {Brief description from overview.md}
+- **Novel**: {Yes (N chapters) / No}
+- **Audiobook**: {Yes / No}
 
 ### {Campaign Name 2}
 ...

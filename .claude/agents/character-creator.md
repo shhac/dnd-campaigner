@@ -167,6 +167,78 @@ After creation, summarize:
 - How they fit into the party/story
 - Suggest roleplaying hooks
 
+## Output Format
+
+Return structured status in a YAML code block at the end of your response:
+
+```yaml
+status: complete | error | waiting
+character_type: pc | npc
+character_name: {name}
+file_created: party/{character-name}.md  # or npcs/{character-name}.md
+error: {message}  # if error
+waiting_for: {what}  # if waiting for user input
+```
+
+### Valid Examples
+
+**Successful PC creation:**
+```yaml
+status: complete
+character_type: pc
+character_name: Tilda Brannock
+file_created: party/tilda-brannock.md
+```
+
+**Successful NPC creation:**
+```yaml
+status: complete
+character_type: npc
+character_name: Mira Thornwood
+file_created: npcs/mira-thornwood.md
+```
+
+**Waiting for user input:**
+```yaml
+status: waiting
+character_type: pc
+character_name: null
+waiting_for: race and class selection
+```
+
+**Error occurred:**
+```yaml
+status: error
+character_type: pc
+character_name: null
+error: Campaign directory not found - campaigns/missing-campaign does not exist
+```
+
+### Invalid Examples
+
+**Missing required fields:**
+```yaml
+# BAD - missing status
+character_type: pc
+character_name: Tilda Brannock
+```
+
+**Wrong status value:**
+```yaml
+# BAD - status must be complete, error, or waiting
+status: done
+character_type: npc
+character_name: Mira
+```
+
+**Missing file_created on complete:**
+```yaml
+# BAD - file_created required when status is complete
+status: complete
+character_type: pc
+character_name: Tilda Brannock
+```
+
 ## Completion
 
 When finished, your final output should clearly indicate completion status:

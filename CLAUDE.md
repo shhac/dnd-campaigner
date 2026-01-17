@@ -49,15 +49,25 @@ source .piper-venv/bin/activate && python scripts/piper-tts.py ...
 └── skills/             # Reusable skills
 
 templates/              # Markdown templates for campaign content
-campaigns/{name}/       # Individual campaign data
+campaigns/{campaign}/   # Individual campaign data
+├── overview.md         # World setting, themes, factions
+├── story-state.md      # Current situation, secrets (GM only)
+├── party-knowledge.md  # Shared knowledge (no secrets)
+├── decision-log.md     # Character decisions and actions
+├── party/              # Player character sheets
+├── npcs/               # NPC details and secrets
 ├── items/              # Notable items and artifacts
+├── sessions/           # Session logs
+└── novel/              # Novelization output (if created)
+    ├── outline.md
+    ├── chapter-NN.md
+    └── chatterbox/     # Audiobook files (if created)
 ```
 
 ## Path Conventions
 
 - `{campaign}`: Campaign directory name (kebab-case, e.g., `the-rot-beneath`)
 - `{character}`: Full hyphenated character name (e.g., `tilda-brannock`, matching the character sheet filename)
-- `{name}`: Generic name placeholder (lowercase, hyphenated)
 
 ## Core Design Principle: Information Isolation
 
@@ -120,6 +130,12 @@ Creates PCs or NPCs with full sheets.
 /play {campaign-name}
 ```
 Starts a session. You declare your character, GM orchestrates.
+
+### Chatting with Characters
+```
+/chat {campaign-name} {character-name}
+```
+Have a fireside conversation with a D&D character outside of gameplay. Characters are safe, at rest, and willing to be vulnerable. READ-ONLY - does not affect campaign state.
 
 ### Listing Campaigns
 ```
@@ -230,14 +246,31 @@ Chatterbox TTS uses voice samples for cloning. Available samples:
 - **decision-log**: Records character decisions and actions after significant events to help with context reconstruction
 
 ### Novelization Agents
-- **novelizer**: Creates outlines (PLAN), writes chapter drafts (WRITE), and applies fixes (FIX). Self-sufficient - reads source files, writes directly, returns status only.
+- **novelizer-planner**: Creates and validates novel outlines from campaign content. Handles planning, validation, and outline extension.
+- **novelizer-writer**: Writes single chapter drafts from outline specs. Reads character sheets, decision-log, and previous chapters for continuity.
 - **novelizer-editor**: Improves prose mechanics (clarity, flow, engagement) without changing plot. Reads drafts, writes edited versions.
 - **novelizer-continuity**: Checks consistency across chapters. INCREMENTAL mode for quick checks every 2-3 chapters, FULL mode for complete analysis. Maintains continuity-manifest.md.
+- **novelizer-fixer**: Applies continuity corrections from approved fix requests to chapter drafts.
 - **novelizer-publisher**: Evaluates reader experience - "Is this worth reading?" Provides feedback on engagement, pacing, and what might make readers put the book down.
+- **novelizer-reviser**: Applies publisher feedback to improve chapter engagement and pacing without changing plot.
+- **novelizer-reader**: Beta reader providing emotional/experiential reactions from an enthusiastic fantasy fan perspective.
+
+### Audiobook Agents
+- **audiobook-segmenter**: Parses novel chapter markdown, detects voice boundaries (dialogue, narration, internal thoughts), creates segment files for TTS.
+- **segment-reviewer**: Reviews audiobook segments - resolves pronouns to speakers, extracts speech verbs, strips dialogue tags for clean TTS, merges short segments.
+- **audiobook-generator**: Generates WAV audio from segments using Chatterbox TTS. Invokes CLI script, monitors progress, tracks per-segment status.
+- **audiobook-assembler**: Assembles WAV segments into final audiobook files (MP3/M4A). Verifies output and reports results.
+
+### Utility Agents
+- **narrative-writer**: Writes narrative content to tmp/ for journal agents to read. Simple utility agent.
+- **knowledge-delta-writer**: Merges party knowledge deltas into party-knowledge.md. Reads tmp/party-knowledge-delta.md and applies changes.
+- **state-delta-writer**: Merges GM state deltas into story-state.md. Reads tmp/gm-state-delta.md and applies changes.
+- **character-chat**: Meta-conversations with D&D characters outside gameplay. Fireside chat mode - READ-ONLY, does not affect campaign state.
+- **llm-prompt-expert**: Expert in LLM prompting, agent design, and prompt engineering. Use for validating plans, reviewing implementations.
 
 ## Skills
 
-Skills are automatically loaded by Claude Code when relevant. Agents reference them by name.
+Skills are automatically discovered by Claude based on their description. Agents can also explicitly reference skills in their frontmatter.
 
 ### User-Facing Skills
 - **dice-roll**: Intelligent `toss` CLI wrapper for D&D dice notation

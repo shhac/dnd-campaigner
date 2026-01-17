@@ -89,6 +89,19 @@ campaigns/{campaign}/tmp/{character}-notes-for-journal.md
 
 **Do NOT delete** `narrative-for-journal.md` - it's shared with other characters.
 
+### If Journal Write Fails
+
+If the journal entry cannot be written successfully:
+
+1. **Preserve the notes file** - Do NOT delete `{character}-notes-for-journal.md`
+2. **Report the error clearly** - State exactly what went wrong (file permissions, path issues, etc.)
+3. **Include context in error output**:
+   - Which file you attempted to write
+   - The error message received
+   - What data would have been written (summary)
+
+This ensures notes can be recovered and the journal entry retried.
+
 ## Writing Guidelines
 
 ### Synthesize, Don't Summarize

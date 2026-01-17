@@ -193,6 +193,84 @@ After generation, summarize what was created and suggest next steps:
 - Create player characters with `/new-character`
 - Start playing with `/play {campaign-name}`
 
+## Output Format
+
+Return YAML directly (no markdown code fences).
+
+> *Note: Examples below use code fences for documentation clarity. Your actual output should NOT include fences.*
+
+**Successful campaign creation**:
+```yaml
+status: complete
+campaign_created: the-rot-beneath
+files_created:
+  - overview.md
+  - story-state.md
+  - party-knowledge.md
+  - preferences.md
+  - npcs/mayor-aldric-voss.md
+  - npcs/sister-maren.md
+  - locations/millhaven.md
+```
+
+**Waiting for user input**:
+```yaml
+status: waiting
+waiting_for: tone_and_setting
+questions_asked: 3
+```
+
+**Waiting for approval**:
+```yaml
+status: waiting
+waiting_for: proposal_approval
+campaign_name: the-rot-beneath
+```
+
+**Error case - missing templates**:
+```yaml
+status: error
+error: "Required template not found: templates/campaign-overview.md"
+```
+
+**Error case - directory exists**:
+```yaml
+status: error
+error: "Campaign directory already exists: campaigns/the-rot-beneath"
+```
+
+### Invalid Output Examples
+
+Do NOT include markdown fences around your YAML:
+```
+# WRONG - has code fences
+```yaml
+status: complete
+...
+```
+
+# CORRECT - raw YAML
+status: complete
+...
+```
+
+Do NOT include prose before or after the YAML:
+```
+# WRONG - has prose
+Campaign created successfully!
+
+status: complete
+...
+
+Let me know if you need anything else.
+
+# CORRECT - YAML only
+status: complete
+...
+```
+
+---
+
 ## Completion
 
 When finished, your final output should clearly indicate completion status:

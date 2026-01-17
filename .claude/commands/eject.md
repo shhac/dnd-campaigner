@@ -44,7 +44,8 @@ If no destination is provided, you'll be asked where to put it.
 ├── npcs/
 ├── locations/
 ├── factions/
-└── items/
+├── items/
+└── novel/                 # (if exists) Novelized chapters
 ```
 
 ### Claude Infrastructure

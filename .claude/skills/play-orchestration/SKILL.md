@@ -554,6 +554,32 @@ If the GM agent seems stuck:
 - Resume it with "Continue narrating"
 - Or provide a gentle prompt about what happened last
 
+### Timeout/Stuck Detection
+
+If the GM agent doesn't return after a reasonable time:
+
+1. **First attempt**: Try resuming with "Continue narrating from where you left off"
+2. **Second attempt**: If resume fails, try once more with added context from story-state.md:
+   ```
+   Continue the session. Here's the current state for context:
+   [Include relevant excerpt from story-state.md]
+   Continue narrating from where you left off.
+   ```
+3. **Third attempt**: If still stuck, try a fresh GM spawn with full context reload
+4. **After 3 failed attempts**: Inform the user the session may need manual intervention:
+   ```
+   The GM agent appears stuck and hasn't responded after multiple recovery attempts.
+   You may need to:
+   - Check story-state.md for any corruption
+   - Verify the campaign files are intact
+   - Try starting a fresh session with /play
+   ```
+
+**Important**: Always save current state before any recovery attempts:
+- Ensure `gm-context.md` reflects the last known good state
+- Check that any pending delta files are processed
+- Note the last successful narrative exchange for manual recovery if needed
+
 ### AI Players Don't Complete
 
 If some AI players fail:

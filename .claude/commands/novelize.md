@@ -130,7 +130,7 @@ If validation fails:
 ### Dry Run Mode
 
 If `--dry-run`:
-1. Spawn novelizer with DRY_RUN header:
+1. Spawn novelizer-planner with DRY_RUN header:
    ```
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    MODE: PLAN
@@ -140,7 +140,7 @@ If `--dry-run`:
    ```
 2. Display outline summary to user
 3. Show estimated chapter count and word count
-4. **Do not write any files** - the novelizer should only return the plan without creating outline.md
+4. **Do not write any files** - the planner should only return the plan without creating outline.md
 5. Exit
 
 ### Append Mode
@@ -149,7 +149,7 @@ If `--append`:
 1. **Prerequisites**: Existing `novel/outline.md` and at least one chapter must exist
 2. **Detect new content**: Compare decision-log.md against existing outline to find new sessions/events
 3. **Extend outline**:
-   - Spawn novelizer (PLAN mode) with APPEND header:
+   - Spawn novelizer-planner with APPEND header:
      ```
      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
      MODE: PLAN
@@ -158,7 +158,7 @@ If `--append`:
      EXISTING_CHAPTERS: {N}
      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
      ```
-   - Novelizer reads existing outline and decision-log, adds new chapters starting at N+1
+   - Planner reads existing outline and decision-log, adds new chapters starting at N+1
 4. **Write only new chapters**: Skip chapters 1 through N, write N+1 onwards
 5. **Continuity**: Run INCREMENTAL continuity on new chapters + last existing chapter (chapter N)
    - This ensures new content connects properly to existing content
@@ -169,7 +169,7 @@ If `--append`:
 If `--chapter N`:
 1. **Prerequisites**: Existing `novel/outline.md` must exist with chapter N defined
 2. **Regenerate chapter N only**:
-   - Spawn novelizer (WRITE mode) for chapter N
+   - Spawn novelizer-writer for chapter N
    - Spawn novelizer-editor for chapter N
 3. **Continuity check**:
    - Run INCREMENTAL continuity on chapter N and its neighbors (N-1, N, N+1)
@@ -230,7 +230,7 @@ drafts_archived: false  # true after Phase 6 archival
 ### Phase 1: Planning
 
 ```
-1. Spawn novelizer (PLAN mode):
+1. Spawn novelizer-planner:
    Task prompt:
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    MODE: PLAN
@@ -253,7 +253,7 @@ drafts_archived: false  # true after Phase 6 archival
 After outline approval, validate that the plan is coherent before writing begins.
 
 ```
-1. Spawn novelizer (VALIDATE mode):
+1. Spawn novelizer-planner:
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    MODE: VALIDATE
    CAMPAIGN: {campaign}
@@ -280,9 +280,8 @@ For each chapter N:
 
 ```
 2a. Write Draft
-    Spawn novelizer (WRITE mode):
+    Spawn novelizer-writer:
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    MODE: WRITE
     CAMPAIGN: {campaign}
     CHAPTER: {N}
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -308,7 +307,6 @@ For each chapter N:
       - Ask for feedback (e.g., "too formal", "more gritty")
       - Re-run WRITE and EDIT for chapter 1 with VOICE_FEEDBACK header:
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        MODE: WRITE
         CAMPAIGN: {campaign}
         CHAPTER: 1
         VOICE_FEEDBACK: "more gritty, less formal"
@@ -401,9 +399,8 @@ For each chapter N:
 For each chapter with approved fixes:
 
 ```
-1. Spawn novelizer (FIX mode):
+1. Spawn novelizer-fixer:
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   MODE: FIX
    CAMPAIGN: {campaign}
    CHAPTER: {N}
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -429,6 +426,18 @@ For each chapter with approved fixes:
    - If fix_cycles < 3: repeat Phase 4 (fix, edit, verify)
    - If fix_cycles >= 3: mark affected chapters as "needs manual review"
 
+   **Error Recovery (fix_cycles >= 3):**
+   - Store failed chapters in state: `failed_fix_chapters: [N, M, ...]`
+   - Display warning to user:
+     ```
+     ⚠️  Fix cycle limit reached for chapter(s): [N, M]
+     These chapters still have BLOCKING issues after 3 fix attempts.
+     ```
+   - In auto mode: warn and continue to Phase 5
+   - In manual mode: ask user whether to continue or pause for manual fixes
+   - Continue processing remaining chapters (don't halt entire pipeline)
+   - At final completion, list all chapters needing manual review
+
 5. Update state: fix_cycles, chapters.{N}.continuity = checked
 ```
 
@@ -452,6 +461,33 @@ Skip if `--skip-publisher`.
 
 4. Update state: publisher_review = complete
 ```
+
+### Phase 5.5: Revision (optional)
+
+If publisher review identified issues worth addressing and user requests revisions:
+
+```
+1. Spawn novelizer-reviser:
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CAMPAIGN: {campaign}
+   FEEDBACK_SOURCE: publisher
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   Receive status: chapters revised, changes made
+
+2. Re-run continuity INCREMENTAL on revised chapters:
+   Spawn novelizer-continuity (INCREMENTAL mode):
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   MODE: INCREMENTAL
+   CAMPAIGN: {campaign}
+   CHAPTERS: [{revised chapter numbers}]
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+3. Update state: revision_applied = true
+```
+
+Note: This phase is triggered when user requests revisions after publisher review.
+Auto-mode skips revisions (displays publisher feedback and continues to Phase 6).
 
 ### Phase 6: Final Assembly
 
@@ -631,7 +667,10 @@ Files:
 ## Related Files
 
 - **Agents**:
-  - `.claude/agents/novelizer.md` - Outline creation and chapter writing
+  - `.claude/agents/novelizer-planner.md` - Outline creation and validation
+  - `.claude/agents/novelizer-writer.md` - Chapter draft writing
+  - `.claude/agents/novelizer-fixer.md` - Applying continuity fixes
+  - `.claude/agents/novelizer-reviser.md` - Applying publisher/editorial revisions
   - `.claude/agents/novelizer-editor.md` - Prose quality editing
   - `.claude/agents/novelizer-continuity.md` - Consistency checking
   - `.claude/agents/novelizer-publisher.md` - Reader experience assessment

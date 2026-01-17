@@ -49,6 +49,26 @@ Full engagement:
 - Narrate dramatically between turns
 - Every decision matters
 
+## Escalation Triggers
+
+Promote combat tier mid-fight if circumstances warrant:
+
+| Trigger | Escalation |
+|---------|------------|
+| Party member drops to 0 HP | Trivial → Standard, Standard → Critical |
+| Multiple critical hits in one round | Trivial → Standard |
+| Unexpected enemy reinforcements | Re-assess based on new threat |
+| Tactical situation dramatically shifts | Re-assess based on new threat |
+| Enemy reveals dangerous ability | Consider promotion |
+
+**When escalating:**
+1. Announce the shift narratively ("This just got serious...")
+2. Switch to the new tier's pacing immediately
+3. Give AI players full context on the changed situation
+4. Consider whether to invoke `[AWAIT_AI_PLAYERS]` for reactions
+
+**Note:** De-escalation is also valid. If a critical fight becomes one-sided, shift to standard or offer quick resolution.
+
 ## Turn Structure
 
 Each turn:
@@ -101,3 +121,4 @@ Post-combat checklist:
 
 - **invoke-ai-players**: Handles `[AWAIT_AI_PLAYERS]` signals
 - **auto-journal**: Handles journaling (invoked automatically after GM narrative)
+- **quick-or-veto**: AI player reaction pattern for combat turns

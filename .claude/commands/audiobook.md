@@ -1,6 +1,6 @@
 ---
 description: Generate MP3 audiobook from novel chapters using Chatterbox TTS
-argument-hint: <campaign> [--chapter N] [--chapters N-M] [--resume] [--dry-run] [--test-voices] [--format mp3|wav] [--quality draft|standard|high] [--clean]
+argument-hint: <campaign> [--chapter N] [--chapters N-M] [--resume] [--force] [--dry-run] [--test-voices] [--clean] [--parallel N] [--segment-only] [--generate-only] [--assemble-only] [--no-assemble]
 ---
 
 # /audiobook
@@ -17,11 +17,15 @@ This command transforms your novelized campaign chapters into audio files. It us
 - `--chapter N`: Process only chapter N
 - `--chapters N-M`: Process chapters N through M (inclusive)
 - `--resume`: Continue from last checkpoint (reads audiobook-state.yaml)
+- `--force`: Regenerate existing segments even if they exist
 - `--dry-run`: Show plan without generating audio
 - `--test-voices`: Generate short voice samples for each character
-- `--format mp3|wav`: Output format (default: mp3)
-- `--quality draft|standard|high`: Audio quality preset (default: standard)
 - `--clean`: Remove all generated audio files and state
+- `--parallel N`: I/O parallelism level for generation (default: 1)
+- `--segment-only`: Run segmentation phase only, skip generation
+- `--generate-only`: Run generation phase only, skip segmentation and assembly
+- `--assemble-only`: Run assembly phase only (combine existing WAVs to MP3)
+- `--no-assemble`: Generate segments but don't combine into final MP3
 
 ## Prerequisites
 

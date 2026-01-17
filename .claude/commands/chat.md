@@ -125,6 +125,8 @@ The conversation ends when:
 - The user says goodbye, thanks the character, or indicates they're done
 - The user explicitly asks to stop
 
+The character-chat agent outputs `[END_CHAT]` when the conversation reaches a natural conclusion or the user indicates they're done. The orchestrator watches for this signal to gracefully end the session.
+
 When ending:
 - Let the agent give a brief in-character farewell
 - No files are modified (this is a meta-conversation)

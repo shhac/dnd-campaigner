@@ -84,6 +84,8 @@ advisory:
     issue: "Repeated use of 'silver veins' (8 times in chapter)"
 ```
 
+> Note: The code fences above are for documentation readability. Actual output must be raw YAML without fences.
+
 **Output Format Enforcement**:
 
 Output raw YAML directly (no markdown code fences) since this is parsed programmatically.
@@ -146,6 +148,8 @@ files_written:
   - continuity-notes.md
   - fix-requests.md
 ```
+
+> Note: The code fences above are for documentation readability. Actual output must be raw YAML without fences.
 
 **Output Format Enforcement**:
 
