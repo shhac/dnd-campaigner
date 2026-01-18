@@ -205,6 +205,7 @@ After running, use `source scripts/piper-env.sh` to enable `read-chapter` and `r
 | `chapter-NN.md` | Final edited chapter versions |
 | `continuity-manifest.md` | Running tracker of names, descriptions, timeline |
 | `continuity-notes.md` | Full continuity report |
+| `pattern-report.md` | Cross-chapter repetition analysis |
 | `publisher-feedback.md` | Reader experience assessment |
 | `metadata.yaml` | Final novel metadata |
 | `table-of-contents.md` | Final TOC |
@@ -232,6 +233,7 @@ Chatterbox TTS voice samples for cloning. See **audiobook-orchestration/voice-sa
 - **novelizer-writer**: Writes single chapter drafts from outline specs. Reads character sheets, decision-log, and previous chapters for continuity.
 - **novelizer-editor**: Improves prose mechanics (clarity, flow, engagement) without changing plot. Reads drafts, writes edited versions.
 - **novelizer-continuity**: Checks consistency across chapters. INCREMENTAL mode for quick checks every 2-3 chapters, FULL mode for complete analysis. Maintains continuity-manifest.md.
+- **novelizer-pattern-reviewer**: Scans all chapters for repetitive prose patterns (overused words, repeated constructions, character tic fatigue). Runs after continuity check, outputs pattern-report.md.
 - **novelizer-fixer**: Applies continuity corrections from approved fix requests to chapter drafts.
 - **novelizer-publisher**: Evaluates reader experience - "Is this worth reading?" Provides feedback on engagement, pacing, and what might make readers put the book down.
 - **novelizer-reviser**: Applies publisher feedback to improve chapter engagement and pacing without changing plot.

@@ -15,9 +15,10 @@ This command transforms your D&D campaign's decision logs and character journals
 2. **Writing** - Chapter drafts from campaign sources
 3. **Editing** - Prose quality improvements
 4. **Continuity** - Consistency checking across chapters
-5. **Fixing** - Addressing blocking issues
-6. **Publisher Review** - Reader experience assessment
-7. **Final Assembly** - Metadata and table of contents
+5. **Pattern Review** - Cross-chapter repetition analysis
+6. **Fixing** - Addressing blocking issues and pattern fixes
+7. **Publisher Review** - Reader experience assessment
+8. **Final Assembly** - Metadata and table of contents
 
 ## Arguments
 
@@ -55,6 +56,7 @@ campaigns/{campaign}/novel/
 ├── ...
 ├── continuity-manifest.md     # Running tracker of names, descriptions, timeline
 ├── continuity-notes.md        # Full continuity report
+├── pattern-report.md          # Cross-chapter repetition analysis
 ├── publisher-feedback.md      # Reader experience assessment
 ├── metadata.yaml              # Final metadata
 ├── table-of-contents.md       # Final TOC
@@ -195,7 +197,7 @@ campaign: the-rot-beneath
 started: 2024-01-15T10:30:00Z
 last_updated: 2024-01-15T11:45:00Z
 
-phase: writing  # planning, writing, continuity, fixing, publisher, assembly
+phase: writing  # planning, writing, continuity, pattern_review, fixing, publisher, assembly
 current_chapter: 3
 
 chapters:
@@ -215,6 +217,12 @@ continuity:
   advisory_issues: 0
 
 fix_cycles: 0  # track fix/re-verify cycles (max 3)
+
+pattern_review:
+  status: pending  # pending, complete
+  high_severity: 0
+  medium_severity: 0
+  low_severity: 0
 
 publisher_review: pending
 
@@ -392,6 +400,39 @@ For each chapter N:
 
    ...
    ```
+```
+
+### Phase 3.5: Pattern Review
+
+Scan for repetitive prose patterns across all chapters.
+
+```
+1. Spawn novelizer-pattern-reviewer:
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CAMPAIGN: {campaign}
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+2. Receive status: high/medium/low severity counts, top patterns
+
+3. Update state: pattern_review = complete
+
+4. If HIGH severity patterns found:
+   - In auto mode: include in fix-requests-approved.md automatically
+   - In manual mode: show patterns and ask which to address
+   - Format pattern fixes for editor:
+
+   Append to fix-requests-approved.md:
+
+   ## Pattern Issues (HIGH Severity)
+
+   ### Pattern P1: {Pattern Name}
+   - **Category**: {Overused Word | Repeated Construction | etc.}
+   - **Occurrences**: {count} across {N} chapters
+   - **Fix**: Vary with suggested alternatives from pattern-report.md
+
+5. MEDIUM/LOW severity patterns:
+   - Listed in pattern-report.md for reference
+   - User can address manually or in future passes
 ```
 
 ### Phase 4: Fix Issues (if any)
@@ -673,6 +714,7 @@ Files:
   - `.claude/agents/novelizer-reviser.md` - Applying publisher/editorial revisions
   - `.claude/agents/novelizer-editor.md` - Prose quality editing
   - `.claude/agents/novelizer-continuity.md` - Consistency checking
+  - `.claude/agents/novelizer-pattern-reviewer.md` - Cross-chapter repetition analysis
   - `.claude/agents/novelizer-publisher.md` - Reader experience assessment
 - **Tone files**: `.claude/skills/novelization-style/tones/`
 - **Style files**: `.claude/skills/novelization-style/styles/`
