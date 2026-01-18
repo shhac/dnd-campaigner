@@ -34,5 +34,7 @@ __pycache__/
 .chatterbox-venv/
 
 # Intermediate Files
+campaigns/*/novel/**/*.m4a
+campaigns/*/novel/**/*.mp3
 campaigns/*/novel/**/*.wav
 
