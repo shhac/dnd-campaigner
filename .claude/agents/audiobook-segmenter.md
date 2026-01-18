@@ -62,8 +62,33 @@ For dialogue, detect the speaker:
 
 1. **Explicit attribution**: `"Hello," Sarah said.` -> Sarah
 2. **Action attribution**: `Sarah stepped forward. "Hello."` -> Sarah
-3. **Alternating dialogue**: In back-and-forth, alternate between last two speakers
-4. **Default**: If no speaker can be inferred, use POV character
+3. **Narrative speaker signals**: Prose cues indicating who speaks next (see below)
+4. **Alternating dialogue**: In back-and-forth, alternate between last two speakers
+5. **Default**: If no speaker can be inferred, use POV character
+
+### Narrative Speaker Signals
+
+Look for phrases in narration that signal an upcoming speaker. These are NOT traditional dialogue tags but contextual cues that appear in prose immediately before dialogue (within the same paragraph or the immediately preceding paragraph, with no intervening dialogue or scene break):
+
+| Pattern | Example | Speaker |
+|---------|---------|---------|
+| `{Name} continued` | "Lysara continued." | Lysara |
+| `{Name} added` | "The knight added." | The knight |
+| `{Name} went on` | "Marcus went on." | Marcus |
+| `{Name}'s voice...` | "The woman's voice went cold." | The woman |
+| `{Name} spoke` | "Finally, the captain spoke." | The captain |
+| `{Name} broke the silence` | "Theron broke the silence." | Theron |
+| `{Name} began` | "She began hesitantly." | She (resolve pronoun) |
+| `{Name} resumed` | "The elder resumed." | The elder |
+| `{Name} pressed` | "Kira pressed." | Kira |
+
+This list is not exhaustive. Detect similar patterns where a character name/pronoun followed by a speech-related verb (continued, added, demanded, interrupted, cut in, etc.) appears before dialogue.
+
+**Detection Rules:**
+- These signals appear in narration segments immediately **before** a dialogue segment
+- When found, attribute the following dialogue to the signaled speaker
+- This takes precedence over "alternating dialogue" logic but not explicit attribution
+- Pronouns in signals (she, he, they) should resolve to the most recent matching character
 
 ### Speech Verb Detection
 

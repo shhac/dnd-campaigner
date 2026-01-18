@@ -1528,9 +1528,10 @@ def validate_pre_assembly(chapter_dir: Path) -> list[str]:
     return errors
 
 
-def assemble_chapter(chapter_dir: Path, output_mp3: Path, chapter_num: int,
-                     title: str, campaign: str, quality: str = 'high'):
-    """Concatenate segments and encode to MP3 with normalization and metadata."""
+def assemble_chapter(chapter_dir: Path, output_path: Path, chapter_num: int,
+                     title: str, campaign: str, quality: str = 'high',
+                     output_format: str = 'm4a'):
+    """Concatenate segments and encode to M4A/MP3 with normalization and metadata."""
     manifest = yaml.safe_load((chapter_dir / 'manifest.yaml').read_text())
 
     # Ensure silence file exists
@@ -1581,22 +1582,39 @@ def assemble_chapter(chapter_dir: Path, output_mp3: Path, chapter_num: int,
     # Pretty title for campaign
     pretty_campaign = campaign.replace('-', ' ').title()
 
-    print(f"Encoding to MP3...")
+    # Build codec-specific arguments
+    if output_format == 'm4a':
+        print(f"Encoding to M4A (AAC)...")
+        # AAC quality mapping (bitrate in kbps)
+        aac_bitrate_map = {
+            'high': '192k',
+            'medium': '128k',
+            'low': '96k',
+        }
+        codec_args = [
+            '-c:a', 'aac',
+            '-b:a', aac_bitrate_map.get(quality, '128k'),
+        ]
+    else:
+        print(f"Encoding to MP3...")
+        codec_args = [
+            '-c:a', 'libmp3lame',
+            '-q:a', quality_value,
+            '-id3v2_version', '3',
+        ]
 
-    # Encode to MP3
+    # Encode audio
     result = subprocess.run([
         'ffmpeg', '-y',
         '-f', 'concat', '-safe', '0',
         '-i', str(concat_file),
         '-af', 'aresample=44100,loudnorm=I=-16:TP=-1.5:LRA=11,highpass=f=80',
-        '-c:a', 'libmp3lame',
-        '-q:a', quality_value,
-        '-id3v2_version', '3',
+        *codec_args,
         '-metadata', f'title=Chapter {chapter_num}: {title}',
         '-metadata', f'album={pretty_campaign}',
         '-metadata', f'track={chapter_num}',
         '-metadata', 'genre=Audiobook',
-        str(output_mp3)
+        str(output_path)
     ], capture_output=True, text=True)
 
     if result.returncode != 0:
@@ -1608,7 +1626,7 @@ def assemble_chapter(chapter_dir: Path, output_mp3: Path, chapter_num: int,
     # Get output file info
     probe = subprocess.run(
         ['ffprobe', '-v', 'quiet', '-show_entries', 'format=duration,size',
-         '-of', 'csv=p=0', str(output_mp3)],
+         '-of', 'csv=p=0', str(output_path)],
         capture_output=True, text=True
     )
     duration_str, size_str = probe.stdout.strip().split(',')
@@ -1916,7 +1934,7 @@ def assemble_single_chapter(campaign: str, chapter: int, output_format: str,
 
     # Assemble
     title = manifest.get('title', f'Chapter {chapter}')
-    result = assemble_chapter(chapter_dir, output_path, chapter, title, campaign, quality)
+    result = assemble_chapter(chapter_dir, output_path, chapter, title, campaign, quality, output_format)
 
     print(f"\nAssembly complete:")
     print(f"  Output: {output_path}")
@@ -2007,12 +2025,12 @@ Examples:
     generate_parser.add_argument('--resume', '-r', action='store_true', help='Resume from checkpoint')
 
     # Assemble command
-    assemble_parser = subparsers.add_parser('assemble', help='Concatenate segments and encode to MP3')
+    assemble_parser = subparsers.add_parser('assemble', help='Concatenate segments and encode to M4A/MP3')
     assemble_parser.add_argument('campaign', help='Campaign name')
     assemble_parser.add_argument('--chapter', '-c', type=int, help='Chapter number')
     assemble_parser.add_argument('--chapters', type=str, help='Chapter range (e.g., 1-5)')
-    assemble_parser.add_argument('--format', '-f', choices=['mp3', 'wav', 'm4a'], default='mp3',
-                                 help='Output format (default: mp3)')
+    assemble_parser.add_argument('--format', '-f', choices=['mp3', 'wav', 'm4a'], default='m4a',
+                                 help='Output format (default: m4a)')
     assemble_parser.add_argument('--quality', '-q', choices=['high', 'medium', 'low'], default='high',
                                  help='Output quality (default: high)')
     assemble_parser.add_argument('--clean', action='store_true',

@@ -406,6 +406,80 @@ Flag for manual review:
 - Multiple speakers referenced in nearby narration (ambiguous resolution)
 - Speaker not found in character registry (possible new NPC or error)
 
+### Narrative Context Cross-Check
+
+For each dialogue segment, cross-reference against the source chapter text to verify speaker attribution:
+
+1. **Read surrounding narration** in the source chapter (±2 paragraphs from the dialogue)
+2. **Check for speaker indicators** in nearby prose:
+   - Look for patterns like "{Name} said", "{Name} continued", "{Name} asked"
+   - Check for dialogue tags that name a different character than the segment's speaker
+3. **Flag mismatches** where:
+   - Narration near the dialogue explicitly mentions a different character speaking (e.g., narration says "Lysara continued" but segment has `voice: corwin-voss`)
+   - The dialogue is clearly a response to another character's question (the respondent should be the speaker, not the asker)
+   - Action beats before dialogue name a different character (e.g., "Gideon stepped forward." followed by dialogue attributed to Tilda)
+
+**Example of misattribution to catch:**
+```
+Source text: "We need to move," Lysara said, turning to the door.
+Segment: voice: corwin-voss  # WRONG - should be lysara
+```
+
+### Speaker Distribution Sanity Check
+
+After processing all segments, analyze the overall speaker distribution:
+
+1. **Build distribution stats:**
+   - Count dialogue segments per speaker
+   - Calculate percentage of total dialogue for each speaker
+   - Note characters mentioned in narration vs. those with dialogue
+
+2. **Flag anomalies:**
+   - **Silent present characters**: If a character from voices.yaml appears in chapter narration but has 0 dialogue segments, flag for review (they may have been misattributed to another speaker)
+   - **POV dominance**: If the POV character has >60% of dialogue segments, review for potential misattribution (other characters' lines may have been incorrectly assigned to POV). This threshold applies to third-person narration. For first-person or close-POV chapters, adjust threshold to >75% or consider whether the chapter's structure explains the distribution.
+   - **Absent speakers**: If a speaker has dialogue but is never mentioned in narration, flag as potential error
+
+3. **Report in review notes:**
+   ```markdown
+   ## Speaker Distribution
+
+   | Speaker | Dialogue Segments | % of Total | In Narration? |
+   |---------|-------------------|------------|---------------|
+   | corwin-voss (POV) | 45 | 52% | Yes |
+   | lysara-vendrath | 22 | 26% | Yes |
+   | gideon-harrowmoor | 12 | 14% | Yes |
+   | tilda-brannock | 7 | 8% | Yes |
+   | old-wenna | 0 | 0% | Yes | ⚠️ Silent but present
+
+   **Warnings:**
+   - old-wenna appears in narration but has no dialogue - verify no misattribution
+   ```
+
+### Scene Presence Validation
+
+For each dialogue segment, verify the attributed speaker is actually present in the scene:
+
+1. **Extract scene context** (extract the current scene: text between the nearest scene breaks before and after the dialogue, or ~500-1000 words if no scene breaks are nearby)
+2. **Search for character presence indicators:**
+   - Character name mentioned directly
+   - Character's role/title mentioned (e.g., "the foreman" for Joral)
+   - Pronouns that clearly refer to the character based on prior context
+3. **Flag if speaker is not established as present:**
+   - Speaker's name not found within the context window
+   - No role/title reference that maps to the speaker
+   - Scene explicitly describes a different set of characters present
+
+**Example to catch:**
+```
+Scene: Corwin and Lysara are alone in the warehouse office.
+Segment 47: voice: gideon-harrowmoor  # FLAG - Gideon not in this scene
+```
+
+**Handling scene transitions:**
+- Reset presence tracking at scene breaks (`type: scene_break`)
+- After a scene break, require re-establishment of character presence
+- Characters from previous scene are NOT automatically present in new scene
+
 ---
 
 ## Output Format
@@ -445,7 +519,21 @@ Write `review-notes.md` in the chapter directory:
 - [x] No unresolved pronouns
 - [x] No empty segments
 - [x] All speakers in character registry
+- [x] Narrative context cross-checked
+- [x] Speaker distribution reasonable
+- [x] Scene presence validated
 - [ ] Manual review needed: 2 segments
+
+## Speaker Distribution
+
+| Speaker | Dialogue Segments | % of Total | In Narration? |
+|---------|-------------------|------------|---------------|
+| corwin-voss (POV) | 45 | 52% | Yes |
+| lysara-vendrath | 22 | 26% | Yes |
+| gideon-harrowmoor | 12 | 14% | Yes |
+| tilda-brannock | 7 | 8% | Yes |
+
+**Distribution warnings:** None
 
 ## Character Registry
 
@@ -460,6 +548,9 @@ Loaded {N} characters from campaign state:
 | 089 | Ambiguous speaker | Could be Gideon or Tilda - both present |
 | 102 | Very long (145 words) | Consider manual split |
 | 115 | Unknown speaker | "the guard" - not in character registry |
+| 047 | Context mismatch | Narration says "Lysara continued" but speaker is corwin-voss |
+| 063 | Scene presence | Speaker gideon-harrowmoor not established in scene |
+| - | Distribution anomaly | old-wenna appears in narration but has 0 dialogue segments |
 
 ## Summary
 
@@ -468,6 +559,9 @@ Loaded {N} characters from campaign state:
 - Segments merged: {N}
 - Issues flagged: {N}
 - Unknown speakers: {N}
+- Context mismatches: {N}
+- Scene presence violations: {N}
+- Distribution anomalies: {N}
 ```
 
 ---
@@ -526,6 +620,9 @@ For chapters with many segments (100+), process in batches to manage context:
 8. **Validate**
    - Run all validation checks
    - Verify all speakers exist in character registry
+   - Cross-check dialogue against narrative context in source chapter
+   - Build speaker distribution stats and flag anomalies
+   - Verify scene presence for each dialogue speaker
    - Flag issues for manual review
 
 9. **Write review notes**
