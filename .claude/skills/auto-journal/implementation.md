@@ -41,7 +41,10 @@ run_in_background: true
 Prompt: |
   Campaign: {campaign}
   Character: {character}
+  Scene: {scene_number} - {scene_slug}
 ```
+
+**Scene info**: Get the current scene number and slug from the most recent file in `campaigns/{campaign}/scenes/` or from `gm-context.md`. This helps journal agents situate their entries in the narrative.
 
 **Decision Log Agent**:
 
@@ -102,15 +105,17 @@ After spawning all journal agents, continue with player interaction. Do not wait
 **Standard invocation:**
 ```
 Skill: auto-journal
-Args: the-rot-beneath tilda-brannock,brother-aldric,mira-thornwood,korvin-blackwood
+Args: the-rot-beneath tilda-brannock,brother-aldric,mira-thornwood,korvin-blackwood 003-the-warehouse
 ```
+
+The third argument is the scene identifier (number-slug format).
 
 **With human player character included:**
 If the human plays `korvin-blackwood` and the AI controls `tilda-brannock`, `brother-aldric`, and `mira-thornwood`:
 
 ```
 Skill: auto-journal
-Args: the-rot-beneath tilda-brannock,brother-aldric,mira-thornwood,korvin-blackwood
+Args: the-rot-beneath tilda-brannock,brother-aldric,mira-thornwood,korvin-blackwood 003-the-warehouse
 ```
 
 All four characters get journal entries capturing the scene from their perspectives.

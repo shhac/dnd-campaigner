@@ -89,6 +89,24 @@ prompt: |
   Read responses, incorporate into narrative, and continue.
 ```
 
+### Weaving Parallel Responses
+
+Because AI players respond in parallel without seeing each other's responses, the raw output can feel disjointed. **The GM has artistic license to weave parallel responses into coherent dialogue.**
+
+When resuming the GM after AI player responses, the GM may:
+- **Reorder dialogue** for natural conversational flow
+- **Add reactions and interjections** between speakers
+- **Have characters respond to each other** (even though written in parallel)
+- **Merge overlapping descriptions** into unified narrative
+- **Smooth transitions** between character moments
+
+**What the GM must preserve:**
+- The **substance** of each character's decision or action
+- Key **dialogue content** (though phrasing may be adjusted for flow)
+- **Character voice** and personality
+
+The goal is a scene that reads naturally, not a sequence of isolated monologues.
+
 **Why spawn fresh instead of resume?** The GM agent doesn't properly "complete" before yielding control - the "STOP" instruction is just prompt text, not an API-level mechanism. Resuming incomplete agents causes 400 errors. The architecture already supports fresh spawns via `gm-context.md`, which the GM writes before signaling.
 
 ## Handling Vetoes

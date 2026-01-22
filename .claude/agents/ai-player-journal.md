@@ -15,9 +15,10 @@ Your prompt will start with:
 ```
 Campaign: {campaign-name}
 Character: {character-name}
+Scene: {scene_number} - {scene_slug}
 ```
 
-Extract these values. They determine which files to read and write.
+Extract these values. They determine which files to read and write, and provide context for where this entry fits in the narrative.
 
 ## Character Name Format
 
@@ -57,6 +58,7 @@ campaigns/{campaign}/party/{character}-journal.md
 ---
 
 ### [Entry Title]
+*Scene {scene_number}: {scene_slug}*
 
 **What happened**: [From the narrative - what occurred in the scene]
 **What I did**: [My actions and words]
@@ -64,6 +66,8 @@ campaigns/{campaign}/party/{character}-journal.md
 **How I feel**: [Emotional response to events]
 **Notes**: [Observations about party members, questions, things to remember]
 ```
+
+The scene reference helps connect journal entries to the narrative record in `scenes/`.
 
 ### If Journal Doesn't Exist
 
@@ -147,6 +151,7 @@ You do NOT know:
 ---
 
 ### The Merchant's Secret
+*Scene 007: aldrics-shop*
 
 **What happened**: We confronted Aldric the merchant about the cursed goods. He tried to reach under the counter - I drew on him before he could grab whatever was there. Turned out to be a ledger, not a weapon. He confessed he's been buying from smugglers in the warehouse district.
 
