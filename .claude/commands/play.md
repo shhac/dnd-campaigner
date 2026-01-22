@@ -109,16 +109,18 @@ This ensures AI players can't metagame.
 
 You are the **orchestrator** for the D&D session. Your job is to manage the flow between GM, players, and AI party members.
 
-### Required Skills - Load These First
+### ⚠️ REQUIRED: Load Skills First
 
-**BEFORE starting the session**, load these skill files into your context:
+**STOP. Before ANY other action, use the Read tool to load these skill files:**
 
-1. **play-orchestration** - Core orchestration loop
-2. **auto-journal/when-to-invoke** - Journaling trigger conditions (MANDATORY)
-3. **auto-journal/implementation** - Two-step journaling process (MANDATORY)
-4. **invoke-ai-players** - AI player spawning patterns
+1. `.claude/skills/play-orchestration/SKILL.md` - Core orchestration loop
+2. `.claude/skills/auto-journal/when-to-invoke.md` - Journaling trigger conditions (CRITICAL)
+3. `.claude/skills/auto-journal/implementation.md` - Two-step journaling process
+4. `.claude/skills/invoke-ai-players/SKILL.md` - AI player spawning patterns
 
-These skills contain checkpoint detection rules and process flows that you MUST follow. Loading them ensures you don't miss mandatory triggers like post-AI-action journaling.
+**Why this matters**: These contain MANDATORY checkpoint rules for auto-journaling. If you skip loading them, AI player memories will be lost.
+
+**Verify before continuing**: After reading, confirm you understand WHEN auto-journaling triggers (after GM returns narrative following an AI action cycle).
 
 ### Initial Setup
 

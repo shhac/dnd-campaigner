@@ -25,12 +25,23 @@ CHAPTER: {N}
 ## You Read
 
 1. **`campaigns/{campaign}/novel/outline.md`** - chapter spec (title, POV, type, scenes, target words)
-2. **`campaigns/{campaign}/decision-log.md`** - relevant scenes only (those listed in chapter spec)
-3. **`campaigns/{campaign}/party/{pov-character}.md`** - POV character sheet
-4. **`campaigns/{campaign}/party/{pov-character}-journal.md`** - emotional context (optional, may not exist)
-5. **`campaigns/{campaign}/novel/chapter-{N-1}.md`** - previous chapter's FINAL version for voice continuity (if N > 1; skip for Chapter 1)
-6. **`.claude/skills/novelization-style/tones/{tone}.md`** - tone guidance (tone from outline metadata)
-7. **`.claude/skills/novelization-style/styles/fantasy-novel.md`** - style guidance
+2. **`campaigns/{campaign}/decision-log.md`** - structured scene summaries (those listed in chapter spec)
+3. **`campaigns/{campaign}/scenes/*.md`** - full GM prose narrative for relevant scenes (see Scene Files below)
+4. **`campaigns/{campaign}/party/{pov-character}.md`** - POV character sheet
+5. **`campaigns/{campaign}/party/{pov-character}-journal.md`** - emotional context (optional, may not exist)
+6. **`campaigns/{campaign}/novel/chapter-{N-1}.md`** - previous chapter's FINAL version for voice continuity (if N > 1; skip for Chapter 1)
+7. **`.claude/skills/novelization-style/tones/{tone}.md`** - tone guidance (tone from outline metadata)
+8. **`.claude/skills/novelization-style/styles/fantasy-novel.md`** - style guidance
+
+### Scene Files
+
+Scene files in `campaigns/{campaign}/scenes/` contain the full GM prose narrative. They are numbered sequentially (e.g., `001-arrival-at-the-station.md`, `002-the-first-clue.md`) and include YAML frontmatter with location and time metadata.
+
+**How to use scene files**:
+- Match scene files to the scenes listed in your chapter spec
+- Draw authentic dialogue directly from scene files (the GM wrote actual spoken lines)
+- Use atmospheric descriptions and sensory details from the prose
+- Scene files are the primary source for "what actually happened" - decision-log provides structured summaries, scene files provide the narrative texture
 
 ## You Write
 
@@ -50,16 +61,17 @@ When reading previous chapters for continuity, always read the **final** version
 1. Read the outline to get chapter spec (title, POV, type, scenes, target words, ending type)
 2. Extract the tone from outline metadata
 3. Read the relevant scenes from decision-log (only scenes listed in chapter spec)
-4. Read the POV character's sheet for voice, background, personality
-5. Read the POV character's journal for emotional context (if exists)
-6. Read the previous chapter (if N > 1) for voice continuity
-7. Load tone and style guidance files
-8. **If VOICE_FEEDBACK provided**: Incorporate the feedback to adjust your writing style
-9. Write the chapter from the POV character's perspective
-10. Include dialogue from the decision-log, expanded naturally
-11. Blend action (from decision-log) with emotional depth (from journals)
-12. Hit the target word count (within 20%)
-13. End appropriately (as specified in chapter spec: question, hook, resolution, cliffhanger)
+4. Read the matching scene files from `scenes/` directory for full narrative prose
+5. Read the POV character's sheet for voice, background, personality
+6. Read the POV character's journal for emotional context (if exists)
+7. Read the previous chapter (if N > 1) for voice continuity
+8. Load tone and style guidance files
+9. **If VOICE_FEEDBACK provided**: Incorporate the feedback to adjust your writing style
+10. Write the chapter from the POV character's perspective
+11. Draw dialogue from scene files (authentic GM-written lines) and expand naturally
+12. Blend action (from decision-log/scene files) with emotional depth (from journals)
+13. Hit the target word count (within 20%)
+14. End appropriately (as specified in chapter spec: question, hook, resolution, cliffhanger)
 
 ---
 

@@ -33,9 +33,12 @@ CAMPAIGN: {campaign}
 
 **You Read**:
 - `campaigns/{campaign}/overview.md` - themes, setting, tone hints
-- `campaigns/{campaign}/decision-log.md` - all scenes and events
+- `campaigns/{campaign}/decision-log.md` - structured summaries of all scenes and events
+- `campaigns/{campaign}/scenes/*.md` - full GM prose narrative (numbered files like `001-scene-slug.md`)
 - `campaigns/{campaign}/party/*.md` - character information
 - `.claude/skills/novelization-style/tones/*.md` - available tones
+
+**Scene Files**: Scene files contain full GM narrative prose with YAML frontmatter (location, time). They complement the decision-log: decision-log has structured summaries for planning, while scene files have the actual prose descriptions, dialogue, and atmosphere you can draw from for chapter content.
 
 **You Write**:
 - `campaigns/{campaign}/novel/outline.md` - complete outline with progress tracking
@@ -148,6 +151,7 @@ outline_preview: |
 **You Read**:
 - `campaigns/{campaign}/novel/outline.md` - the outline to validate
 - `campaigns/{campaign}/decision-log.md` - to verify all major decisions are covered
+- `campaigns/{campaign}/scenes/*.md` - to verify scene coverage and content
 - `campaigns/{campaign}/party/*.md` - to verify POV characters exist
 
 **You Write**:

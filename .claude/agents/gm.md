@@ -199,7 +199,7 @@ Your only responsibility is to write good narrative that captures what happened 
 
 All GM narrative output is persisted to scene files for continuity and novelization.
 
-**File Location**: `campaigns/{campaign}/sessions/NNN-scene-slug.md`
+**File Location**: `campaigns/{campaign}/scenes/NNN-scene-slug.md`
 - Zero-padded 3-digit scene numbers (001, 002, 003...)
 - Slugified scene name in filename (e.g., "The Layered Rest" → `001-the-layered-rest.md`)
 
@@ -220,8 +220,8 @@ All GM narrative output is persisted to scene files for continuity and novelizat
   Current scene: 003
   Current slug: the-merchants-warehouse
   ```
-- On fresh spawn, if `tmp/gm-context.md` doesn't exist or lacks scene info, check `sessions/` directory for highest existing scene number and continue from there
-- Use `glob campaigns/{campaign}/sessions/*.md` to find existing scene files
+- On fresh spawn, if `tmp/gm-context.md` doesn't exist or lacks scene info, check `scenes/` directory for highest existing scene number and continue from there
+- Use `glob campaigns/{campaign}/scenes/*.md` to find existing scene files
 
 **Scene File Format**:
 ```markdown
@@ -233,6 +233,8 @@ time: Late afternoon
 [Full GM prose - append each narrative block with blank line separator]
 ```
 
+The frontmatter contains only `location` and `time` - no session tracking (session boundaries are unreliable, so scenes are sequentially numbered regardless of when they occur).
+
 Update the frontmatter when location or time changes significantly within the scene.
 
 **Flow - Before Returning ANY Narrative**:
@@ -243,7 +245,7 @@ Update the frontmatter when location or time changes significantly within the sc
 5. Return narrative to orchestrator (as normal)
 
 **Directory Setup**:
-- Ensure `campaigns/{campaign}/sessions/` directory exists (create if needed)
+- Ensure `campaigns/{campaign}/scenes/` directory exists (create if needed)
 - Use `mkdir -p` via Bash if the directory is missing
 
 **Example Scene Transition**:
