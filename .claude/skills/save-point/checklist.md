@@ -76,7 +76,7 @@ Detailed checklist for each save point type.
 - [ ] Party resources (HP, gold, consumables, spell slots)
 - [ ] All NPC dispositions and locations
 - [ ] Upcoming planned events
-- [ ] Session number: {N}
+- [ ] Current scene: {NNN} - {scene-slug}
 - [ ] Date: {date}
 - [ ] Cliffhanger/stopping point note
 

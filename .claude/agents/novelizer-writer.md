@@ -105,7 +105,6 @@ title: "{Title}"
 pov: {character}
 type: {type}
 word_count: {actual count}
-sessions_covered: [{list}]
 scenes_covered:
   - "{scene 1}"
   - "{scene 2}"

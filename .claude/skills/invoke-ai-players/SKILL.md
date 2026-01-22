@@ -28,6 +28,7 @@ The GM agent outputs this signal when it needs AI player input:
    Prompt: |
      Campaign: {campaign}
      Character: {character}
+     Scene: {scene_number} - {scene_slug}
    ```
 5. AI players read prompts, write responses to `tmp/{character}-response.md`
 6. AI players also write `tmp/{character}-notes-for-journal.md` (for later journaling)
@@ -59,7 +60,10 @@ subagent_type: ai-player-action
 prompt: |
   Campaign: the-rot-beneath
   Character: tilda-brannock
+  Scene: 003 - first-contact
 ```
+
+**Scene info**: The scene number and slug come from the GM's prompt files or can be determined from the `campaigns/{campaign}/scenes/` directory. The GM writes scene context to prompt files, and the orchestrator should include this in the Task prompt.
 
 The ai-player-action agent will:
 1. Parse campaign and character from the prompt

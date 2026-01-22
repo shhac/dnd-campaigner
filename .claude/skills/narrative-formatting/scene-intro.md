@@ -191,13 +191,13 @@ Some are fresh.*
 "We're not alone down here."
 ```
 
-## Session Opening
+## Scene Opening
 
-For starting a new play session:
+For starting a new scene:
 
 ```
 ═══════════════════
-**SESSION 4: INTO THE ROT**
+**SCENE 004: INTO THE ROT**
 ═══════════════════
 
 ★ *Previously: You discovered the **Thornwood family**'s connection

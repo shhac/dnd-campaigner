@@ -1,9 +1,6 @@
 # Story State: {Campaign Name}
 
 > **Last Updated**: {Date}
-> **Last Session**: Session {N}
->
-> Note: Session numbers are sequential starting from 1
 
 ## Current Situation
 

@@ -1,9 +1,6 @@
 # Story State: The Rot Beneath
 
-> **Last Updated**: Session 0
-> **Last Session**: Pre-campaign
->
-> Note: Session numbers are sequential starting from 1
+> **Last Updated**: Campaign Start
 
 ## Current Situation
 

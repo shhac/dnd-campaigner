@@ -37,8 +37,8 @@ If no campaigns exist, inform the user they can create one with `/new-campaign`.
 For each campaign found, collect:
 
 1. **Campaign name** (directory name)
-2. **Last session date**: Check `campaigns/{name}/sessions/` for the most recent session file
-   - Session files follow pattern `session-*.md`
+2. **Last session date**: Check `campaigns/{name}/beats/` for the most recent beat sheet file
+   - Beat sheet files follow pattern `session-*-beats.md`
    - Extract date from filename or file content if available
 3. **Overview snippet**: Read first few lines of `campaigns/{name}/overview.md` if it exists
 4. **Novelization status**: Check if `campaigns/{name}/novel/` directory exists

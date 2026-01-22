@@ -143,6 +143,9 @@ Then, for each character, write `tmp/{character}-prompt.md`:
 request_type: QUICK_REACTION
 ---
 
+## Current Scene
+Scene: 003 - the-merchants-shop
+
 ## Scene
 You're in the merchant's shop. Aldric stands at the counter.
 
@@ -152,6 +155,8 @@ Aldric accused the merchant of selling cursed goods. The merchant's face went pa
 ## Request
 Brief reaction (1-2 sentences) or [VETO] if this touches your backstory.
 ```
+
+**Include current scene info**: Always add the `## Current Scene` section with the scene number and slug from your `tmp/gm-context.md`. This lets AI players know where they are in the narrative without reading gm-context.md (which contains GM secrets).
 
 **Request types:**
 - `QUICK_REACTION` - Brief 1-2 sentence response
@@ -629,6 +634,9 @@ Writes `tmp/grimjaw-prompt.md`:
 request_type: QUICK_REACTION
 ---
 
+## Current Scene
+Scene: 005 - the-warehouse-heist
+
 ## Scene
 Inside dark warehouse, sneaking past guards. Aldric found the target crate but spotted a tripwire.
 
@@ -644,6 +652,9 @@ Writes `tmp/lyra-prompt.md`:
 ---
 request_type: QUICK_REACTION
 ---
+
+## Current Scene
+Scene: 005 - the-warehouse-heist
 
 ## Scene
 Inside dark warehouse. Aldric found the crate but there's a tripwire.

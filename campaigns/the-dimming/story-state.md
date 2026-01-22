@@ -1,9 +1,6 @@
 # Story State: The Dimming
 
-> **Last Updated**: Session 0 (Campaign Start)
-> **Last Session**: Pre-session
->
-> Note: Session numbers are sequential starting from 1
+> **Last Updated**: Campaign Start
 
 ## Current Situation
 

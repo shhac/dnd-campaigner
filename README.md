@@ -131,7 +131,8 @@ dnd-campaigner/
 │       ├── locations/
 │       ├── factions/
 │       ├── items/
-│       └── sessions/
+│       ├── beats/
+│       └── scenes/
 ├── CLAUDE.md             # Instructions for Claude
 └── README.md             # You are here
 ```

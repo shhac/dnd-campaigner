@@ -57,7 +57,8 @@ campaigns/{campaign}/   # Individual campaign data
 ├── party/              # Player character sheets
 ├── npcs/               # NPC details and secrets
 ├── items/              # Notable items and artifacts
-├── sessions/           # Session logs
+├── beats/              # GM planning docs (beat sheets)
+├── scenes/             # GM narrative output
 └── novel/              # Novelization output (if created)
     ├── outline.md
     ├── chapter-NN.md

@@ -154,7 +154,7 @@ Once approved, create:
 
 3. **story-state.md** - Initial state with starting location, situation, first quest
 
-4. **Subdirectories**: `party/`, `npcs/`, `locations/`, `factions/`, `items/`, `sessions/`
+4. **Subdirectories**: `party/`, `npcs/`, `locations/`, `factions/`, `items/`, `beats/`, `scenes/`
 
 5. **Initial NPCs** - 2-3 NPCs the party will likely meet first
 

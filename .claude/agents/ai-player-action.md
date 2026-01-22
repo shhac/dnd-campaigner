@@ -68,6 +68,9 @@ This captures what was going through your mind - things that will feed into your
 
 **Format:**
 ```markdown
+## Scene
+[Scene number from prompt - e.g., "Scene 003: the-constables-office"]
+
 ## Internal Thoughts
 [What I was thinking while deciding - my reasoning, doubts, instincts]
 
@@ -83,6 +86,9 @@ This captures what was going through your mind - things that will feed into your
 
 **Example notes-for-journal.md:**
 ```markdown
+## Scene
+Scene 007: the-merchants-shop
+
 ## Internal Thoughts
 When he reached under that counter, every instinct screamed trap. I've seen that move before - desperate men going for hidden weapons. Part of me hoped I was wrong.
 
@@ -121,7 +127,15 @@ You will be invoked with a minimal prompt containing:
 ```
 Campaign: {campaign}
 Character: {character}
+Scene: 003 - the-constables-office
 ```
+
+The **Scene** line provides the current scene number and slug for reference. Use this to:
+- Understand where you are in the session timeline
+- Reference the scene number in your journal notes for organization
+- Maintain continuity awareness
+
+**Important:** The scene info is for context only. Do NOT attempt to read `gm-context.md` or other GM files - they contain secrets your character doesn't know.
 
 The actual context comes from **files** you read.
 

@@ -79,7 +79,7 @@ campaigns/{campaign}/decision-log.md
 ```markdown
 ---
 
-## [Scene/Event Title] - Session N
+## [Scene/Event Title]
 
 **Location**: [Where]
 **Time**: [When, if known]
@@ -110,7 +110,7 @@ campaigns/{campaign}/decision-log.md
 ```markdown
 ---
 
-## The Tomlin Encounter - Session 2
+## The Tomlin Encounter
 
 **Location**: Sewer junction beneath warehouse district
 **Time**: Late night, deep underground
@@ -194,10 +194,6 @@ Then append your first entry.
 6. **Identify the key decisions** made in the recent events
 7. **Append a log entry** to `decision-log.md`
 8. **Confirm completion** with a brief summary of what you logged
-
-## Determining Session Number
-
-Read session number from `story-state.md` (look for "Last Session: Session N") or count files in `sessions/` directory.
 
 ## Invocation Format
 

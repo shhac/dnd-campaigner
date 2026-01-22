@@ -27,7 +27,8 @@ campaigns/{campaign-name}/
 ├── locations/
 │   └── {starting-location}.md
 ├── factions/
-└── sessions/
+├── beats/
+└── scenes/
 ```
 
 ## Usage
