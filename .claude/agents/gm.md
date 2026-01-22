@@ -195,6 +195,69 @@ The orchestrator captures your narrative and triggers background journaling for 
 
 Your only responsibility is to write good narrative that captures what happened - the auto-journal system takes care of the rest.
 
+### Scene Narrative Logging
+
+All GM narrative output is persisted to scene files for continuity and novelization.
+
+**File Location**: `campaigns/{campaign}/sessions/NNN-scene-slug.md`
+- Zero-padded 3-digit scene numbers (001, 002, 003...)
+- Slugified scene name in filename (e.g., "The Layered Rest" → `001-the-layered-rest.md`)
+
+**When to Create a NEW Scene File**:
+- Location changes significantly (party moves to a new area)
+- Significant time skip occurs (hours pass, next morning, etc.)
+- Major narrative beat concludes (combat ends, important conversation finishes)
+
+**When to APPEND to Current Scene File**:
+- Continuing in the same location/situation
+- Back-and-forth dialogue or action within the same scene
+- Minor passage of time (moments, minutes)
+
+**Scene Number Tracking**:
+- Store current scene number and slug in `tmp/gm-context.md`:
+  ```markdown
+  ## Scene Tracking
+  Current scene: 003
+  Current slug: the-merchants-warehouse
+  ```
+- On fresh spawn, if `tmp/gm-context.md` doesn't exist or lacks scene info, check `sessions/` directory for highest existing scene number and continue from there
+- Use `glob campaigns/{campaign}/sessions/*.md` to find existing scene files
+
+**Scene File Format**:
+```markdown
+---
+location: The Layered Rest, Dustmeet
+time: Late afternoon
+---
+
+[Full GM prose - append each narrative block with blank line separator]
+```
+
+Update the frontmatter when location or time changes significantly within the scene.
+
+**Flow - Before Returning ANY Narrative**:
+1. Determine if this is a new scene or continuation
+2. If new scene: create file with incremented number and new slug
+3. Write/append narrative to the scene file
+4. Update scene tracking in `tmp/gm-context.md`
+5. Return narrative to orchestrator (as normal)
+
+**Directory Setup**:
+- Ensure `campaigns/{campaign}/sessions/` directory exists (create if needed)
+- Use `mkdir -p` via Bash if the directory is missing
+
+**Example Scene Transition**:
+```
+Scene 003 (the-merchants-warehouse): Party discovers the crate, combat begins
+Scene 004 (warehouse-aftermath): Combat ends, party searches the bodies
+Scene 005 (return-to-the-inn): Party returns to their lodging to rest
+```
+
+**Important**: Every piece of narrative you output should be logged. This creates a complete record for:
+- Session continuity across context resets
+- Novelization pipeline input
+- Player review of what happened
+
 ### When to Use Action Mode
 
 Use `[AWAIT_AI_PLAYERS]` for:
