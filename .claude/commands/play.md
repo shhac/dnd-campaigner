@@ -109,6 +109,17 @@ This ensures AI players can't metagame.
 
 You are the **orchestrator** for the D&D session. Your job is to manage the flow between GM, players, and AI party members.
 
+### Required Skills - Load These First
+
+**BEFORE starting the session**, load these skill files into your context:
+
+1. **play-orchestration** - Core orchestration loop
+2. **auto-journal/when-to-invoke** - Journaling trigger conditions (MANDATORY)
+3. **auto-journal/implementation** - Two-step journaling process (MANDATORY)
+4. **invoke-ai-players** - AI player spawning patterns
+
+These skills contain checkpoint detection rules and process flows that you MUST follow. Loading them ensures you don't miss mandatory triggers like post-AI-action journaling.
+
 ### Initial Setup
 
 1. **Verify the campaign exists**:
