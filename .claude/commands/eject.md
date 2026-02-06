@@ -70,6 +70,8 @@ If no destination is provided, you'll be asked where to put it.
 │   ├── save-point/SKILL.md         # Session state persistence
 │   ├── quick-or-veto/SKILL.md      # AI player reaction pattern
 │   ├── combat-orchestration/SKILL.md    # Combat management
+│   ├── gm-special-scenarios/SKILL.md   # GM edge case handling
+│   ├── dnd-rules-reference/SKILL.md    # D&D 5e mechanics reference
 │   ├── play-orchestration/SKILL.md      # Session orchestration
 │   ├── messaging-protocol/SKILL.md     # Message protocol reference
 │   └── narrative-formatting/            # Scene formatting styles
@@ -145,6 +147,8 @@ mkdir -p {destination}/.claude/skills/ask-user-orchestration
 mkdir -p {destination}/.claude/skills/save-point
 mkdir -p {destination}/.claude/skills/quick-or-veto
 mkdir -p {destination}/.claude/skills/combat-orchestration
+mkdir -p {destination}/.claude/skills/gm-special-scenarios
+mkdir -p {destination}/.claude/skills/dnd-rules-reference
 mkdir -p {destination}/.claude/skills/play-orchestration
 mkdir -p {destination}/.claude/skills/messaging-protocol
 mkdir -p {destination}/.claude/skills/narrative-formatting/conversation
@@ -180,7 +184,10 @@ Copy skills (no modification needed):
 - `.claude/skills/save-point/SKILL.md`
 - `.claude/skills/quick-or-veto/SKILL.md`
 - `.claude/skills/combat-orchestration/SKILL.md`
+- `.claude/skills/gm-special-scenarios/SKILL.md`
+- `.claude/skills/dnd-rules-reference/SKILL.md`
 - `.claude/skills/play-orchestration/SKILL.md`
+- `.claude/skills/play-orchestration/session-lifecycle.md`
 - `.claude/skills/messaging-protocol/SKILL.md`
 - `.claude/skills/narrative-formatting/SKILL.md` (and all subdirectory files)
 

@@ -54,11 +54,15 @@ campaigns/{campaign}/   # Individual campaign data
 ├── story-state.md      # Current situation, secrets (GM only)
 ├── party-knowledge.md  # Shared knowledge (no secrets)
 ├── decision-log.md     # Character decisions and actions
+├── preferences.md      # Narrative style, player character
 ├── party/              # Player character sheets
 ├── npcs/               # NPC details and secrets
 ├── items/              # Notable items and artifacts
+├── locations/          # Location descriptions
+├── factions/           # Faction details
 ├── beats/              # GM planning docs (beat sheets)
 ├── scenes/             # Narrative output (written by Narrator)
+├── tmp/                # Transient delta files (auto-cleaned)
 └── novel/              # Novelization output (if created)
     ├── outline.md
     ├── chapter-NN.md
@@ -158,12 +162,6 @@ Creates PCs or NPCs with full sheets.
 ```
 Starts a session using Claude Code Teams. All participants are persistent teammates: GM, Narrator, and every player character (AI and human). The GM messages players directly; players respond directly. The human's character operates in HUMAN_RELAY mode (relays decisions to/from the human) or AUTONOMOUS mode (acts independently when the human steps away). Players self-journal at beat boundaries. The team lead is a lightweight delegate handling human I/O and session lifecycle.
 
-### Playing (Legacy Mode)
-```
-/play-legacy {campaign-name}
-```
-Starts a session using the legacy spin-up/spin-down model. You declare your character, GM orchestrates. Uses ephemeral AI player agents instead of persistent teammates.
-
 ### Chatting with Characters
 ```
 /chat {campaign-name} {character-name}
@@ -218,6 +216,19 @@ Generates `voices.yaml` for text-to-speech novel reading. Maps POV characters to
 
 After running, use `source scripts/piper-env.sh` to enable `read-chapter` and `read-novel` commands.
 
+### Generating Audiobooks
+```
+/audiobook {campaign-name} [options]
+```
+Generates MP3 audiobook files from novelized chapters using Chatterbox TTS.
+
+**Options:**
+- `--chapter N`: Process only chapter N
+- `--chapters N-M`: Process chapters N through M
+- `--resume`: Continue from last checkpoint
+- `--dry-run`: Show plan without generating audio
+- `--test-voices`: Generate short voice samples for each character
+
 ## Campaign File Purposes
 
 | File | Purpose | Who Reads It |
@@ -228,7 +239,10 @@ After running, use `source scripts/piper-env.sh` to enable `read-chapter` and `r
 | `party/{name}.md` | Character sheet | GM, that character's agent |
 | `npcs/{name}.md` | NPC details + secrets | GM only |
 | `items/{name}.md` | Notable items, artifacts, equipment | GM, reference |
+| `locations/{name}.md` | Location descriptions and details | GM, reference |
+| `factions/{name}.md` | Faction details and goals | GM, reference |
 | `decision-log.md` | Character decisions and actions for context reconstruction | GM, reference |
+| `preferences.md` | Narrative style, player character selection | Team lead |
 
 ### Novel Directory (`novel/`)
 
@@ -256,7 +270,6 @@ Chatterbox TTS voice samples for cloning. See **audiobook-orchestration/voice-sa
 - **campaign-creator**: Designs new campaigns through interactive Q&A
 - **character-creator**: Builds PCs/NPCs with proper D&D 5e stats
 - **gm**: Persistent GM teammate. Communicates via SendMessage, reads campaign files once, retains context for the entire session. Messages player teammates directly with `[GM_TO_PLAYER]`. Does not write scene files (narrator handles this).
-- **gm-legacy**: Runs the game in legacy spin-up/spin-down mode. Used by `/play-legacy`.
 - **narrator**: Persistent Narrator teammate that observes all gameplay (GM broadcasts + peer DM visibility) and writes scene files in real-time. Output is secret-free — only externally observable behavior. Feeds the novelization and audiobook pipelines.
 - **player-teammate**: Persistent AI player teammate. Receives GM prompts directly, responds with actions/dialogue, can message other players in-character. Self-journals at beat boundaries. Maintains character personality across the entire session.
 - **human-relay-player**: Persistent human player teammate. Relays GM prompts to the human, translates human decisions into in-character actions. Supports HUMAN_RELAY and AUTONOMOUS modes. Indistinguishable from AI player teammates from the GM's perspective.
@@ -293,15 +306,21 @@ Skills are automatically discovered by Claude based on their description. Agents
 ### User-Facing Skills
 - **dice-roll**: Intelligent `toss` CLI wrapper for D&D dice notation
 - **ability-check**: DC tables, saving throws, conditions, advantage/disadvantage, skill guidance
+- **dnd-rules-reference**: Quick reference for common D&D 5e mechanics (NPC attitudes, rest mechanics, encounter difficulty)
 - **name-generator**: Creates varied, original names by race/culture while avoiding duplicates
 - **random-events**: Generates weather, encounters, rumors, NPC moods to make the world feel alive
 
 ### Orchestration Skills
 - **play-orchestration**: Core orchestration loop for Teams-based D&D play sessions. Creates a persistent team with all participants as teammates (GM, Narrator, player characters). Team lead is a lightweight delegate handling human I/O and session lifecycle. GM and players communicate directly. Used by `/play`.
-- **play-orchestration-legacy**: Core orchestration loop for legacy D&D play sessions (used by `/play-legacy`)
 - **messaging-protocol**: Canonical reference for the structured message protocol used by all agents. Defines every message tag, sender/recipient, payload format, and routing rules. Referenced by GM, players, narrator, and team lead.
 - **ask-user-orchestration**: Orchestrates agents that need to ask users questions
 - **combat-orchestration**: Manages theater-of-mind D&D combat with threat assessment and pacing tiers
+- **gm-special-scenarios**: Handles GM edge cases (split parties, unconscious players, shopping/downtime, loot distribution, secret actions)
 - **save-point**: Manages session state persistence for D&D campaigns
 - **quick-or-veto**: The quick-or-veto pattern for AI player reactions
 - **narrative-formatting**: Formatting system for D&D narrative output
+- **audiobook-orchestration**: Orchestrates audiobook generation pipeline (segmentation, TTS generation, assembly)
+
+### Novelization Skills
+- **novelization-style**: Tone and style guidelines for converting campaigns into prose fiction
+- **novelization-mechanics**: Chapter types, prose translation of D&D mechanics, output format rules, quality checklists

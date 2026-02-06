@@ -47,7 +47,7 @@ The session will:
 ## Session Flow
 
 1. **GM broadcasts narrative** — you see the scene, Narrator captures it
-2. **You declare what your character does** — sent to GM as `[PLAYER_ACTION]`
+2. **You declare what your character does** — your character teammate relays it to the GM
 3. **GM responds** (may call for rolls, prompt AI players directly)
 4. **AI party members act** (persistent teammates respond directly to GM)
 5. **GM weaves responses into narrative** — broadcasts again
@@ -110,7 +110,7 @@ When you want to stop:
 
 They never see: story-state.md, GM secrets, other character sheets, plot information.
 
-The GM is trusted to enforce information isolation when composing per-character context in `[GM_TO_PLAYER]` messages — same enforcement model as the legacy system.
+The GM is trusted to enforce information isolation when composing per-character context in `[GM_TO_PLAYER]` messages.
 
 ---
 

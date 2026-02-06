@@ -97,14 +97,13 @@ Players respond in parallel. Batch their actions in narrative.
 Post-combat checklist:
 
 1. **Confirm resolution** - Enemies defeated, fled, or surrendered
-2. **Update story-state.md**:
+2. **Write delta files** (`tmp/gm-state-delta.md` and `tmp/party-knowledge-delta.md`):
    - [ ] Final HP for all party members
    - [ ] Resources expended (spell slots, abilities)
    - [ ] Combat outcome summary
    - [ ] Loot acquired
-3. **Update party-knowledge.md** with combat results
-4. **Journal updates**: GM sends `[STATE_UPDATED]` to team lead, which triggers background delta agents and journal checkpoints. Player teammates self-journal.
-5. **Clean up** any combat-related tmp files
+   - [ ] Combat results visible to the party (party-knowledge delta)
+3. **Send `[STATE_UPDATED]`** to team lead — triggers background delta writers and journal checkpoints. Player teammates self-journal.
 
 ## Detailed Procedures
 

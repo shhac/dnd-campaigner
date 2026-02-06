@@ -25,14 +25,15 @@ The veto includes why they need more context:
 The merchant mentioned the Flaming Fist. I'm ex-Fist and this could involve people I know.
 ```
 
-### Step 2: Write Full Context Prompt
+### Step 2: Send Full Context Prompt
 
-Create a new prompt with `request_type: FULL_CONTEXT`:
+Send a new `[GM_TO_PLAYER]` with `request_type: FULL_CONTEXT` directly to that character via `SendMessage`:
 
-```markdown
----
+```
+[GM_TO_PLAYER]
 request_type: FULL_CONTEXT
----
+scene_number: 003
+scene_slug: the-merchants-shop
 
 ## Scene
 You're in the merchant's dusty shop. He just mentioned having "friends in the Fist" who help move his goods.
@@ -50,12 +51,9 @@ The merchant is clearly involved in something shady. Aldric is pushing him for i
 This is your moment. Take as much space as you need.
 ```
 
-### Step 3: Re-Signal
+### Step 3: Send Full Context Prompt
 
-Signal for just that character:
-```
-[AWAIT_AI_PLAYERS: tilda-brannock]
-```
+Send the `FULL_CONTEXT` prompt directly to that character's player teammate via `[GM_TO_PLAYER]`. The player will respond via `[PLAYER_TO_GM]`.
 
 ### Step 4: Incorporate Full Response
 
