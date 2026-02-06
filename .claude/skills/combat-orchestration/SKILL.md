@@ -65,7 +65,7 @@ Promote combat tier mid-fight if circumstances warrant:
 1. Announce the shift narratively ("This just got serious...")
 2. Switch to the new tier's pacing immediately
 3. Give AI players full context on the changed situation
-4. Consider whether to invoke `[AWAIT_AI_PLAYERS]` for reactions
+4. Request player reactions for the changed situation
 
 **Note:** De-escalation is also valid. If a critical fight becomes one-sided, shift to standard or offer quick resolution.
 
@@ -86,15 +86,18 @@ Each turn:
 
 ## AI Player Combat Flow
 
-Write prompts for ALL AI players, signal once:
+Request actions from ALL AI players simultaneously. How this works depends on the play mode:
 
+**Teams mode (`/play-team`):** Send `[GM_TO_PLAYER]` with `request_type: COMBAT_ACTION` to each AI player teammate directly (or send `[AWAIT_PLAYERS]` to the team lead for ephemeral players in Phase 1). Players respond via `[PLAYER_TO_GM]`.
+
+**Legacy mode (`/play`):** Write prompt files for all AI players and signal:
 ```
 [AWAIT_AI_PLAYERS: grimjaw-ironforge, tilda-brannock, seraphine-dawnwhisper]
 ```
 
 **Character naming**: Always use full hyphenated names matching the character sheet filename.
 
-They respond in parallel. Batch their actions in narrative.
+Players respond in parallel. Batch their actions in narrative.
 
 ## After Combat
 
@@ -107,7 +110,9 @@ Post-combat checklist:
    - [ ] Combat outcome summary
    - [ ] Loot acquired
 3. **Update party-knowledge.md** with combat results
-4. **Journal updates**: Journaling is automatic - the orchestrator invokes the `auto-journal` skill after GM narrative returns
+4. **Journal updates**: Journaling happens automatically after the GM narrative
+   - **Teams mode**: GM sends `[STATE_UPDATED]` to team lead, which triggers background journal/delta agents. Persistent player teammates (Phase 2) self-journal.
+   - **Legacy mode**: The orchestrator invokes the `auto-journal` skill after GM narrative returns.
 5. **Clean up** any combat-related tmp files
 
 ## Detailed Procedures
@@ -119,6 +124,7 @@ Post-combat checklist:
 
 ## Related Skills
 
-- **invoke-ai-players**: Handles `[AWAIT_AI_PLAYERS]` signals
-- **auto-journal**: Handles journaling (invoked automatically after GM narrative)
+- **invoke-ai-players**: Handles `[AWAIT_AI_PLAYERS]` signals (legacy mode)
+- **team-play-orchestration**: Handles `[AWAIT_PLAYERS]` and `[GM_TO_PLAYER]` messaging (Teams mode)
+- **auto-journal**: Handles journaling after GM narrative (legacy mode; in Teams mode, `[STATE_UPDATED]` triggers background agents)
 - **quick-or-veto**: AI player reaction pattern for combat turns

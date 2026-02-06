@@ -18,9 +18,17 @@ When the party splits up:
 4. Interleave until the party reunites
 
 ### Information Isolation During Split
-- When running Group A's scene, do NOT invoke Group B's AI players
-- Each group only learns about the other through in-character communication later
-- Track rough time passage - if Group A spends 30 minutes searching while Group B has a 2-minute combat, run multiple Group B scenes
+
+**Legacy mode (`/play`):** When running Group A's scene, do NOT invoke Group B's AI players. Each group only learns about the other through in-character communication later.
+
+**Teams mode (`/play-team`):** All player teammates are persistent and always listening, so broadcast isolation is critical:
+- **Do NOT use broadcast** for split party scenes — broadcasts reach ALL teammates
+- Send `[GM_TO_PLAYER]` directly to only the characters in the active group
+- Send narrative to the team lead as a direct message (not broadcast), with metadata indicating which group: `[NARRATIVE] group: A`
+- Send `[NARRATOR_NOTE]` to the narrator with the full scene text for each group, so the narrator can capture both sides without the players cross-contaminating
+- When groups reunite, resume normal `[NARRATIVE]` broadcasts
+
+**In both modes:** Track rough time passage — if Group A spends 30 minutes searching while Group B has a 2-minute combat, run multiple Group B scenes.
 
 ### Cutting Points
 Cut between groups at:

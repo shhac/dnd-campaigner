@@ -58,7 +58,7 @@ campaigns/{campaign}/   # Individual campaign data
 ├── npcs/               # NPC details and secrets
 ├── items/              # Notable items and artifacts
 ├── beats/              # GM planning docs (beat sheets)
-├── scenes/             # GM narrative output
+├── scenes/             # Narrative output (written by Narrator in Teams mode, GM in legacy)
 └── novel/              # Novelization output (if created)
     ├── outline.md
     ├── chapter-NN.md
@@ -92,7 +92,32 @@ When invoking AI player agents:
    - Events they personally witnessed
 3. **Never** pass: `story-state.md`, other character sheets, NPC secret notes
 
-The `/play` command handles this orchestration automatically.
+The `/play` and `/play-team` commands handle this orchestration automatically.
+
+## Teams Architecture (Experimental)
+
+The `/play-team` command uses Claude Code Teams to run D&D sessions with persistent teammates instead of the legacy spin-up/spin-down model.
+
+### How It Works
+
+A team named `dnd-{campaign}` is created with:
+- **GM teammate** (`gm-team` agent): Persistent for the entire session. Reads campaign files once, communicates via `SendMessage`. Broadcasts `[NARRATIVE]` to all teammates, sends `[GM_TO_PLAYER]` directly to AI players, sends structured messages (`[AWAIT_PLAYERS]`, `[STATE_UPDATED]`, `[SESSION_END]`) to the team lead.
+- **Narrator teammate** (`narrator` agent): Observes GM broadcasts and peer DM activity. Writes scene files to `scenes/` in real-time. Output is secret-free.
+- **Team lead** (main conversation): Creates the team, spawns teammates, relays human input to GM as `[PLAYER_ACTION]`, displays GM narrative to the human, spawns ephemeral AI player Tasks when the GM requests, and manages session lifecycle.
+- **AI players**: Ephemeral Tasks spawned when the GM needs party input (same isolation model as legacy).
+
+### Message Protocol
+
+All teammate communication uses structured YAML-like tags in `SendMessage` content. Key message types:
+- `[NARRATIVE]`: GM broadcasts player-facing narration (team lead displays, narrator captures)
+- `[AWAIT_PLAYERS]`: GM requests AI player input (team lead spawns Tasks, collects responses)
+- `[PLAYER_ACTION]`: Team lead forwards human player's action to GM
+- `[STATE_UPDATED]`: GM signals delta files are ready (team lead spawns background writers)
+- `[SESSION_END]`: GM signals session complete (team lead shuts down team)
+
+### Coexistence
+
+Both `/play` (legacy) and `/play-team` (Teams) coexist. Campaign file formats are identical — no migration needed. Skills like `combat-orchestration`, `save-point`, and `gm-special-scenarios` support both modes.
 
 ## Rules System
 
@@ -130,7 +155,13 @@ Creates PCs or NPCs with full sheets.
 ```
 /play {campaign-name}
 ```
-Starts a session. You declare your character, GM orchestrates.
+Starts a session using the legacy spin-up/spin-down model. You declare your character, GM orchestrates.
+
+### Playing (Teams Mode)
+```
+/play-team {campaign-name}
+```
+Starts a session using Claude Code Teams. A persistent GM and Narrator teammate run as long-lived agents communicating via `SendMessage`. The GM reads campaign files once and retains context for the entire session. The Narrator captures the story to scene files in real-time. AI party members are spawned as ephemeral Tasks with isolated context. Both `/play` and `/play-team` coexist for side-by-side comparison.
 
 ### Chatting with Characters
 ```
@@ -223,7 +254,9 @@ Chatterbox TTS voice samples for cloning. See **audiobook-orchestration/voice-sa
 ### Gameplay Agents
 - **campaign-creator**: Designs new campaigns through interactive Q&A
 - **character-creator**: Builds PCs/NPCs with proper D&D 5e stats
-- **gm**: Runs the game - narrates, controls NPCs, adjudicates rules
+- **gm**: Runs the game - narrates, controls NPCs, adjudicates rules (legacy spin-up/spin-down model, used by `/play`)
+- **gm-team**: Persistent GM teammate for Teams-based play. Communicates via SendMessage, reads campaign files once, retains context for the entire session. Does not write scene files (narrator handles this). Used by `/play-team`.
+- **narrator**: Persistent Narrator teammate that observes all gameplay (GM broadcasts + peer DM visibility) and writes scene files in real-time. Output is secret-free — only externally observable behavior. Feeds the novelization and audiobook pipelines.
 - **ai-player-action**: Plays a party member during action scenes (isolated context, quick-or-veto system)
 - **ai-player-journal**: Records character reflections and memories after events
 - **dnd-enthusiast**: Experienced D&D player/DM offering feedback on campaign design, rules, and player experience
@@ -264,8 +297,9 @@ Skills are automatically discovered by Claude based on their description. Agents
 - **random-events**: Generates weather, encounters, rumors, NPC moods to make the world feel alive
 
 ### Orchestration Skills
-- **play-orchestration**: Core orchestration loop for D&D play sessions
-- **invoke-ai-players**: Orchestrates AI player agent spawning for D&D sessions
+- **play-orchestration**: Core orchestration loop for legacy D&D play sessions (used by `/play`)
+- **team-play-orchestration**: Core orchestration loop for Teams-based D&D play sessions. Creates a persistent team with GM and Narrator teammates, handles structured messaging, spawns ephemeral AI player Tasks, and manages session lifecycle. Used by `/play-team`.
+- **invoke-ai-players**: Orchestrates AI player agent spawning for legacy D&D sessions (used by `/play`)
 - **ask-user-orchestration**: Orchestrates agents that need to ask users questions
 - **combat-orchestration**: Manages theater-of-mind D&D combat with threat assessment and pacing tiers
 - **save-point**: Manages session state persistence for D&D campaigns
