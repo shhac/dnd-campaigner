@@ -9,25 +9,17 @@ Ensures game state is persisted correctly so players maintain continuity.
 
 ## Why Save Points Matter
 
-Saved state serves multiple purposes depending on the play mode:
-
-**Legacy mode (`/play`):** AI players are spawned as fresh Tasks with no memory. They rely on `party-knowledge.md` for shared context and their personal journal for memories. If you don't save, AI players won't know what happened.
-
-**Teams mode (`/play-team`):** Persistent player teammates retain full session context, but saves are still critical for:
+Persistent player teammates retain full session context, but saves are still critical for:
 - Surviving context compaction (teammates re-read saved state to recover)
 - Session resume (between play sessions, teammates start fresh)
 - The narrator's scene files (durable record of what happened)
 - Background delta writers that merge incremental updates
 
-**In both modes:** `story-state.md` and `party-knowledge.md` are the canonical game state. Always keep them current.
+`story-state.md` and `party-knowledge.md` are the canonical game state. Always keep them current.
 
 ## Automatic State Updates
 
-State updates happen automatically when the GM writes delta files:
-- **Teams mode**: GM sends `[STATE_UPDATED]` to the team lead after writing delta files. The team lead spawns background `state-delta-writer` and `knowledge-delta-writer` Tasks to merge changes.
-- **Legacy mode**: The auto-journal flow triggers delta writers when the GM closes a narrative beat.
-
-In both cases, background agents merge changes into `story-state.md` and `party-knowledge.md` without blocking play.
+State updates happen automatically when the GM writes delta files. The GM sends `[STATE_UPDATED]` to the team lead after writing delta files. The team lead spawns background `state-delta-writer` and `knowledge-delta-writer` Tasks to merge changes into `story-state.md` and `party-knowledge.md` without blocking play.
 
 **Manual saves are still available** for situations where you need immediate updates or want to save outside the normal flow. The triggers below remain valid for manual intervention.
 
@@ -87,6 +79,4 @@ At each save point:
 
 ## Related Skills
 
-- **invoke-ai-players**: Handles `[AWAIT_AI_PLAYERS]` signals for AI player turn coordination (legacy mode)
-- **team-play-orchestration**: Handles `[STATE_UPDATED]` messaging and background task spawning (Teams mode)
-- **auto-journal**: Handles automatic journaling after GM narrative returns (legacy mode)
+- **play-orchestration**: Handles `[STATE_UPDATED]` messaging and background task spawning

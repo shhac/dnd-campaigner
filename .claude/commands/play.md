@@ -1,11 +1,13 @@
 ---
-description: Start or continue a D&D session in a campaign
+description: Start or continue a D&D session using Claude Code Teams
 argument-hint: <campaign-name>
 ---
 
 # /play
 
-Start or continue a D&D session in a campaign.
+Start or continue a D&D session using the Teams-based architecture.
+
+Uses persistent GM and Narrator teammates with structured messaging.
 
 ## Arguments
 
@@ -14,9 +16,11 @@ Start or continue a D&D session in a campaign.
 ## What This Does
 
 Launches a game session where:
-- The GM agent controls the world
+- A **persistent GM teammate** runs the world (reads campaign files once, maintains context)
+- A **persistent Narrator teammate** captures the story in real-time (writes scene files)
 - You play your chosen character
-- AI agents play other party members (with isolated context)
+- AI agents play other party members (spawned as ephemeral Tasks with isolated context)
+- All communication uses **structured messaging** via SendMessage
 
 **Preferences**: The orchestrator reads campaign preferences (narrative style, player character) from `preferences.md`. If preferences aren't set, you'll be asked once and they're saved for future sessions.
 
@@ -30,22 +34,25 @@ Before playing, you need:
 ## Usage
 
 ```
-/play curse-of-strahd
+/play the-rot-beneath
 ```
 
-The GM will:
-1. Load campaign context (overview, story-state)
-2. Summarize where you left off
-3. Use your saved character preference (or ask if first session)
-4. Begin narrating
+The session will:
+1. Create team `dnd-{campaign}`
+2. Spawn GM and Narrator as persistent teammates
+3. GM loads campaign context (overview, story-state) — reads files **once**
+4. GM summarizes where you left off
+5. Begin the session loop
 
 ## Session Flow
 
-1. **GM sets the scene**
-2. **You declare what your character does**
-3. **GM responds** (may call for rolls)
-4. **AI party members act** (spawned with isolated context)
-5. **Repeat until session ends**
+1. **GM broadcasts narrative** — you see the scene, Narrator captures it
+2. **You declare what your character does** — sent to GM as `[PLAYER_ACTION]`
+3. **GM responds** (may call for rolls, invoke AI players)
+4. **AI party members act** (spawned as isolated Tasks when needed)
+5. **GM weaves responses into narrative** — broadcasts again
+6. **Background agents** process state saves and journals
+7. **Repeat until session ends**
 
 ## Commands During Play
 
@@ -55,6 +62,7 @@ While playing, you can say:
 - "Can I roll [skill]?" - Request a specific check
 - "What do I see/hear/notice?" - Perception/Investigation
 - "Let's take a short/long rest" - Rest mechanics
+- "Let's save" - Trigger a save checkpoint
 - "I'd like to stop here" - End session gracefully
 
 ## Special Situations
@@ -62,15 +70,15 @@ While playing, you can say:
 The GM handles these edge cases:
 
 - **Split party**: Interleaved scenes, cutting between groups at dramatic moments
-- **Your character unconscious**: You can narrate their experience, direct spotlight to allies, or suggest environmental developments
+- **Your character unconscious**: Direct spotlight to allies, or suggest environmental developments
 - **Downtime/shopping**: Batched resolution for routine activities, full scenes only for meaningful choices
 - **Loot distribution**: In-character negotiation; you have final say as party leader
 - **AI character secrets**: AI characters may act secretly in-character; tracked by GM for dramatic reveals
 - **Charmed/paralyzed AI characters**: Still invoked for internal experience, but actions constrained by condition
 
-## Save Points (IMPORTANT)
+## Save Points
 
-The GM should save game state at these moments:
+The GM saves game state at these moments:
 
 1. **End of combat** - Record HP, resources, what happened
 2. **End of scene** - When moving to new location or situation changes
@@ -79,48 +87,48 @@ The GM should save game state at these moments:
 5. **Before rests** - Capture state before healing
 6. **When you ask** - Say "let's save" anytime
 
-**Files updated at save points:**
-- `story-state.md` - Full GM state including secrets
-- `party-knowledge.md` - Shared knowledge (AI players read this)
-
-**Why this matters:** AI party members are spawned fresh each time with no memory. They rely on `party-knowledge.md` and their personal journals for continuity. If the GM doesn't save, AI players won't know what happened.
+**How saves work in Teams mode:**
+- GM writes delta files to `tmp/`
+- GM sends `[STATE_UPDATED]` to team lead
+- Team lead spawns background agents: `state-delta-writer`, `knowledge-delta-writer`, journals, decision-log
+- All background — does not interrupt play
 
 ## Ending a Session
 
 When you want to stop:
-1. Tell the GM
-2. GM will find a good stopping point
-3. GM updates `story-state.md` AND `party-knowledge.md`
+1. Tell the GM (say "I'd like to stop here")
+2. GM finds a good stopping point and performs final save
+3. GM sends `[SESSION_END]` with summary and next-session hook
+4. Team lead shuts down all teammates and deletes the team
 
 ## Information Isolation
 
 **CRITICAL**: AI party members are spawned as separate Tasks with ONLY:
 - Their character sheet
-- Current scene description
-- Events they witnessed
+- Scene context from the GM's `[AWAIT_PLAYERS]` message
+- Events they would know about
 
 They never see: story-state.md, GM secrets, other character sheets, plot information.
 
-This ensures AI players can't metagame.
+The GM is trusted to enforce information isolation when composing per-character context in `[AWAIT_PLAYERS]` messages — same enforcement model as the legacy system.
 
 ---
 
 ## Instructions for Claude
 
-You are the **orchestrator** for the D&D session. Your job is to manage the flow between GM, players, and AI party members.
+You are the **team lead** for a Teams-based D&D session. Your job is to create the team, spawn teammates, handle human I/O, and manage the session lifecycle.
 
-### ⚠️ REQUIRED: Load Skills First
+### REQUIRED: Load Skill First
 
-**STOP. Before ANY other action, use the Read tool to load these skill files:**
+**STOP. Before ANY other action, use the Read tool to load this skill file:**
 
 1. `.claude/skills/play-orchestration/SKILL.md` - Core orchestration loop
-2. `.claude/skills/auto-journal/when-to-invoke.md` - Journaling trigger conditions (CRITICAL)
-3. `.claude/skills/auto-journal/implementation.md` - Two-step journaling process
-4. `.claude/skills/invoke-ai-players/SKILL.md` - AI player spawning patterns
 
-**Why this matters**: These contain MANDATORY checkpoint rules for auto-journaling. If you skip loading them, AI player memories will be lost.
+**Then also load:**
 
-**Verify before continuing**: After reading, confirm you understand WHEN auto-journaling triggers (after GM returns narrative following an AI action cycle).
+2. `.claude/skills/play-orchestration/session-lifecycle.md` - Startup, save, end, cleanup procedures
+
+**Why this matters**: These contain the complete message protocol, team creation steps, and message dispatch logic. Without them, you won't know how to parse GM messages or coordinate the session.
 
 ### Initial Setup
 
@@ -133,8 +141,7 @@ You are the **orchestrator** for the D&D session. Your job is to manage the flow
    - Note narrative style and player character for the session
 
 3. **Clean up stale tmp/ files**:
-   - Delete any leftover prompt/response files in `campaigns/{campaign}/tmp/`
-   - Keep `gm-context.md` if it exists (contains continuity notes)
+   - Delete any orphaned delta files in `campaigns/{campaign}/tmp/`
 
 4. **Check for party members**:
    - List files in `campaigns/{campaign}/party/`
@@ -142,17 +149,19 @@ You are the **orchestrator** for the D&D session. Your job is to manage the flow
 
 5. **Start the session using the play-orchestration skill**
 
-### Use the Play-Orchestration Skill
+### Use the Team-Play-Orchestration Skill
 
 **IMPORTANT**: After initial setup, use the **play-orchestration skill** for all session orchestration.
 
 The skill handles:
-- Spawning and resuming the GM agent
-- Relaying narrative to the player (show everything, summarize nothing)
-- Detecting and handling `[AWAIT_AI_PLAYERS]` signals
+- Creating the team (`dnd-{campaign}`)
+- Spawning GM and Narrator as persistent teammates
+- Parsing structured messages from the GM (`[NARRATIVE]`, `[AWAIT_PLAYERS]`, `[ASK_PLAYER]`, `[STATE_UPDATED]`, `[SESSION_END]`)
+- Spawning ephemeral AI player Tasks when needed
 - Using AskUserQuestion for player decision points
-- Post-compaction recovery (the skill can be re-triggered to restore orchestration)
-- Auto-journaling (triggered automatically after GM narrative via auto-journal skill)
+- Background agent spawning for saves and journals
+- Post-compaction recovery
+- Graceful session shutdown
 
 Simply invoke the skill with the campaign name to begin orchestration.
 
@@ -160,17 +169,19 @@ Simply invoke the skill with the campaign name to begin orchestration.
 
 | Task | How |
 |------|-----|
-| Start session | Spawn GM with campaign context |
-| GM returns narrative | Relay FULL content, use AskUserQuestion if there's a choice |
-| `[AWAIT_AI_PLAYERS: ...]` | Use invoke-ai-players skill (action mode) |
-| Journaling | Automatic via auto-journal skill (no signal needed) |
-| Player responds | Resume GM with player's response |
-| Context compacted | Re-invoke play-orchestration skill |
-| Missing preferences | Ask player, save to preferences.md |
+| Start session | TeamCreate + spawn GM & Narrator teammates |
+| GM broadcasts narrative | Display FULL content to human |
+| `[AWAIT_PLAYERS]` | Spawn ephemeral AI Tasks, collect, send `[PLAYER_RESPONSES]` to GM |
+| `[ASK_PLAYER]` | Convert to AskUserQuestion, send `[PLAYER_ANSWER]` to GM |
+| `[STATE_UPDATED]` | Spawn background delta writers + journal agents |
+| `[SESSION_END]` | Display summary, shutdown teammates, TeamDelete |
+| Player responds | Send `[PLAYER_ACTION]` to GM |
+| Context compacted | Re-read files, send `[CONTEXT_REFRESH]` to GM |
+| Missing preferences | Ask player via AskUserQuestion, save to preferences.md |
 
 ### Related Skills
 
 - **play-orchestration**: Core orchestration loop (use this)
-- **invoke-ai-players**: Spawns AI player agents
 - **save-point**: Session state persistence
 - **combat-orchestration**: Combat encounter handling
+- **narrative-formatting**: Output formatting for narrative display

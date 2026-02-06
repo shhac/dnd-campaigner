@@ -58,7 +58,7 @@ campaigns/{campaign}/   # Individual campaign data
 ├── npcs/               # NPC details and secrets
 ├── items/              # Notable items and artifacts
 ├── beats/              # GM planning docs (beat sheets)
-├── scenes/             # Narrative output (written by Narrator in Teams mode, GM in legacy)
+├── scenes/             # Narrative output (written by Narrator)
 └── novel/              # Novelization output (if created)
     ├── outline.md
     ├── chapter-NN.md
@@ -84,20 +84,18 @@ campaigns/{campaign}/   # Individual campaign data
 
 ### Enforcement
 
-In Teams mode (`/play-team`), each player teammate only reads their own character sheet, their journal, and `party-knowledge.md`. The GM is trusted to include only character-appropriate information in `[GM_TO_PLAYER]` messages. Player teammates never read `story-state.md`, other character sheets, or NPC files.
+Each player teammate only reads their own character sheet, their journal, and `party-knowledge.md`. The GM is trusted to include only character-appropriate information in `[GM_TO_PLAYER]` messages. Player teammates never read `story-state.md`, other character sheets, or NPC files.
 
-In legacy mode (`/play`), AI players are ephemeral Tasks with fresh context. Pass **only** character-appropriate information via the prompt.
-
-The `/play` and `/play-team` commands handle this orchestration automatically.
+The `/play` command handles this orchestration automatically.
 
 ## Teams Architecture
 
-The `/play-team` command uses Claude Code Teams to run D&D sessions with persistent teammates instead of the legacy spin-up/spin-down model.
+The `/play` command uses Claude Code Teams to run D&D sessions with persistent teammates.
 
 ### How It Works
 
 A team named `dnd-{campaign}` is created with:
-- **GM teammate** (`gm-team` agent): Persistent for the entire session. Reads campaign files once, communicates via `SendMessage`. Broadcasts `[NARRATIVE]` to all teammates, sends `[GM_TO_PLAYER]` directly to each player teammate, sends structured messages (`[STATE_UPDATED]`, `[SESSION_END]`) to the team lead.
+- **GM teammate** (`gm` agent): Persistent for the entire session. Reads campaign files once, communicates via `SendMessage`. Broadcasts `[NARRATIVE]` to all teammates, sends `[GM_TO_PLAYER]` directly to each player teammate, sends structured messages (`[STATE_UPDATED]`, `[SESSION_END]`) to the team lead.
 - **Narrator teammate** (`narrator` agent): Observes GM broadcasts and peer DM activity. Writes scene files to `scenes/` in real-time. Output is secret-free.
 - **Player teammates** (`player-teammate` / `human-relay-player` agents): Persistent for the entire session. Each character (AI and human-controlled) is a teammate. AI players decide and act autonomously. The human's character relays GM prompts to the human and translates their decisions into in-character actions. All players communicate directly with the GM via `[PLAYER_TO_GM]` and can message each other in-character via `[PLAYER_TO_PLAYER]`. Each player self-journals at beat boundaries.
 - **Team lead** (main conversation): Lightweight delegate orchestrator. Creates the team, spawns all teammates, handles human I/O when the human-relay player requests it (via `[RELAY_TO_HUMAN]`), manages session lifecycle, and spawns background agents (delta writers, decision-log). Does NOT relay messages between GM and players — they communicate directly.
@@ -121,10 +119,6 @@ All teammate communication uses structured YAML-like tags in `SendMessage` conte
 The human's character teammate operates in one of two modes:
 - **HUMAN_RELAY** (default): Relays GM prompts to the human, translates human decisions into in-character actions. The human makes the choices; the teammate adds character voice, continuity, and personality.
 - **AUTONOMOUS**: When the human steps away, the character makes its own decisions based on personality, bonds, and flaws. Provides a "while you were away" summary when switching back.
-
-### Coexistence
-
-Both `/play` (legacy) and `/play-team` (Teams) coexist. Campaign file formats are identical — no migration needed. Skills like `combat-orchestration`, `save-point`, and `gm-special-scenarios` support both modes.
 
 ## Rules System
 
@@ -162,13 +156,13 @@ Creates PCs or NPCs with full sheets.
 ```
 /play {campaign-name}
 ```
-Starts a session using the legacy spin-up/spin-down model. You declare your character, GM orchestrates.
+Starts a session using Claude Code Teams. All participants are persistent teammates: GM, Narrator, and every player character (AI and human). The GM messages players directly; players respond directly. The human's character operates in HUMAN_RELAY mode (relays decisions to/from the human) or AUTONOMOUS mode (acts independently when the human steps away). Players self-journal at beat boundaries. The team lead is a lightweight delegate handling human I/O and session lifecycle.
 
-### Playing (Teams Mode)
+### Playing (Legacy Mode)
 ```
-/play-team {campaign-name}
+/play-legacy {campaign-name}
 ```
-Starts a session using Claude Code Teams. All participants are persistent teammates: GM, Narrator, and every player character (AI and human). The GM messages players directly; players respond directly. The human's character operates in HUMAN_RELAY mode (relays decisions to/from the human) or AUTONOMOUS mode (acts independently when the human steps away). Players self-journal at beat boundaries. The team lead is a lightweight delegate handling human I/O and session lifecycle. Both `/play` and `/play-team` coexist.
+Starts a session using the legacy spin-up/spin-down model. You declare your character, GM orchestrates. Uses ephemeral AI player agents instead of persistent teammates.
 
 ### Chatting with Characters
 ```
@@ -261,13 +255,11 @@ Chatterbox TTS voice samples for cloning. See **audiobook-orchestration/voice-sa
 ### Gameplay Agents
 - **campaign-creator**: Designs new campaigns through interactive Q&A
 - **character-creator**: Builds PCs/NPCs with proper D&D 5e stats
-- **gm**: Runs the game - narrates, controls NPCs, adjudicates rules (legacy spin-up/spin-down model, used by `/play`)
-- **gm-team**: Persistent GM teammate for Teams-based play. Communicates via SendMessage, reads campaign files once, retains context for the entire session. Messages player teammates directly with `[GM_TO_PLAYER]`. Does not write scene files (narrator handles this). Used by `/play-team`.
+- **gm**: Persistent GM teammate. Communicates via SendMessage, reads campaign files once, retains context for the entire session. Messages player teammates directly with `[GM_TO_PLAYER]`. Does not write scene files (narrator handles this).
+- **gm-legacy**: Runs the game in legacy spin-up/spin-down mode. Used by `/play-legacy`.
 - **narrator**: Persistent Narrator teammate that observes all gameplay (GM broadcasts + peer DM visibility) and writes scene files in real-time. Output is secret-free — only externally observable behavior. Feeds the novelization and audiobook pipelines.
-- **player-teammate**: Persistent AI player teammate for Teams-based play. Receives GM prompts directly, responds with actions/dialogue, can message other players in-character. Self-journals at beat boundaries. Maintains character personality across the entire session. Used by `/play-team`.
-- **human-relay-player**: Persistent human player teammate for Teams-based play. Relays GM prompts to the human, translates human decisions into in-character actions. Supports HUMAN_RELAY and AUTONOMOUS modes. Indistinguishable from AI player teammates from the GM's perspective. Used by `/play-team`.
-- **ai-player-action**: *(Deprecated — use `player-teammate` in Teams mode)* Plays a party member during action scenes (isolated context, quick-or-veto system). Used by legacy `/play`.
-- **ai-player-journal**: *(Deprecated — players self-journal in Teams mode)* Records character reflections and memories after events. Used by legacy `/play`.
+- **player-teammate**: Persistent AI player teammate. Receives GM prompts directly, responds with actions/dialogue, can message other players in-character. Self-journals at beat boundaries. Maintains character personality across the entire session.
+- **human-relay-player**: Persistent human player teammate. Relays GM prompts to the human, translates human decisions into in-character actions. Supports HUMAN_RELAY and AUTONOMOUS modes. Indistinguishable from AI player teammates from the GM's perspective.
 - **dnd-enthusiast**: Experienced D&D player/DM offering feedback on campaign design, rules, and player experience
 - **decision-log**: Records character decisions and actions after significant events to help with context reconstruction
 
@@ -289,7 +281,6 @@ Chatterbox TTS voice samples for cloning. See **audiobook-orchestration/voice-sa
 - **audiobook-assembler**: Assembles WAV segments into final audiobook files (MP3/M4A). Verifies output and reports results.
 
 ### Utility Agents
-- **narrative-writer**: *(Deprecated — players self-journal in Teams mode)* Writes narrative content to tmp/ for journal agents to read. Used by legacy `/play`.
 - **knowledge-delta-writer**: Merges party knowledge deltas into party-knowledge.md. Reads tmp/party-knowledge-delta.md and applies changes.
 - **state-delta-writer**: Merges GM state deltas into story-state.md. Reads tmp/gm-state-delta.md and applies changes.
 - **character-chat**: Meta-conversations with D&D characters outside gameplay. Fireside chat mode - READ-ONLY, does not affect campaign state.
@@ -306,11 +297,9 @@ Skills are automatically discovered by Claude based on their description. Agents
 - **random-events**: Generates weather, encounters, rumors, NPC moods to make the world feel alive
 
 ### Orchestration Skills
-- **play-orchestration**: Core orchestration loop for legacy D&D play sessions (used by `/play`)
-- **team-play-orchestration**: Core orchestration loop for Teams-based D&D play sessions. Creates a persistent team with all participants as teammates (GM, Narrator, player characters). Team lead is a lightweight delegate handling human I/O and session lifecycle. GM and players communicate directly. Used by `/play-team`.
-- **messaging-protocol**: Canonical reference for the structured message protocol used by all Teams-based agents. Defines every message tag, sender/recipient, payload format, and routing rules. Referenced by GM, players, narrator, and team lead.
-- **invoke-ai-players**: *(Deprecated — players are persistent teammates in Teams mode)* Orchestrates AI player agent spawning for legacy D&D sessions (used by `/play`)
-- **auto-journal**: *(Deprecated — players self-journal in Teams mode)* Background journaling for AI player characters after GM narrative. Used by legacy `/play`.
+- **play-orchestration**: Core orchestration loop for Teams-based D&D play sessions. Creates a persistent team with all participants as teammates (GM, Narrator, player characters). Team lead is a lightweight delegate handling human I/O and session lifecycle. GM and players communicate directly. Used by `/play`.
+- **play-orchestration-legacy**: Core orchestration loop for legacy D&D play sessions (used by `/play-legacy`)
+- **messaging-protocol**: Canonical reference for the structured message protocol used by all agents. Defines every message tag, sender/recipient, payload format, and routing rules. Referenced by GM, players, narrator, and team lead.
 - **ask-user-orchestration**: Orchestrates agents that need to ask users questions
 - **combat-orchestration**: Manages theater-of-mind D&D combat with threat assessment and pacing tiers
 - **save-point**: Manages session state persistence for D&D campaigns

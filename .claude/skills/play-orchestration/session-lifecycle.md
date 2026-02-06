@@ -1,5 +1,5 @@
 ---
-name: team-play-orchestration/session-lifecycle
+name: play-orchestration/session-lifecycle
 description: Startup, save, end, and cleanup sequences for Teams-based D&D sessions. Detailed procedures for session lifecycle management.
 ---
 
@@ -89,7 +89,7 @@ Result: AI-controlled character list
 
 ```
 Task:
-  subagent_type: gm-team
+  subagent_type: gm
   team_name: dnd-{campaign}
   name: gm
   prompt: |
@@ -365,7 +365,7 @@ The `tmp/` directory may still have files from background agents that completed 
 
 | Human Says | Team Lead Action |
 |------------|-----------------|
-| "/play-team {campaign}" | Full startup sequence |
+| "/play {campaign}" | Full startup sequence |
 | "Let's save" | Send `[SESSION_COMMAND] save` to GM |
 | "I want to stop" | Send `[SESSION_COMMAND] end` to GM |
 | "I need to step away" | Send `[MODE_SWITCH] AUTONOMOUS` to human's player |

@@ -52,27 +52,26 @@ If no destination is provided, you'll be asked where to put it.
 ```
 {destination}/.claude/
 ├── agents/
-│   ├── gm.md
-│   ├── ai-player-action.md
-│   ├── ai-player-journal.md
-│   ├── narrative-writer.md        # Utility for writing narrative files
-│   ├── decision-log.md            # Records character decisions
-│   ├── state-delta-writer.md      # Writes story state updates
-│   ├── knowledge-delta-writer.md  # Writes party knowledge updates
-│   ├── character-creator.md       # For adding new characters
-│   └── dnd-enthusiast.md          # For rules/design feedback
+│   ├── gm.md                      # Persistent GM teammate
+│   ├── narrator.md                 # Persistent Narrator teammate
+│   ├── player-teammate.md          # AI player teammate
+│   ├── human-relay-player.md       # Human player teammate
+│   ├── decision-log.md             # Records character decisions
+│   ├── state-delta-writer.md       # Writes story state updates
+│   ├── knowledge-delta-writer.md   # Writes party knowledge updates
+│   ├── character-creator.md        # For adding new characters
+│   └── dnd-enthusiast.md           # For rules/design feedback
 ├── skills/
 │   ├── dice-roll/SKILL.md
 │   ├── ability-check/SKILL.md
 │   ├── name-generator/SKILL.md
-│   ├── random-events/SKILL.md  # Weather, encounters, rumors
+│   ├── random-events/SKILL.md      # Weather, encounters, rumors
 │   ├── ask-user-orchestration/SKILL.md  # GM question handling
-│   ├── save-point/SKILL.md     # Session state persistence
-│   ├── quick-or-veto/SKILL.md  # AI player reaction pattern
+│   ├── save-point/SKILL.md         # Session state persistence
+│   ├── quick-or-veto/SKILL.md      # AI player reaction pattern
 │   ├── combat-orchestration/SKILL.md    # Combat management
-│   ├── invoke-ai-players/SKILL.md       # AI player spawning
 │   ├── play-orchestration/SKILL.md      # Session orchestration
-│   ├── auto-journal/SKILL.md            # Automatic character journaling
+│   ├── messaging-protocol/SKILL.md     # Message protocol reference
 │   └── narrative-formatting/            # Scene formatting styles
 └── commands/
     ├── play.md                 # Modified for standalone use
@@ -146,9 +145,8 @@ mkdir -p {destination}/.claude/skills/ask-user-orchestration
 mkdir -p {destination}/.claude/skills/save-point
 mkdir -p {destination}/.claude/skills/quick-or-veto
 mkdir -p {destination}/.claude/skills/combat-orchestration
-mkdir -p {destination}/.claude/skills/invoke-ai-players
 mkdir -p {destination}/.claude/skills/play-orchestration
-mkdir -p {destination}/.claude/skills/auto-journal
+mkdir -p {destination}/.claude/skills/messaging-protocol
 mkdir -p {destination}/.claude/skills/narrative-formatting/conversation
 mkdir -p {destination}/.claude/commands
 mkdir -p {destination}/templates
@@ -164,9 +162,9 @@ cp -r campaigns/{campaign}/* {destination}/
 
 Copy these agents (no modification needed):
 - `.claude/agents/gm.md`
-- `.claude/agents/ai-player-action.md`
-- `.claude/agents/ai-player-journal.md`
-- `.claude/agents/narrative-writer.md`
+- `.claude/agents/narrator.md`
+- `.claude/agents/player-teammate.md`
+- `.claude/agents/human-relay-player.md`
 - `.claude/agents/decision-log.md`
 - `.claude/agents/character-creator.md`
 - `.claude/agents/dnd-enthusiast.md`
@@ -182,9 +180,8 @@ Copy skills (no modification needed):
 - `.claude/skills/save-point/SKILL.md`
 - `.claude/skills/quick-or-veto/SKILL.md`
 - `.claude/skills/combat-orchestration/SKILL.md`
-- `.claude/skills/invoke-ai-players/SKILL.md`
 - `.claude/skills/play-orchestration/SKILL.md`
-- `.claude/skills/auto-journal/SKILL.md`
+- `.claude/skills/messaging-protocol/SKILL.md`
 - `.claude/skills/narrative-formatting/SKILL.md` (and all subdirectory files)
 
 Copy templates for ongoing content creation:

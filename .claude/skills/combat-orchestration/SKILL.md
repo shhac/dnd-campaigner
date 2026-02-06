@@ -86,14 +86,7 @@ Each turn:
 
 ## AI Player Combat Flow
 
-Request actions from ALL AI players simultaneously. How this works depends on the play mode:
-
-**Teams mode (`/play-team`):** Send `[GM_TO_PLAYER]` with `request_type: COMBAT_ACTION` to each AI player teammate directly (or send `[AWAIT_PLAYERS]` to the team lead for ephemeral players in Phase 1). Players respond via `[PLAYER_TO_GM]`.
-
-**Legacy mode (`/play`):** Write prompt files for all AI players and signal:
-```
-[AWAIT_AI_PLAYERS: grimjaw-ironforge, tilda-brannock, seraphine-dawnwhisper]
-```
+Request actions from ALL AI players simultaneously. Send `[GM_TO_PLAYER]` with `request_type: COMBAT_ACTION` to each player teammate directly. Players respond via `[PLAYER_TO_GM]`.
 
 **Character naming**: Always use full hyphenated names matching the character sheet filename.
 
@@ -110,9 +103,7 @@ Post-combat checklist:
    - [ ] Combat outcome summary
    - [ ] Loot acquired
 3. **Update party-knowledge.md** with combat results
-4. **Journal updates**: Journaling happens automatically after the GM narrative
-   - **Teams mode**: GM sends `[STATE_UPDATED]` to team lead, which triggers background journal/delta agents. Persistent player teammates (Phase 2) self-journal.
-   - **Legacy mode**: The orchestrator invokes the `auto-journal` skill after GM narrative returns.
+4. **Journal updates**: GM sends `[STATE_UPDATED]` to team lead, which triggers background delta agents and journal checkpoints. Player teammates self-journal.
 5. **Clean up** any combat-related tmp files
 
 ## Detailed Procedures
@@ -124,7 +115,5 @@ Post-combat checklist:
 
 ## Related Skills
 
-- **invoke-ai-players**: Handles `[AWAIT_AI_PLAYERS]` signals (legacy mode)
-- **team-play-orchestration**: Handles `[AWAIT_PLAYERS]` and `[GM_TO_PLAYER]` messaging (Teams mode)
-- **auto-journal**: Handles journaling after GM narrative (legacy mode; in Teams mode, `[STATE_UPDATED]` triggers background agents)
+- **play-orchestration**: Handles `[GM_TO_PLAYER]` messaging and `[STATE_UPDATED]` processing
 - **quick-or-veto**: AI player reaction pattern for combat turns

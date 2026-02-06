@@ -1,19 +1,19 @@
 ---
 name: play-orchestration
-description: Core orchestration loop for D&D play sessions. Use when orchestrating D&D play sessions, when the GM returns narrative to relay, when handling [AWAIT_AI_PLAYERS] signals, when asking the player questions via AskUserQuestion, or when context may have been compacted during a long session. MANDATORY - After spawning fresh GM post-AI-actions, trigger auto-journal skill with narrative file. This skill survives context compaction.
+description: Core orchestration loop for Teams-based D&D play sessions. Use when orchestrating D&D play sessions via Claude Code Teams, when the GM sends messages to process, when handling human relay I/O, when asking the player questions via AskUserQuestion, or when context may have been compacted during a long session. This skill survives context compaction.
 ---
 
 # Play Orchestration Skill
 
-Core orchestration logic for running D&D sessions. This skill guides the main conversation (orchestrator) through spawning the GM, relaying narrative, handling signals, and coordinating AI players.
+Core orchestration logic for running D&D sessions using Claude Code Teams. The team lead is a **lightweight delegate** — it creates the team, spawns all teammates (GM, Narrator, and player characters), handles human I/O via the human-relay player, manages session lifecycle, and spawns background agents. The GM and players communicate directly; the team lead does NOT relay messages between them.
+
+All characters (AI and human) are persistent teammates. The GM messages players directly. The team lead is a lightweight orchestrator in delegate mode.
 
 ## When This Skill Activates
 
 Use this skill when:
-- Starting a new D&D play session
-- The GM agent returns narrative to relay to the player
-- The GM outputs `[AWAIT_AI_PLAYERS: ...]` signal
-- The GM asks a question that requires AskUserQuestion
+- Starting a new D&D play session via `/play`
+- A teammate sends a message to the team lead (GM state updates, human relay requests, session end)
 - Context has been compacted during a long session (re-invoke to restore orchestration patterns)
 
 ## Quick Reference: The Orchestration Loop
@@ -28,55 +28,75 @@ Clean up orphaned delta files (rm -f tmp/*-delta.md)
 Load Preferences (or ask player)
     |
     v
-Spawn GM (with campaign context + preferences) --+
-    |                                            |
-    v                                            |
-GM narrates -> Relay to player                   |
-    |                                            |
-    v                                            |
-Player responds -> Spawn fresh GM with input     |
-    |                                            |
-    v                                            |
-[AWAIT_AI_PLAYERS] -> invoke-ai-players skill    |
-    |                 (all AI players parallel)  |
-    v                                            |
-AI players respond                               |
-    |                                            |
-    +---> decision-log (background, don't wait)  |
-    |                                            |
-    v                                            |
-Spawn fresh GM (reads gm-context.md)             |
-    |                                            |
-    v                                            |
-GM narrates with AI player actions               |
-GM writes delta files (if state changed)         |
-    |                                            |
-    +---> auto-journal (background, don't wait)  |
-    |     - Journal agents (ALL chars)           |
-    |     - state-delta-writer                   |
-    |     - knowledge-delta-writer               |
-    |                                            |
-    v                                            |
-Relay to player ----------------- ---------------+
+TeamCreate: dnd-{campaign}
     |
     v
-Loop until session ends
+Spawn GM teammate (gm agent, persistent)
+Spawn Narrator teammate (narrator agent, persistent)
+Spawn Player teammates:
+  - human-relay-player for human's character
+  - player-teammate for each AI character
+    |
+    v
+Send session-start to GM ──────────────────────────────┐
+    |                                                   |
+    v                                                   |
+GM broadcasts [NARRATIVE] -> Display to human           |
+    |                                                   |
+    v                                                   |
+GM sends [GM_TO_PLAYER] directly to players             |
+    |                                                   |
+    v                                                   |
+Human's teammate sends [RELAY_TO_HUMAN] ->              |
+    Team lead shows to human via AskUserQuestion         |
+    Team lead sends [HUMAN_DECISION] back                |
+    |                                                   |
+    v                                                   |
+All players send [PLAYER_TO_GM] directly to GM          |
+    |                                                   |
+    v                                                   |
+GM broadcasts [NARRATIVE] (with woven player actions)   |
+    |                                                   |
+    +---> [STATE_UPDATED] handler:                      |
+    |     - state-delta-writer (background)             |
+    |     - knowledge-delta-writer (background)         |
+    |     - decision-log (background)                   |
+    |     - [JOURNAL_CHECKPOINT] to player teammates    |
+    |                                                   |
+    v                                                   |
+Display narrative to human  ────────────────────────────┘
+    |
+    v
+Loop until [SESSION_END]
 ```
+
+## Message Sequencing Rules
+
+**CRITICAL**: When the GM sends multiple messages in sequence, process them in this order:
+
+1. **Display first**: Always display `[NARRATIVE]` to the human immediately upon receipt
+2. **Then act**: Process `[STATE_UPDATED]`, `[ASK_PLAYER]`, or `[RELAY_TO_HUMAN]` messages
+3. **No relay needed for player I/O**: The GM and players communicate directly
+
+The GM will send messages in this canonical order:
+1. `[NARRATIVE]` broadcast (for display, narrator capture, and player awareness)
+2. `[GM_TO_PLAYER]` directly to players (team lead NOT involved)
+3. `[STATE_UPDATED]` to team lead (if delta files were written)
 
 ## Step 0: Session Start Cleanup
 
-Before loading preferences, clean up any orphaned delta files from previous sessions:
+Before loading preferences, clean up orphaned files from previous sessions:
 
 ```bash
 # Delete any orphaned delta files from previous sessions
 rm -f campaigns/{campaign}/tmp/*-delta.md 2>/dev/null || true
 ```
 
-**Rationale**: Stale deltas from previous sessions may contain outdated information. Processing them could introduce inconsistencies, so we delete them without processing at session start.
+**Rationale**: Stale deltas from previous sessions may contain outdated information.
 
 ## Step 1: Load Preferences
 
-Before spawning the GM, check for and load player preferences.
+Before creating the team, check for and load player preferences.
 
 ### Read Preferences File
 
@@ -89,7 +109,7 @@ If the file exists, read it to extract:
 ### Handle Narrative Style
 
 If `narrative_style` is set in preferences:
-- Note it for passing to the GM (e.g., "script", "novel", "hybrid", "minimal")
+- Note it for passing to the GM
 
 If `narrative_style` is NOT set:
 - Use AskUserQuestion to ask the player:
@@ -97,7 +117,7 @@ If `narrative_style` is NOT set:
 ```
 AskUserQuestion:
   question: "What narrative style would you like for this session?"
-  header: "Narrative Style"
+  header: "Style"
   options:
     - label: "Script"
       description: "Clean dialogue format with speaker names, minimal prose"
@@ -114,71 +134,160 @@ AskUserQuestion:
 ### Handle Player Character
 
 If `player_character` is set in preferences:
-- Note it for passing to the GM (skip the "which character" question)
+- Note it for session start message to GM
 
 If `player_character` is NOT set:
-- The GM will ask during session start (or you can ask here via AskUserQuestion)
-- After the player answers, save to `campaigns/{campaign}/preferences.md`
+- List character files in `campaigns/{campaign}/party/`
+- Use AskUserQuestion with the character names as options
+- Save to `campaigns/{campaign}/preferences.md`
 
-### Preferences File Format
+## Step 2: Create Team and Spawn Teammates
 
-```markdown
-# Session Preferences
-
-## Narrative Style
-narrative_style: hybrid
-
-## Player Character
-player_character: Corwin
-```
-
-## Step 2: Spawning the GM
-
-When starting a session, spawn the GM agent with this prompt:
+### Create the Team
 
 ```
-Task: gm agent
-Prompt: Run a D&D session for the {campaign} campaign.
-
-Use {narrative_style} formatting style for dialogue and scenes.
-[If player_character is known: The player is controlling {player_character}.]
-
-First read:
-- campaigns/{campaign}/overview.md
-- campaigns/{campaign}/story-state.md
-- campaigns/{campaign}/party-knowledge.md
-- All files in campaigns/{campaign}/party/
-- Relevant NPCs from campaigns/{campaign}/npcs/
-
-Then:
-1. Summarize where we left off
-2. [If player_character unknown: Ask which character the player is controlling]
-3. Begin running the session
-
-When you need AI player input:
-1. Write prompt files to campaigns/{campaign}/tmp/
-2. Output [AWAIT_AI_PLAYERS: char1, char2] and STOP
+TeamCreate:
+  team_name: dnd-{campaign}
+  description: "D&D session for {campaign}"
 ```
 
-## Step 3: Signal Detection
+**Conflict check**: If a team `dnd-{campaign}` already exists, warn the player and ask if they want to take over the existing session or start fresh. Starting fresh means deleting the old team first.
 
-Monitor GM output for these signals:
+### Determine AI-Controlled Characters
 
-| Signal | Action | Skill to Use |
-|--------|--------|--------------|
-| `[AWAIT_AI_PLAYERS: char1, char2]` | Spawn AI players in action mode | invoke-ai-players |
-| No signal, narrative output | Relay to player, await input, resume GM | - |
-| No signal, question for player | Use AskUserQuestion, then resume GM | - |
+List all character sheets in `campaigns/{campaign}/party/` (excluding journal files `*-journal.md`). Remove the player_character from the list. The remaining characters are AI-controlled.
 
-## Step 4: Relaying GM Narrative
+### Spawn GM Teammate
 
-**CRITICAL**: Show everything, summarize nothing.
+```
+Task:
+  subagent_type: gm
+  team_name: dnd-{campaign}
+  name: gm
+  prompt: |
+    You are the Game Master for the "{campaign}" campaign.
+    Use {narrative_style} formatting style.
+    The human player controls {player_character}.
 
-When the GM returns narrative, dialogue, or scene descriptions:
-1. Strip any signal markers before displaying
-2. Relay the FULL content to the player
+    Read your campaign files and wait for the session-start message.
+```
+
+### Spawn Narrator Teammate
+
+```
+Task:
+  subagent_type: narrator
+  team_name: dnd-{campaign}
+  name: narrator
+  prompt: |
+    You are the Narrator for the "{campaign}" campaign.
+    Observe all broadcasts and peer DM activity.
+    Write scene files to campaigns/{campaign}/scenes/.
+
+    Read campaigns/{campaign}/preferences.md for narrative style.
+    Check campaigns/{campaign}/scenes/ for existing scene files
+    and continue numbering from the highest existing number + 1.
+```
+
+### Spawn Human-Relay Player Teammate
+
+```
+Task:
+  subagent_type: human-relay-player
+  team_name: dnd-{campaign}
+  name: {player_character}
+  prompt: |
+    Campaign: {campaign}
+    Character: {player_character}
+    Mode: HUMAN_RELAY
+
+    You are {player_character} in the "{campaign}" campaign.
+    The human player controls you. Relay GM prompts to the team lead
+    for human input, then translate the human's decisions into
+    in-character actions.
+
+    Read your character files and wait for the session to begin.
+```
+
+### Spawn AI Player Teammates
+
+For each AI-controlled character:
+
+```
+Task:
+  subagent_type: player-teammate
+  team_name: dnd-{campaign}
+  name: {character}
+  prompt: |
+    Campaign: {campaign}
+    Character: {character}
+
+    You are {character} in the "{campaign}" campaign.
+    Read your character files and wait for the session to begin.
+```
+
+**Spawn all player teammates in a single message with multiple Task calls** (parallel).
+
+### Send Session-Start Message to GM
+
+After all teammates are spawned:
+
+```
+SendMessage:
+  type: message
+  recipient: gm
+  content: |
+    [SESSION_COMMAND]
+    command: start
+    campaign: {campaign}
+    player_character: {player_character}
+    narrative_style: {narrative_style}
+    ai_characters:
+      - {char1}
+      - {char2}
+      - {char3}
+  summary: "Starting session for {campaign}"
+```
+
+Wait for the GM's opening `[NARRATIVE]` broadcast.
+
+## Step 3: Core Message Loop
+
+The team lead receives messages from teammates. Most player-GM communication happens directly — the team lead handles only a focused set of messages.
+
+### Messages the Team Lead Handles
+
+Reference: **messaging-protocol** skill for full message protocol (all tag formats, fields, and routing rules).
+
+| Tag | Source | Action |
+|-----|--------|--------|
+| `[NARRATIVE]` | GM (broadcast or direct) | Display to human |
+| `[RELAY_TO_HUMAN]` | Human's player teammate | Show to human, collect input, send `[HUMAN_DECISION]` back |
+| `[ASK_PLAYER]` | GM (direct) | Convert to AskUserQuestion, send `[PLAYER_ANSWER]` to GM |
+| `[STATE_UPDATED]` | GM (direct) | Spawn background delta writers, send `[JOURNAL_CHECKPOINT]` to players |
+| `[SESSION_END]` | GM (direct) | Display summary, shutdown team |
+
+### Messages the Team Lead Does NOT Handle
+
+These flow directly between GM and players — the team lead is not involved:
+
+| Tag | Flow | Notes |
+|-----|------|-------|
+| `[GM_TO_PLAYER]` | GM → Player teammate | GM prompts players directly |
+| `[PLAYER_TO_GM]` | Player teammate → GM | Players respond directly |
+| `[PLAYER_TO_PLAYER]` | Player → Player | In-character crosstalk |
+
+**Note on `[NARRATIVE]` delivery**: Normally the GM broadcasts `[NARRATIVE]` to all teammates. However, during **split party** scenarios, the GM sends `[NARRATIVE]` as a **direct message** to the team lead (not broadcast) to avoid leaking group-specific narrative to all players. Handle both delivery methods identically — strip the tag and display to the human.
+
+## Step 4: Handling [NARRATIVE] Broadcasts
+
+When the GM broadcasts a `[NARRATIVE]` message:
+
+1. **Strip the `[NARRATIVE]` tag** from the content
+2. **Display the FULL narrative to the human** — show everything, summarize nothing
 3. Use proper formatting (see Formatting Guidelines below)
-4. Never condense or paraphrase the GM's creative output
+
+**Note**: The team lead does NOT collect human input after narrative. The GM sends `[GM_TO_PLAYER]` directly to the human's player teammate, which handles relaying to the human via `[RELAY_TO_HUMAN]`.
 
 ### Formatting Guidelines
 
@@ -190,124 +299,381 @@ When the GM returns narrative, dialogue, or scene descriptions:
 | **Dice results** | Code formatting | `Perception check: 14 + 3 = 17` |
 | **GM notes/mechanics** | Parenthetical | (DC 15 - Success) |
 
-### Example: Full Scene Relay
+## Step 5: Handling [RELAY_TO_HUMAN]
 
-Instead of:
+When the human's player teammate sends `[RELAY_TO_HUMAN]`, it needs the human's input.
+
+### Parse the Message
+
 ```
-The party introduces themselves and agrees to investigate.
-```
+[RELAY_TO_HUMAN]
+character: {character}
 
-Show the full scene:
-```markdown
-The four of you settle into the corner booth, tankards between you.
+## Scene
+{What the character perceives}
 
-> **Gideon**: "So. A warehouse sealed for a decade, and someone's paying to crack it open." *He takes a long pull of his ale.* "Fifty gold to walk into the dark."
+## Decision Needed
+{What the GM is asking}
 
-*Tilda-Brannock drums her fingers on the table, her eyes scanning the room.*
-
-> **Tilda-Brannock**: "Fools with rent due. I've taken worse jobs."
-
-> **Mira-Thornwood**: *She speaks quietly.* "The posting mentioned 'disturbances.' What kind makes a merchant seal a warehouse and walk away?"
-
-*Gideon-Harrowmoor raises his mug.*
-
-> **Gideon-Harrowmoor**: "Shall we go see what's rotting in Warehouse 7?"
+## Suggested Options
+- Option A (brief description)
+- Option B (brief description)
+- (freeform always available)
 ```
 
-## Step 5: Handling Player Questions with AskUserQuestion
+### Show to Human
 
-When the GM output contains a question for the player, use AskUserQuestion rather than plain text.
-
-### When to Use AskUserQuestion
-
-| GM Output Contains | Action |
-|-------------------|--------|
-| "Which character are you playing?" | AskUserQuestion with PC names as options |
-| "What do you do?" | AskUserQuestion with common actions |
-| "Do you want to [X] or [Y]?" | AskUserQuestion with X and Y as options |
-| Any decision point | AskUserQuestion with the choices |
-
-### Character Selection Example
+Use AskUserQuestion to present the decision:
 
 ```
 AskUserQuestion:
-  question: "Which character are you playing?"
-  header: "Character"
-  options:
-    - label: "Corwin-Ashford"
-      description: "Human fighter, former city guard"
-    - label: "Tilda-Brannock"
-      description: "Half-elf rogue, ex-Flaming Fist"
-```
-
-**Note**: Character names use full hyphenated format matching the character sheet filename.
-
-### Action Decision Example
-
-```
-AskUserQuestion:
-  question: "What do you do?"
+  question: "{Decision Needed text}"
   header: "Action"
   options:
-    - label: "Investigate"
-      description: "Look around, search for clues"
-    - label: "Talk"
-      description: "Speak to someone present"
-    - label: "Attack"
-      description: "Initiate combat"
-    - label: "Move"
-      description: "Go somewhere else"
+    - label: "{Option A label}"
+      description: "{Option A description}"
+    - label: "{Option B label}"
+      description: "{Option B description}"
 ```
 
-The player can always type a custom response instead of selecting an option.
+The player can always type a custom response via "Other".
 
-## Step 6: Spawning a Fresh GM (After Signals)
-
-After handling signals or player input, spawn a **fresh** GM agent (do NOT resume):
-
-**Why fresh spawn?** The GM agent doesn't properly "complete" before yielding control - the "STOP" instruction is just prompt text, not an API-level mechanism. Resuming incomplete agents causes 400 errors. Continuity is maintained via `gm-context.md`.
+### Send Human's Response Back
 
 ```
-Task: gm agent
-Prompt: Continue the session for {campaign}.
+SendMessage:
+  type: message
+  recipient: {player_character}
+  content: |
+    [HUMAN_DECISION]
+    character: {player_character}
 
-**First**: Read your context notes from campaigns/{campaign}/tmp/gm-context.md
-to restore continuity from before the handoff. This is CRITICAL for session flow.
-
-Use {narrative_style} formatting style for dialogue and scenes.
-
-[Include context based on what happened:]
-- If player responded: "Player said: {response}"
-- If action mode complete: "AI player responses ready in tmp/"
-
-Read any response files if applicable and continue.
+    {human's selection or typed response}
+  summary: "{player_character} decides"
 ```
 
-## Signal Handling Details
+The human's player teammate translates the response into in-character action and sends `[PLAYER_TO_GM]` directly to the GM.
 
-### [AWAIT_AI_PLAYERS] Signal
+### Dice Rolling for Human
 
-1. Strip the signal from displayed output
-2. Show any narrative that preceded the signal
-3. **Use the invoke-ai-players skill** to spawn AI players in action mode
-4. After all AI players complete, spawn fresh GM
-5. **⚠️ MANDATORY: After GM returns narrative, trigger auto-journal** (see checkpoint below)
+When the human's player teammate or the GM needs dice rolled for the human's character, the team lead performs the roll using the `toss` CLI (via the dice-roll skill) and sends the result:
 
----
+```
+SendMessage:
+  type: message
+  recipient: gm
+  content: |
+    [DICE_RESULT]
+    character: {player_character}
+    check: Stealth
+    roll: "1d20+5 = [8]+5 = 13"
+    dc: 12
+    result: success
+  summary: "{player_character} rolls {check}"
+```
 
-## ⚠️ MANDATORY CHECKPOINT: Post-AI-Action Journaling
+## Step 6: Handling [ASK_PLAYER]
 
-**CRITICAL**: After the GM narrates the results of an `[AWAIT_AI_PLAYERS]` cycle, you MUST trigger auto-journaling.
+When the GM sends `[ASK_PLAYER]`, convert it to an AskUserQuestion call.
 
-**MUST load**: `auto-journal/when-to-invoke` for detection rules and trigger conditions.
+### Parse the Message
 
-**MUST load**: `auto-journal/implementation` for the two-step journaling process.
+```
+[ASK_PLAYER]
+question: "Which character are you playing this session?"
+header: "Character"
+options:
+  - label: "Corwin Voss"
+    description: "Human rogue, haunted by his past"
+  - label: "New character"
+    description: "Create a new character for this campaign"
+```
 
-**Detection**: If you just spawned a fresh GM after AI players responded, and the GM returned narrative (not another signal), this is a journaling checkpoint.
+### Convert to AskUserQuestion
 
-**Do NOT skip this step.** AI player memories depend on journaling.
+Map the fields directly:
 
----
+```
+AskUserQuestion:
+  question: {question}
+  header: {header}
+  options: {options array}
+```
+
+### Send Answer to GM
+
+```
+SendMessage:
+  type: message
+  recipient: gm
+  content: |
+    [PLAYER_ANSWER]
+    question: "{original question}"
+    answer: "{human's selection or typed response}"
+  summary: "Player answered: {brief answer}"
+```
+
+## Step 7: Handling [STATE_UPDATED]
+
+When the GM sends `[STATE_UPDATED]`, it means delta files have been written to `campaigns/{campaign}/tmp/`. Spawn background agents to process them and signal players to journal.
+
+### Parse the Message
+
+```
+[STATE_UPDATED]
+deltas_written:
+  - gm-state-delta.md
+  - party-knowledge-delta.md
+characters_involved:
+  - tilda-brannock
+  - grimjaw-ironforge
+```
+
+### Spawn Background Agents
+
+Spawn ALL of these in a single message (parallel, all `run_in_background: true`):
+
+**State Delta Writer:**
+```
+Task:
+  subagent_type: state-delta-writer
+  run_in_background: true
+  prompt: "Campaign: {campaign}"
+```
+
+**Knowledge Delta Writer:**
+```
+Task:
+  subagent_type: knowledge-delta-writer
+  run_in_background: true
+  prompt: "Campaign: {campaign}"
+```
+
+**Decision-Log (if player actions preceded this state update):**
+```
+Task:
+  subagent_type: decision-log
+  run_in_background: true
+  prompt: |
+    Campaign: {campaign}
+    Scene: {scene_number} - {scene_slug}
+    Characters involved: {characters_involved list}
+```
+
+### Send Journal Checkpoints to Player Teammates
+
+After spawning background agents, signal all player teammates to write journal entries:
+
+```
+SendMessage:
+  type: message
+  recipient: {character-1}
+  content: |
+    [JOURNAL_CHECKPOINT]
+    campaign: {campaign}
+    scene_number: {scene_number}
+    scene_slug: {scene_slug}
+    trigger: state_updated
+  summary: "Journal checkpoint"
+```
+
+Send one `[JOURNAL_CHECKPOINT]` to each player teammate (AI and human-relay). Each player writes their own journal entry. **Do not wait for journal confirmations** — they are fire-and-forget from the team lead's perspective.
+
+### When to Skip Journaling
+
+- If `[STATE_UPDATED]` arrives without a preceding player action cycle (e.g., pure atmospheric narration with a state save), still spawn delta writers but skip `[JOURNAL_CHECKPOINT]`
+- Track whether the most recent beat involved player actions to determine this
+
+## Step 8: Handling [SESSION_END]
+
+When the GM sends `[SESSION_END]`:
+
+### Parse the Message
+
+```
+[SESSION_END]
+summary: |
+  The party investigated the warehouse district, discovered the smuggling
+  operation, and descended into the tunnels beneath the city.
+state_saved: true
+next_hook: "The tunnel stretches into darkness. Something is breathing down there."
+```
+
+### Shutdown Sequence
+
+See [session-lifecycle.md](session-lifecycle.md) for the full shutdown procedure.
+
+Quick reference:
+1. Display the session summary to the human
+2. Display the next hook (cliffhanger for next session)
+3. Send final `[JOURNAL_CHECKPOINT]` with `trigger: session_end` to all player teammates
+4. Wait for any running background tasks to complete
+5. Send `shutdown_request` to all teammates (GM, Narrator, all player teammates)
+6. After all teammates confirm shutdown, call TeamDelete
+
+## Step 9: Handling [MODE_SWITCH] (Human Player Away/Back)
+
+When the human player steps away or returns, send a mode switch to their character teammate:
+
+### Player Steps Away
+
+```
+SendMessage:
+  type: message
+  recipient: {player_character}
+  content: |
+    [MODE_SWITCH]
+    mode: AUTONOMOUS
+    reason: "Player stepped away"
+  summary: "Switching to autonomous mode"
+```
+
+The human's character teammate will begin making its own decisions.
+
+### Player Returns
+
+```
+SendMessage:
+  type: message
+  recipient: {player_character}
+  content: |
+    [MODE_SWITCH]
+    mode: HUMAN_RELAY
+    reason: "Player returned"
+  summary: "Switching back to human relay"
+```
+
+The character teammate will send a `[RELAY_TO_HUMAN]` with a "While you were away" summary. Display this to the human.
+
+## Human-Initiated Session Commands
+
+The human player can request saves or session end at any time.
+
+### "Let's save"
+
+```
+SendMessage:
+  type: message
+  recipient: gm
+  content: |
+    [SESSION_COMMAND]
+    command: save
+    reason: "Player requested save"
+  summary: "Player requests save"
+```
+
+The GM will write delta files and send `[STATE_UPDATED]`.
+
+### "I want to stop" / "Let's end the session"
+
+```
+SendMessage:
+  type: message
+  recipient: gm
+  content: |
+    [SESSION_COMMAND]
+    command: end
+    reason: "Player wants to end the session"
+  summary: "Player requests session end"
+```
+
+The GM will find a good stopping point, perform a final save, and send `[SESSION_END]`.
+
+## Post-Compaction Recovery
+
+If this skill is invoked after context compaction:
+
+1. You are the team lead for a D&D session using Claude Code Teams
+2. Re-read `campaigns/{campaign}/preferences.md` to restore narrative style and player character
+3. Read the team config at `~/.claude/teams/dnd-{campaign}/config.json` to verify teammates are still active
+4. All teammates (GM, Narrator, player characters) should still be running as persistent teammates
+5. Resume the message loop — wait for the next teammate message
+6. If unclear what state the session is in, send a `[CONTEXT_REFRESH]` to the GM:
+
+```
+SendMessage:
+  type: message
+  recipient: gm
+  content: |
+    [CONTEXT_REFRESH]
+    campaign: {campaign}
+    current_scene: "{latest scene number from scenes/ directory}"
+    last_narrative_summary: "Context was compacted. Please recap the current situation."
+  summary: "Context refresh after compaction"
+```
+
+The GM will re-read its campaign files and provide a recap via `[NARRATIVE]` broadcast.
+
+7. Also send `[CONTEXT_REFRESH]` to any player teammates that seem to have lost context:
+
+```
+SendMessage:
+  type: message
+  recipient: {character}
+  content: |
+    [CONTEXT_REFRESH]
+    campaign: {campaign}
+    current_scene: "{scene number}"
+    last_narrative_summary: "Context was compacted. Re-read your files."
+  summary: "Context refresh for {character}"
+```
+
+## Error Handling
+
+### GM Doesn't Respond
+
+If the GM doesn't send any message after a reasonable wait:
+1. Send a `[CONTEXT_REFRESH]` message
+2. If still no response, check team config to verify GM is active
+3. If GM is not active, respawn it with session context
+
+### Player Teammate Stops Responding
+
+If a player teammate goes silent:
+1. Check team config to verify it's active
+2. If active, send `[CONTEXT_REFRESH]`
+3. If not active, respawn with character context. The player's journal serves as durable memory.
+
+### Teammate Goes Down
+
+If a teammate stops unexpectedly:
+- **GM**: Respawn with `[CONTEXT_REFRESH]`. GM re-reads campaign files and scene files to recover.
+- **Narrator**: Respawn with campaign context. Narrator reads existing scene files to continue numbering.
+- **Player teammate**: Respawn with character identity. Re-reads character sheet, party-knowledge, and journal.
+
+### Unrecognized Messages
+
+If a message from a teammate doesn't start with a recognized tag:
+- Treat it as informal communication
+- Display it to the human if it seems player-facing
+- Log a note that an untagged message was received
+
+## Parallelization Guidelines
+
+### What Runs in Parallel
+
+| Task Type | Details |
+|-----------|---------|
+| **Player teammate spawning** | All player teammates spawn simultaneously at session start |
+| **Background agents** | Delta writers, decision-log all spawn in parallel |
+| **Journal checkpoints** | All player teammates receive checkpoints simultaneously |
+| **GM + Player communication** | Happens directly; team lead not involved |
+
+### What Must Be Sequential
+
+| Dependency | Reason |
+|-----------|--------|
+| **Team creation before teammate spawning** | Team must exist before spawning members |
+| **GM spawned before session-start message** | GM must be active to receive messages |
+| **Narrative displayed before human input collected** | Human must read the scene before deciding |
+| **Delta files written before journal checkpoints** | Players may re-read party-knowledge during journaling |
+
+### Fire-and-Forget Tasks
+
+These run in background without blocking the session:
+- **Decision-log**: Records player decisions
+- **Delta writers**: Merge state/knowledge changes
+- **Journal entries**: Players self-journal (no orchestration needed beyond the checkpoint signal)
 
 ## Scene Flow: PC Actions Before NPC Responses
 
@@ -319,206 +685,14 @@ When the player chooses an action or dialogue approach:
 
 Always show what the PC says/does before showing NPC reactions.
 
-## Automatic Journaling
-
-Journaling is now automatic via the `auto-journal` skill. The orchestrator triggers journaling after the GM returns narrative following an AI action cycle.
-
-**REQUIRED**: Load the `auto-journal/when-to-invoke` skill for checkpoint/trigger rules.
-
-**REQUIRED**: Load the `auto-journal/implementation` skill for the two-step journaling process.
-
-### Quick Reference
-
-Auto-journal runs after the GM narrates the results of an `[AWAIT_AI_PLAYERS]` cycle:
-
-1. GM signals `[AWAIT_AI_PLAYERS: char1, char2]`
-2. AI players respond with actions
-3. GM resumes and narrates what happened
-4. **Orchestrator triggers auto-journal** (background, don't wait)
-5. Continue with player interaction
-
-### Invocation
-
-```
-Skill: auto-journal
-Args: {campaign} {char1},{char2},{char3},{char4}
-```
-
-Include ALL party members (both AI-controlled and human-controlled characters).
-
-## Decision-Log Integration
-
-After AI players respond to action prompts, invoke the decision-log agent to record what happened. This creates a reconstruction trail for debugging and continuity.
-
-### When to Invoke Decision-Log
-
-Invoke the decision-log agent:
-- **After** AI players complete their action responses
-- **In parallel** with resuming the GM (fire-and-forget)
-- At other significant decision points (optional)
-
-### Decision-Log Flow
-
-```
-[AWAIT_AI_PLAYERS] signal received
-    |
-    v
-Spawn AI players (action mode)
-    |
-    v
-Collect responses
-    |
-    +---> Invoke decision-log agent (background, fire-and-forget)
-    |
-    v
-Resume GM with responses (don't wait for decision-log)
-```
-
-### Decision-Log Invocation
-
-Run decision-log with `run_in_background: true` - don't wait for it. The agent reads response files from `tmp/` and appends to `decision-log.md`, which doesn't conflict with the GM's workflow.
-
-```
-Task: decision-log agent (run_in_background: true)
-Prompt: Record the following AI player decisions for {campaign}.
-
-Characters involved: {char1}, {char2}
-Scene context: {brief scene description}
-
-Responses are in campaigns/{campaign}/tmp/
-
-Record these for session reconstruction.
-```
-
-The decision-log agent handles file management and formatting.
-
-## Human Player Character Journaling
-
-The human player's character is included in automatic journaling alongside AI characters.
-
-**Key point**: Include ALL party members (AI + human) in the auto-journal invocation. See `auto-journal/implementation` for details and examples.
-
-## Parallelization Guidelines
-
-Understanding what can run in parallel vs. sequentially is critical for efficient orchestration.
-
-### What Runs in Parallel
-
-| Task Type | Details |
-|-----------|---------|
-| **AI player actions** | All AI players in an AWAIT_AI_PLAYERS batch spawn simultaneously |
-| **Auto-journal** | All characters (AI + human) journal simultaneously via auto-journal skill |
-| **Decision-log** | Runs in background while GM continues (fire-and-forget) |
-| **Delta writers** | state-delta-writer and knowledge-delta-writer run in parallel with journals |
-
-### What Must Be Sequential
-
-| Dependency | Reason |
-|-----------|--------|
-| **Prompt files before spawn** | GM must write prompts before AI players can read them |
-| **AI responses before GM resume** | GM needs the response content to continue narration |
-| **Player input before GM resume** | GM waits for human player's chosen action |
-| **Narrative file before auto-journal** | Orchestrator writes narrative before invoking auto-journal skill |
-
-### Fire-and-Forget Tasks
-
-These tasks can run in background without waiting:
-- **Decision-log**: Reads response files and appends to log - no conflict with GM
-- **Auto-journal**: Always runs in background - journal agents don't block story progression
-- **Delta writers**: Skip gracefully if no delta files exist; delete delta files after processing
-
-### Parallelization Flow Example
-
-```
-[AWAIT_AI_PLAYERS: gideon-harrowmoor, mira-thornwood, tilda-brannock]
-    |
-    +---> Spawn gideon-harrowmoor agent ----+
-    +---> Spawn mira-thornwood agent -------+---> Collect all responses
-    +---> Spawn tilda-brannock agent -------+
-                                            |
-                                            +---> decision-log (background, don't wait)
-                                            |
-                                            v
-                                       Resume GM
-                                            |
-                                            v
-                                   GM narrates results
-                                   GM writes delta files (if state changed)
-                                            |
-                                            +---> auto-journal skill (background)
-                                            |     - Journal agents (all chars)
-                                            |     - state-delta-writer
-                                            |     - knowledge-delta-writer
-                                            |
-                                            v
-                                    Relay to player
-```
-
-### Key Principle
-
-**Spawn all agents in a batch simultaneously.** Don't wait for one character before starting another. The only sequential requirement is having prompt files ready before spawning.
-
-## Post-Compaction Recovery
-
-If this skill is invoked after context compaction:
-
-1. You are the orchestrator for a D&D session
-2. Re-read `campaigns/{campaign}/preferences.md` to restore narrative style and player character settings
-3. There should be an active GM agent running the campaign
-4. Resume the orchestration loop from wherever it was interrupted
-5. If unclear what state the session is in, resume GM and ask it to recap
-6. When resuming GM, include the narrative style preference to maintain consistent formatting
-
-## Error Handling
-
-### GM Doesn't Return
-
-If the GM agent seems stuck:
-- Resume it with "Continue narrating"
-- Or provide a gentle prompt about what happened last
-
-### Timeout/Stuck Detection
-
-If the GM agent doesn't return after a reasonable time:
-
-1. **First attempt**: Try resuming with "Continue narrating from where you left off"
-2. **Second attempt**: If resume fails, try once more with added context from story-state.md:
-   ```
-   Continue the session. Here's the current state for context:
-   [Include relevant excerpt from story-state.md]
-   Continue narrating from where you left off.
-   ```
-3. **Third attempt**: If still stuck, try a fresh GM spawn with full context reload
-4. **After 3 failed attempts**: Inform the user the session may need manual intervention:
-   ```
-   The GM agent appears stuck and hasn't responded after multiple recovery attempts.
-   You may need to:
-   - Check story-state.md for any corruption
-   - Verify the campaign files are intact
-   - Try starting a fresh session with /play
-   ```
-
-**Important**: Always save current state before any recovery attempts:
-- Ensure `gm-context.md` reflects the last known good state
-- Check that any pending delta files are processed
-- Note the last successful narrative exchange for manual recovery if needed
-
-### AI Players Don't Complete
-
-If some AI players fail:
-- Resume GM anyway with available responses
-- GM will handle missing responses
-
-### Missing Files
-
-If prompt/response files are missing:
-- Check `campaigns/{campaign}/tmp/` exists
-- GM is responsible for writing prompts before signaling
-
 ## Related Skills
 
-- **invoke-ai-players**: Handles AI player spawning for action mode
-- **auto-journal**: Triggers automatic journaling for all characters after AI action cycles
+- **messaging-protocol**: Canonical message format reference (all tags, fields, routing)
 - **save-point**: Manages session state persistence
 - **combat-orchestration**: Special handling for combat encounters
-- **decision-log** (agent): Records AI player decisions for session reconstruction
+- **quick-or-veto**: AI player reaction pattern (transport-agnostic)
+- **narrative-formatting**: Output formatting for narrative display
+
+## Session Lifecycle
+
+For detailed startup, save, and shutdown procedures, see [session-lifecycle.md](session-lifecycle.md).

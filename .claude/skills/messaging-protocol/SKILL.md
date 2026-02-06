@@ -21,34 +21,30 @@ Canonical reference for all structured message types used in Teams-based D&D ses
 
 ## Quick Reference Table
 
-| Tag | Sender | Recipient | Transport | Phase |
-|-----|--------|-----------|-----------|-------|
-| [`[NARRATIVE]`](#narrative) | GM | All (broadcast) | broadcast | 1+ |
-| [`[GM_TO_PLAYER]`](#gm_to_player) | GM | Specific player | message (Phase 2) / Task prompt (Phase 1) | 1+ |
-| [`[ASK_PLAYER]`](#ask_player) | GM | Team lead | message | 1+ |
-| [`[STATE_UPDATED]`](#state_updated) | GM | Team lead | message | 1+ |
-| [`[SESSION_END]`](#session_end) | GM | Team lead | message | 1+ |
-| [`[NARRATOR_NOTE]`](#narrator_note) | GM or Player | Narrator | message | 1+ |
-| [`[AWAIT_PLAYERS]`](#await_players) | GM | Team lead | message | **1 only** |
-| [`[PLAYER_ACTION]`](#player_action) | Team lead | GM | message | 1+ |
-| [`[DICE_RESULT]`](#dice_result) | Team lead | GM | message | 1+ |
-| [`[PLAYER_ANSWER]`](#player_answer) | Team lead | GM | message | 1+ |
-| [`[PLAYER_RESPONSES]`](#player_responses) | Team lead | GM | message | **1 only** |
-| [`[SESSION_COMMAND]`](#session_command) | Team lead | GM | message | 1+ |
-| [`[CONTEXT_REFRESH]`](#context_refresh) | Team lead | Any teammate | message | 1+ |
-| [`[HUMAN_DECISION]`](#human_decision) | Team lead | Human's player teammate | message | **2+** |
-| [`[MODE_SWITCH]`](#mode_switch) | Team lead | Human's player teammate | message | **2+** |
-| [`[PLAYER_TO_GM]`](#player_to_gm) | Player teammate | GM | message | **2+** |
-| [`[PLAYER_TO_PLAYER]`](#player_to_player) | Player teammate | Player teammate | message | **2+** |
-| [`[RELAY_TO_HUMAN]`](#relay_to_human) | Human's player teammate | Team lead | message | **2+** |
-| [`[NARRATOR_REQUEST]`](#narrator_request) | Narrator | GM | message | 1+ |
-| [`[JOURNAL_CHECKPOINT]`](#journal_checkpoint) | Team lead | Player teammates | message | **2+** |
+| Tag | Sender | Recipient | Transport |
+|-----|--------|-----------|-----------|
+| [`[NARRATIVE]`](#narrative) | GM | All (broadcast) | broadcast |
+| [`[GM_TO_PLAYER]`](#gm_to_player) | GM | Specific player | message |
+| [`[ASK_PLAYER]`](#ask_player) | GM | Team lead | message |
+| [`[STATE_UPDATED]`](#state_updated) | GM | Team lead | message |
+| [`[SESSION_END]`](#session_end) | GM | Team lead | message |
+| [`[NARRATOR_NOTE]`](#narrator_note) | GM or Player | Narrator | message |
+| [`[PLAYER_ACTION]`](#player_action) | Team lead | GM | message |
+| [`[DICE_RESULT]`](#dice_result) | Team lead | GM | message |
+| [`[PLAYER_ANSWER]`](#player_answer) | Team lead | GM | message |
+| [`[SESSION_COMMAND]`](#session_command) | Team lead | GM | message |
+| [`[CONTEXT_REFRESH]`](#context_refresh) | Team lead | Any teammate | message |
+| [`[HUMAN_DECISION]`](#human_decision) | Team lead | Human's player teammate | message |
+| [`[MODE_SWITCH]`](#mode_switch) | Team lead | Human's player teammate | message |
+| [`[PLAYER_TO_GM]`](#player_to_gm) | Player teammate | GM | message |
+| [`[PLAYER_TO_PLAYER]`](#player_to_player) | Player teammate | Player teammate | message |
+| [`[RELAY_TO_HUMAN]`](#relay_to_human) | Human's player teammate | Team lead | message |
+| [`[NARRATOR_REQUEST]`](#narrator_request) | Narrator | GM | message |
+| [`[JOURNAL_CHECKPOINT]`](#journal_checkpoint) | Team lead | Player teammates | message |
 
 ---
 
-## Phase 1 Messages (Foundation)
-
-These messages are available from Phase 1 onward. Some are retained across all phases; two are deprecated in Phase 2 (marked below).
+## GM → Team Messages
 
 ---
 
@@ -59,8 +55,6 @@ Player-facing narration broadcast to all teammates.
 - **Sender**: GM
 - **Recipient**: All teammates (broadcast)
 - **Transport**: `SendMessage` with `type: broadcast`
-- **Phase**: 1+ (all phases)
-
 **Payload:**
 ```
 [NARRATIVE]
@@ -75,9 +69,9 @@ No structured fields — the entire content after the tag is free-form narrative
 **When sent:** After the GM narrates a scene beat, describes an outcome, or opens a new scene. The GM should include woven-in player actions and dialogue from the current beat.
 
 **Expected responses:**
-- Team lead: Strips tag, displays to human. If narrative ends with a prompt, collects human input and sends `[PLAYER_ACTION]`.
+- Team lead: Strips tag, displays to human.
 - Narrator: Captures to scene file.
-- Player teammates (Phase 2): Receive scene awareness.
+- Player teammates: Receive scene awareness.
 
 **Split party exception:** During split party scenarios, the GM sends `[NARRATIVE]` as a **direct message** to the team lead (not broadcast) to avoid leaking group-specific narrative to all players. Include a note indicating which group the narrative is for. Send `[NARRATOR_NOTE]` separately so the narrator can capture both threads.
 
@@ -88,9 +82,8 @@ No structured fields — the entire content after the tag is free-form narrative
 Character-specific prompt sent to a single player.
 
 - **Sender**: GM
-- **Recipient**: Specific player teammate (Phase 2) or included in `[AWAIT_PLAYERS]` for ephemeral Tasks (Phase 1)
-- **Transport**: `SendMessage` with `type: message` (Phase 2) / Task prompt (Phase 1)
-- **Phase**: 1+ (transport differs by phase)
+- **Recipient**: Specific player teammate
+- **Transport**: `SendMessage` with `type: message`
 
 **Payload:**
 ```
@@ -120,9 +113,7 @@ scene_slug: the-warehouse-heist
 
 **Information isolation (CRITICAL):** Include ONLY what this character would know. Never include content from `story-state.md`, other characters' secrets, or NPC hidden motivations.
 
-**Expected response:**
-- Phase 2: Player sends `[PLAYER_TO_GM]` directly to GM.
-- Phase 1: Response comes bundled in `[PLAYER_RESPONSES]` from team lead.
+**Expected response:** Player sends `[PLAYER_TO_GM]` directly to GM.
 
 ---
 
@@ -133,7 +124,6 @@ Structured question for the human player, routed through team lead.
 - **Sender**: GM
 - **Recipient**: Team lead
 - **Transport**: `SendMessage` with `type: message`
-- **Phase**: 1+ (all phases)
 
 **Payload:**
 ```
@@ -160,58 +150,6 @@ options:
 
 ---
 
-### `[AWAIT_PLAYERS]` {#await_players}
-
-Request for AI player input, sent to team lead for ephemeral Task spawning.
-
-- **Sender**: GM
-- **Recipient**: Team lead
-- **Transport**: `SendMessage` with `type: message`
-- **Phase**: **1 only** — deprecated in Phase 2
-
-> **Deprecation notice:** In Phase 2, the GM messages player teammates directly with `[GM_TO_PLAYER]` instead of routing through the team lead. This message type is retained only for Phase 1 backward compatibility.
-
-**Payload:**
-```
-[AWAIT_PLAYERS]
-characters:
-  - name: tilda-brannock
-    request_type: QUICK_REACTION
-    scene_context: |
-      Inside dark warehouse, sneaking past guards.
-    just_happened: |
-      Aldric is signaling back about the trap.
-    request: "Brief reaction or [VETO]."
-  - name: grimjaw-ironforge
-    request_type: QUICK_REACTION
-    scene_context: |
-      Inside dark warehouse. Aldric found the crate but there's a tripwire.
-    just_happened: |
-      Aldric paused and is gesturing about something on the ground.
-    request: "Brief reaction or [VETO]."
-
-scene_number: 005
-scene_slug: the-warehouse-heist
-```
-
-**Fields:**
-| Field | Required | Description |
-|-------|----------|-------------|
-| `characters` | Yes | Array of character request objects |
-| `characters[].name` | Yes | Full hyphenated character name matching sheet filename |
-| `characters[].request_type` | Yes | One of: `QUICK_REACTION`, `FULL_CONTEXT`, `COMBAT_ACTION`, `SECRET_ACTION` |
-| `characters[].scene_context` | Yes | What this character perceives (isolated per character) |
-| `characters[].just_happened` | Yes | What triggered this request (from this character's perspective) |
-| `characters[].request` | Yes | What the GM needs from this character |
-| `scene_number` | Yes | Current scene number |
-| `scene_slug` | Yes | Current scene slug |
-
-**When sent:** When the GM needs reactions from multiple AI characters in Phase 1.
-
-**Expected response:** Team lead spawns ephemeral `ai-player-action` Tasks in parallel, collects responses, sends `[PLAYER_RESPONSES]` to GM. After sending, the GM **waits** for `[PLAYER_RESPONSES]` before continuing.
-
----
-
 ### `[STATE_UPDATED]` {#state_updated}
 
 Signal that delta files have been written to disk.
@@ -219,7 +157,6 @@ Signal that delta files have been written to disk.
 - **Sender**: GM
 - **Recipient**: Team lead
 - **Transport**: `SendMessage` with `type: message`
-- **Phase**: 1+ (all phases)
 
 **Payload:**
 ```
@@ -245,8 +182,8 @@ characters_involved:
 **Expected response:** Team lead spawns background agents:
 - `state-delta-writer` (processes `gm-state-delta.md`)
 - `knowledge-delta-writer` (processes `party-knowledge-delta.md`)
-- Phase 1: `ai-player-journal` Tasks + `decision-log` (if AI action cycle preceded)
-- Phase 2: `decision-log` only (players self-journal)
+- `decision-log` (if player action cycle preceded)
+- Sends `[JOURNAL_CHECKPOINT]` to all player teammates (players self-journal)
 
 ---
 
@@ -257,7 +194,6 @@ Session is complete.
 - **Sender**: GM
 - **Recipient**: Team lead
 - **Transport**: `SendMessage` with `type: message`
-- **Phase**: 1+ (all phases)
 
 **Payload:**
 ```
@@ -289,7 +225,6 @@ Human player's declared action, forwarded by the team lead.
 - **Sender**: Team lead
 - **Recipient**: GM
 - **Transport**: `SendMessage` with `type: message`
-- **Phase**: 1+ (all phases)
 
 **Payload:**
 ```
@@ -317,7 +252,6 @@ Dice roll outcome sent by the team lead after rolling for the human player.
 - **Sender**: Team lead
 - **Recipient**: GM
 - **Transport**: `SendMessage` with `type: message`
-- **Phase**: 1+ (all phases)
 
 **Payload:**
 ```
@@ -342,44 +276,6 @@ result: success
 
 ---
 
-### `[PLAYER_RESPONSES]` {#player_responses}
-
-Bundled AI player responses collected by the team lead from ephemeral Tasks.
-
-- **Sender**: Team lead
-- **Recipient**: GM
-- **Transport**: `SendMessage` with `type: message`
-- **Phase**: **1 only** — deprecated in Phase 2
-
-> **Deprecation notice:** In Phase 2, player teammates respond directly to the GM with `[PLAYER_TO_GM]`. This message type is retained only for Phase 1 backward compatibility.
-
-**Payload:**
-```
-[PLAYER_RESPONSES]
-responses:
-  - character: tilda-brannock
-    response: |
-      Tilda's hand drops to her sword. "Easy there."
-  - character: grimjaw-ironforge
-    response: |
-      Grimjaw grunts and moves to block the door.
-vetoes:
-  - character: seraphine-duskhollow
-    reason: "This NPC is connected to my backstory."
-```
-
-**Fields:**
-| Field | Required | Description |
-|-------|----------|-------------|
-| `responses` | Yes | Array of `{character, response}` objects |
-| `vetoes` | No | Array of `{character, reason}` for players who vetoed |
-
-**When sent:** After the team lead collects all ephemeral AI player Task results.
-
-**Expected response:** GM reads responses, weaves into narrative. If vetoes present, GM sends new `[AWAIT_PLAYERS]` with `request_type: FULL_CONTEXT` for vetoing characters.
-
----
-
 ### `[PLAYER_ANSWER]` {#player_answer}
 
 Human's answer to a structured `[ASK_PLAYER]` question.
@@ -387,7 +283,6 @@ Human's answer to a structured `[ASK_PLAYER]` question.
 - **Sender**: Team lead
 - **Recipient**: GM
 - **Transport**: `SendMessage` with `type: message`
-- **Phase**: 1+ (all phases)
 
 **Payload:**
 ```
@@ -413,7 +308,6 @@ Human-initiated session control (save or end).
 - **Sender**: Team lead
 - **Recipient**: GM
 - **Transport**: `SendMessage` with `type: message`
-- **Phase**: 1+ (all phases)
 
 **Payload:**
 ```
@@ -454,7 +348,6 @@ Post-compaction recovery signal.
 - **Sender**: Team lead
 - **Recipient**: Any teammate (GM, narrator, or player)
 - **Transport**: `SendMessage` with `type: message`
-- **Phase**: 1+ (all phases)
 
 **Payload:**
 ```
@@ -484,7 +377,6 @@ Emphasis request or supplementary scene information for the narrator.
 - **Sender**: GM or any player teammate
 - **Recipient**: Narrator
 - **Transport**: `SendMessage` with `type: message`
-- **Phase**: 1+ (all phases)
 
 **Payload:**
 ```
@@ -515,7 +407,6 @@ Narrator requests missing information from the GM.
 - **Sender**: Narrator
 - **Recipient**: GM
 - **Transport**: `SendMessage` with `type: message`
-- **Phase**: 1+ (all phases)
 
 **Payload:**
 ```
@@ -536,9 +427,7 @@ request: "I have a gap in the warehouse scene — can you summarize what happene
 
 ---
 
-## Phase 2 Messages (Full Teammates)
-
-These messages are introduced in Phase 2 when all characters become persistent teammates.
+## Player → GM Messages
 
 ---
 
@@ -549,7 +438,6 @@ Player teammate's action, reaction, or veto sent directly to the GM.
 - **Sender**: Player teammate (AI or human-relay)
 - **Recipient**: GM
 - **Transport**: `SendMessage` with `type: message`
-- **Phase**: **2+**
 
 **Payload (action/reaction):**
 ```
@@ -595,7 +483,6 @@ In-character dialogue between player teammates.
 - **Sender**: Player teammate
 - **Recipient**: Another player teammate
 - **Transport**: `SendMessage` with `type: message`
-- **Phase**: **2+**
 
 **Payload:**
 ```
@@ -629,7 +516,6 @@ Human's character teammate requests human input via the team lead.
 - **Sender**: Human's player teammate
 - **Recipient**: Team lead
 - **Transport**: `SendMessage` with `type: message`
-- **Phase**: **2+**
 
 **Payload:**
 ```
@@ -668,7 +554,6 @@ Human's response relayed to their character teammate.
 - **Sender**: Team lead
 - **Recipient**: Human's player teammate
 - **Transport**: `SendMessage` with `type: message`
-- **Phase**: **2+**
 
 **Payload:**
 ```
@@ -698,7 +583,6 @@ Switch the human's character teammate between relay and autonomous modes.
 - **Sender**: Team lead
 - **Recipient**: Human's player teammate
 - **Transport**: `SendMessage` with `type: message`
-- **Phase**: **2+**
 
 **Payload:**
 ```
@@ -728,7 +612,6 @@ Signal for persistent player teammates to write journal entries.
 - **Sender**: Team lead
 - **Recipient**: All player teammates
 - **Transport**: `SendMessage` with `type: message` (to each player individually)
-- **Phase**: **2+**
 
 **Payload:**
 ```
@@ -755,18 +638,7 @@ trigger: state_updated | session_end | manual
 
 ## Message Sequencing
 
-### Standard Beat (Phase 1)
-
-```
-1. GM broadcasts [NARRATIVE]          → Team lead displays, narrator captures
-2. Team lead sends [PLAYER_ACTION]    → Human's action to GM
-3. GM processes, sends [AWAIT_PLAYERS] → Team lead spawns ephemeral Tasks
-4. Team lead sends [PLAYER_RESPONSES]  → Bundled AI responses to GM
-5. GM broadcasts [NARRATIVE]          → Outcome with woven player actions
-6. GM sends [STATE_UPDATED]           → Team lead spawns background writers
-```
-
-### Standard Beat (Phase 2)
+### Standard Beat
 
 ```
 1. GM broadcasts [NARRATIVE]          → All teammates receive
@@ -784,8 +656,7 @@ trigger: state_updated | session_end | manual
 When the GM sends multiple messages in sequence:
 
 1. **Display first**: Always display `[NARRATIVE]` to the human immediately
-2. **Then act**: Process `[AWAIT_PLAYERS]`, `[STATE_UPDATED]`, `[ASK_PLAYER]`
-3. **Parallel where possible**: Spawn AI Tasks AND collect human input simultaneously
+2. **Then act**: Process `[STATE_UPDATED]`, `[ASK_PLAYER]`, `[RELAY_TO_HUMAN]`
 
 ---
 
@@ -793,11 +664,3 @@ When the GM sends multiple messages in sequence:
 
 All messages use **full hyphenated character names** matching the character sheet filename (e.g., `tilda-brannock`, not `Tilda` or `Tilda Brannock`). This ensures unambiguous routing and file lookups.
 
----
-
-## Deprecation Schedule
-
-| Message | Introduced | Deprecated | Replacement |
-|---------|-----------|------------|-------------|
-| `[AWAIT_PLAYERS]` | Phase 1 | Phase 2 | GM sends `[GM_TO_PLAYER]` directly to each player |
-| `[PLAYER_RESPONSES]` | Phase 1 | Phase 2 | Players send `[PLAYER_TO_GM]` directly to GM |
