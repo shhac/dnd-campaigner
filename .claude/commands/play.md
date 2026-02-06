@@ -19,7 +19,7 @@ Launches a game session where:
 - A **persistent GM teammate** runs the world (reads campaign files once, maintains context)
 - A **persistent Narrator teammate** captures the story in real-time (writes scene files)
 - You play your chosen character
-- AI agents play other party members (spawned as ephemeral Tasks with isolated context)
+- AI agents play other party members (as persistent teammates with isolated context)
 - All communication uses **structured messaging** via SendMessage
 
 **Preferences**: The orchestrator reads campaign preferences (narrative style, player character) from `preferences.md`. If preferences aren't set, you'll be asked once and they're saved for future sessions.
@@ -48,8 +48,8 @@ The session will:
 
 1. **GM broadcasts narrative** — you see the scene, Narrator captures it
 2. **You declare what your character does** — sent to GM as `[PLAYER_ACTION]`
-3. **GM responds** (may call for rolls, invoke AI players)
-4. **AI party members act** (spawned as isolated Tasks when needed)
+3. **GM responds** (may call for rolls, prompt AI players directly)
+4. **AI party members act** (persistent teammates respond directly to GM)
 5. **GM weaves responses into narrative** — broadcasts again
 6. **Background agents** process state saves and journals
 7. **Repeat until session ends**
@@ -103,14 +103,14 @@ When you want to stop:
 
 ## Information Isolation
 
-**CRITICAL**: AI party members are spawned as separate Tasks with ONLY:
-- Their character sheet
-- Scene context from the GM's `[AWAIT_PLAYERS]` message
-- Events they would know about
+**CRITICAL**: AI party members are persistent teammates with access to ONLY:
+- Their own character sheet
+- `party-knowledge.md` (shared knowledge, no secrets)
+- Events they would know about (via GM's `[GM_TO_PLAYER]` messages)
 
 They never see: story-state.md, GM secrets, other character sheets, plot information.
 
-The GM is trusted to enforce information isolation when composing per-character context in `[AWAIT_PLAYERS]` messages — same enforcement model as the legacy system.
+The GM is trusted to enforce information isolation when composing per-character context in `[GM_TO_PLAYER]` messages — same enforcement model as the legacy system.
 
 ---
 
@@ -149,15 +149,15 @@ You are the **team lead** for a Teams-based D&D session. Your job is to create t
 
 5. **Start the session using the play-orchestration skill**
 
-### Use the Team-Play-Orchestration Skill
+### Use the Play-Orchestration Skill
 
 **IMPORTANT**: After initial setup, use the **play-orchestration skill** for all session orchestration.
 
 The skill handles:
 - Creating the team (`dnd-{campaign}`)
 - Spawning GM and Narrator as persistent teammates
-- Parsing structured messages from the GM (`[NARRATIVE]`, `[AWAIT_PLAYERS]`, `[ASK_PLAYER]`, `[STATE_UPDATED]`, `[SESSION_END]`)
-- Spawning ephemeral AI player Tasks when needed
+- Parsing structured messages from the GM (`[NARRATIVE]`, `[GM_TO_PLAYER]`, `[ASK_PLAYER]`, `[STATE_UPDATED]`, `[SESSION_END]`)
+- Coordinating persistent player teammates
 - Using AskUserQuestion for player decision points
 - Background agent spawning for saves and journals
 - Post-compaction recovery
@@ -171,7 +171,7 @@ Simply invoke the skill with the campaign name to begin orchestration.
 |------|-----|
 | Start session | TeamCreate + spawn GM & Narrator teammates |
 | GM broadcasts narrative | Display FULL content to human |
-| `[AWAIT_PLAYERS]` | Spawn ephemeral AI Tasks, collect, send `[PLAYER_RESPONSES]` to GM |
+| `[GM_TO_PLAYER]` | GM sends directly to player teammates; they respond with `[PLAYER_TO_GM]` |
 | `[ASK_PLAYER]` | Convert to AskUserQuestion, send `[PLAYER_ANSWER]` to GM |
 | `[STATE_UPDATED]` | Spawn background delta writers + journal agents |
 | `[SESSION_END]` | Display summary, shutdown teammates, TeamDelete |
