@@ -4,6 +4,9 @@ description: Background journaling for AI player characters after GM narrative. 
 autoLoad: false
 ---
 
+> **⚠️ DEPRECATED** — This skill is superseded by self-journaling in `player-teammate.md` in Teams mode (`/play-team`).
+> It remains functional for legacy `/play` sessions. Will be removed in Phase 3.
+
 # Auto-Journal Skill
 
 Automatically triggers character journaling after GM narrative returns. Runs in background without blocking story progression.

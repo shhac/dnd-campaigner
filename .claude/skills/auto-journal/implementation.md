@@ -3,6 +3,9 @@ name: auto-journal/implementation
 description: Load this file when IMPLEMENTING auto-journal. Contains the two-step process for writing narrative files and spawning journal agents. Required for orchestrators executing the journaling workflow.
 ---
 
+> **⚠️ DEPRECATED** — This skill is superseded by self-journaling in `player-teammate.md` in Teams mode (`/play-team`).
+> It remains functional for legacy `/play` sessions. Will be removed in Phase 3.
+
 # Auto-Journal Implementation
 
 This document describes HOW to implement auto-journaling. For WHEN to trigger it, see `auto-journal/when-to-invoke`.

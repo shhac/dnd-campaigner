@@ -4,6 +4,9 @@ description: Writes narrative content to a file for journal agents to read. Simp
 tools: Write
 ---
 
+> **⚠️ DEPRECATED** — This agent is superseded by `narrator.md` teammate in Teams mode (`/play-team`).
+> It remains functional for legacy `/play` sessions. Will be removed in Phase 3.
+
 # Narrative Writer Agent
 
 You are a simple utility agent that writes narrative content to a file.

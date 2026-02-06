@@ -3,6 +3,9 @@ name: invoke-ai-players
 description: Orchestrates AI player agent spawning for D&D sessions. Use when the GM signals [AWAIT_AI_PLAYERS] to spawn ai-player-action agents. Handles file-based communication between GM and AI players.
 ---
 
+> **⚠️ DEPRECATED** — This skill is superseded by persistent player teammates in `team-play-orchestration` in Teams mode (`/play-team`).
+> It remains functional for legacy `/play` sessions. Will be removed in Phase 3.
+
 # Invoke AI Players Skill
 
 Orchestrates spawning of ai-player-action agents during D&D sessions. The GM agent cannot spawn subagents directly, so this skill guides the main conversation (orchestrator) through the process.

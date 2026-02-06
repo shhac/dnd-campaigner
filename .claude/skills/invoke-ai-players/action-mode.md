@@ -1,3 +1,6 @@
+> **⚠️ DEPRECATED** — This skill is superseded by persistent player teammates in `team-play-orchestration` in Teams mode (`/play-team`).
+> It remains functional for legacy `/play` sessions. Will be removed in Phase 3.
+
 # Action Mode
 
 AI players respond to prompts with actions, dialogue, or decisions.

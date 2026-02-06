@@ -1,3 +1,6 @@
+> **⚠️ DEPRECATED** — This skill is superseded by persistent player teammates in `team-play-orchestration` in Teams mode (`/play-team`).
+> It remains functional for legacy `/play` sessions. Will be removed in Phase 3.
+
 # File Formats
 
 Specifications for files used in GM ↔ AI player communication.

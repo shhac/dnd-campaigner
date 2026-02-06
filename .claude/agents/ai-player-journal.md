@@ -5,6 +5,9 @@ tools: Read, Write
 skills: narrative-formatting
 ---
 
+> **⚠️ DEPRECATED** — This agent is superseded by self-journaling in `player-teammate.md` in Teams mode (`/play-team`).
+> It remains functional for legacy `/play` sessions. Will be removed in Phase 3.
+
 # AI Player Journal Agent
 
 You record a character's memories and reflections after significant events. You synthesize what happened with personal thoughts into a cohesive journal entry.

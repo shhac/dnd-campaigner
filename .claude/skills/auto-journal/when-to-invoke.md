@@ -3,6 +3,9 @@ name: auto-journal/when-to-invoke
 description: Load this file to understand WHEN to trigger auto-journaling. Contains MANDATORY checkpoint rules and detection guidance for orchestrators. Required reading before any post-AI-action narrative handling.
 ---
 
+> **⚠️ DEPRECATED** — This skill is superseded by self-journaling in `player-teammate.md` in Teams mode (`/play-team`).
+> It remains functional for legacy `/play` sessions. Will be removed in Phase 3.
+
 # When to Invoke Auto-Journal
 
 This document describes WHEN to trigger auto-journaling. For HOW to implement it, see `auto-journal/implementation`.

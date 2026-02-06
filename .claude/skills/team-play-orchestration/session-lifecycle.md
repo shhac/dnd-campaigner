@@ -16,12 +16,14 @@ Detailed procedures for starting, saving, ending, and recovering D&D sessions us
 2. Load preferences (or ask player)
 3. Clean orphaned files
 4. Create team
-5. Spawn GM teammate
-6. Spawn Narrator teammate
-7. Determine AI-controlled characters
-8. Send session-start to GM
-9. Wait for opening [NARRATIVE]
-10. Display to human, begin core loop
+5. Determine AI-controlled characters
+6. Spawn GM teammate
+7. Spawn Narrator teammate
+8. Spawn human-relay player teammate
+9. Spawn AI player teammates (parallel)
+10. Send session-start to GM
+11. Wait for opening [NARRATIVE]
+12. Display to human, begin core loop
 ```
 
 ### Step-by-Step
@@ -73,9 +75,17 @@ AskUserQuestion:
 ```
 
 If "Start fresh": TeamDelete the old team first, then TeamCreate.
-If "Resume": Skip to step 8 (re-read team config to find existing teammates).
+If "Resume": Skip to step 10 (re-read team config to find existing teammates).
 
-#### 5. Spawn GM Teammate
+#### 5. Determine AI Characters
+
+```
+List: campaigns/{campaign}/party/*.md (exclude *-journal.md)
+Remove: {player_character} from list
+Result: AI-controlled character list
+```
+
+#### 6. Spawn GM Teammate
 
 ```
 Task:
@@ -90,7 +100,7 @@ Task:
     Read your campaign files and wait for the session-start message.
 ```
 
-#### 6. Spawn Narrator Teammate
+#### 7. Spawn Narrator Teammate
 
 ```
 Task:
@@ -107,15 +117,46 @@ Task:
     and continue numbering from the highest existing number + 1.
 ```
 
-#### 7. Determine AI Characters
+#### 8. Spawn Human-Relay Player Teammate
 
 ```
-List: campaigns/{campaign}/party/*.md (exclude *-journal.md)
-Remove: {player_character} from list
-Result: AI-controlled character list
+Task:
+  subagent_type: human-relay-player
+  team_name: dnd-{campaign}
+  name: {player_character}
+  prompt: |
+    Campaign: {campaign}
+    Character: {player_character}
+    Mode: HUMAN_RELAY
+
+    You are {player_character} in the "{campaign}" campaign.
+    The human player controls you. Relay GM prompts to the team lead
+    for human input, then translate the human's decisions into
+    in-character actions.
+
+    Read your character files and wait for the session to begin.
 ```
 
-#### 8. Send Session-Start
+#### 9. Spawn AI Player Teammates
+
+For each AI-controlled character, spawn in parallel:
+
+```
+Task:
+  subagent_type: player-teammate
+  team_name: dnd-{campaign}
+  name: {character}
+  prompt: |
+    Campaign: {campaign}
+    Character: {character}
+
+    You are {character} in the "{campaign}" campaign.
+    Read your character files and wait for the session to begin.
+```
+
+**Spawn all AI player teammates in a single message with multiple Task calls** (parallel).
+
+#### 10. Send Session-Start
 
 ```
 SendMessage → gm:
@@ -129,7 +170,7 @@ SendMessage → gm:
     - {char2}
 ```
 
-#### 9-10. Wait and Display
+#### 11-12. Wait and Display
 
 Wait for the GM's opening `[NARRATIVE]` broadcast. Display it to the human. Begin the core loop.
 
@@ -164,18 +205,24 @@ The GM sends `[STATE_UPDATED]` on its own at save points. The team lead handles 
 
 1. Spawn `state-delta-writer` (background)
 2. Spawn `knowledge-delta-writer` (background)
-3. If this follows an AI action cycle, trigger auto-journaling:
-   a. Spawn `narrative-writer` (foreground, brief)
-   b. Spawn journal agents for all characters (background)
-   c. Spawn `decision-log` (background)
-4. Continue the session immediately — do not wait for background tasks
+3. Spawn `decision-log` (background, if player actions preceded)
+4. Send `[JOURNAL_CHECKPOINT]` to each player teammate (all characters, AI and human-relay):
+   ```
+   SendMessage → {character}:
+     [JOURNAL_CHECKPOINT]
+     campaign: {campaign}
+     scene_number: {scene_number}
+     scene_slug: {scene_slug}
+     trigger: state_updated
+   ```
+5. Continue the session immediately — do not wait for background tasks or journal confirmations
 
-### Tracking AI Action Cycles
+### Tracking Player Action Cycles
 
-To determine if journaling is needed, maintain a simple flag:
-- Set `last_turn_had_ai_actions = true` when you process `[AWAIT_PLAYERS]` and send `[PLAYER_RESPONSES]`
-- Set `last_turn_had_ai_actions = false` after triggering auto-journal
-- When `[STATE_UPDATED]` arrives, check this flag
+To determine if journaling and decision-log are needed:
+- Set `last_beat_had_player_actions = true` when you observe that the GM has been receiving `[PLAYER_TO_GM]` messages (via teammate activity indicators or when `[STATE_UPDATED]` arrives after a beat that involved player prompts)
+- Set `last_beat_had_player_actions = false` after sending `[JOURNAL_CHECKPOINT]`
+- When `[STATE_UPDATED]` arrives, check this flag to decide whether to send checkpoints
 
 ## Session End
 
@@ -208,9 +255,10 @@ next_hook: "The tunnel stretches into darkness. Something is breathing down ther
 
 1. **Display summary**: Show the session summary to the human
 2. **Display next hook**: Show the cliffhanger/hook for the next session
-3. **Process any pending [STATE_UPDATED]**: Ensure delta writers and journals are spawned
-4. **Wait for background tasks**: Give background agents time to complete (check periodically)
-5. **Shutdown teammates**:
+3. **Process any pending [STATE_UPDATED]**: Ensure delta writers are spawned
+4. **Send final journal checkpoints**: Send `[JOURNAL_CHECKPOINT]` with `trigger: session_end` to all player teammates
+5. **Wait for background tasks**: Give background agents time to complete (check periodically)
+6. **Shutdown all teammates**:
 
 ```
 SendMessage:
@@ -222,16 +270,28 @@ SendMessage:
   type: shutdown_request
   recipient: narrator
   content: "Session ended. Shutting down."
+
+SendMessage:
+  type: shutdown_request
+  recipient: {player_character_1}
+  content: "Session ended. Shutting down."
+
+SendMessage:
+  type: shutdown_request
+  recipient: {player_character_2}
+  content: "Session ended. Shutting down."
+
+(... for each player teammate)
 ```
 
-6. **Wait for shutdown confirmations** from both teammates
-7. **Delete team**:
+7. **Wait for shutdown confirmations** from all teammates
+8. **Delete team**:
 
 ```
 TeamDelete
 ```
 
-8. **Final message to human**: "Session saved. See you next time!"
+9. **Final message to human**: "Session saved. See you next time!"
 
 ### Abrupt End (Error Recovery)
 
@@ -241,7 +301,7 @@ If the session needs to end unexpectedly (error, crash, etc.):
 2. If GM responds with `[SESSION_END]`, follow normal shutdown
 3. If GM is unresponsive:
    - Check if delta files exist in `tmp/` and process them manually
-   - Force shutdown teammates
+   - Force shutdown all teammates
    - TeamDelete
    - Inform the human that the session ended abnormally and state may not be fully saved
 
@@ -251,7 +311,7 @@ If the session needs to end unexpectedly (error, crash, etc.):
 
 You may lose context during long sessions. Signs:
 - You don't remember the campaign name or preferences
-- You don't remember which characters are AI-controlled
+- You don't remember which characters are player teammates
 - You don't remember what the last narrative was about
 
 ### Recovery Procedure
@@ -269,14 +329,24 @@ SendMessage → gm:
   last_narrative_summary: "Context compacted. Please recap."
 ```
 
-5. **Resume core loop**: The GM will broadcast a `[NARRATIVE]` recap
+5. **Send context refresh to player teammates** if needed:
+
+```
+SendMessage → {character}:
+  [CONTEXT_REFRESH]
+  campaign: {campaign}
+  current_scene: "{scene number}"
+  last_narrative_summary: "Context was compacted. Re-read your files."
+```
+
+6. **Resume core loop**: The GM will broadcast a `[NARRATIVE]` recap
 
 ### Teammate Compaction Recovery
 
-Teammates may also experience compaction. The team lead does not need to detect this — each teammate handles its own recovery:
+Teammates may also experience compaction. Each teammate handles its own recovery:
 - **GM**: Re-reads campaign files and scene files. May ask for a `[CONTEXT_REFRESH]` if confused.
 - **Narrator**: Re-reads existing scene files and continues numbering.
-- **AI players** (Phase 1): Ephemeral Tasks, so compaction doesn't apply.
+- **Player teammates**: Re-read character sheet, party-knowledge, and journal. Journal entries serve as durable memory across context boundaries.
 
 ## Team Cleanup
 
@@ -298,5 +368,7 @@ The `tmp/` directory may still have files from background agents that completed 
 | "/play-team {campaign}" | Full startup sequence |
 | "Let's save" | Send `[SESSION_COMMAND] save` to GM |
 | "I want to stop" | Send `[SESSION_COMMAND] end` to GM |
-| (context compacted) | Re-read files, send `[CONTEXT_REFRESH]` to GM |
+| "I need to step away" | Send `[MODE_SWITCH] AUTONOMOUS` to human's player |
+| "I'm back" | Send `[MODE_SWITCH] HUMAN_RELAY` to human's player |
+| (context compacted) | Re-read files, send `[CONTEXT_REFRESH]` to GM and players |
 | (GM unresponsive) | Try `[CONTEXT_REFRESH]`, then respawn if needed |
