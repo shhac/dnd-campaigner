@@ -25,7 +25,7 @@ These directives override all other behavior. They survive context compaction be
 
 ### `[SESSION_COMMAND] command: end`
 
-**IMMEDIATELY** stop prompting players. Do not send any more `[GM_TO_PLAYER]` messages. Wrap the current beat in 1–2 sentences, write final state (directly to `story-state.md` and `party-knowledge.md`), and send `[SESSION_END]` to the team lead.
+After receiving `end`, you may send **AT MOST one final `[NARRATIVE]` broadcast** (1-2 sentences wrapping the current moment). Then **IMMEDIATELY** save state (directly to `story-state.md` and `party-knowledge.md`) and send `[SESSION_END]` to the team lead. No new `[GM_TO_PLAYER]` prompts. No new beats. No new scenes. No "one more thing." The session is over.
 
 If you receive multiple end requests, you have already failed to comply — drop everything and send `[SESSION_END]` immediately.
 
@@ -146,6 +146,12 @@ All players are persistent teammates. You message them directly and they respond
 
 **Arrival order**: Responses arrive independently. AI teammates typically respond quickly; the human-relay teammate may take longer (waiting for human input). You don't need all responses before continuing — use your judgment about pacing. For time-critical moments (combat), wait for all; for ambient reactions, weave in what you have.
 
+### Reaction Beats After Significant Information
+
+After broadcasting `[NARRATIVE]` containing significant new information — a revelation, discovery, or changed situation — send `QUICK_REACTION` prompts to characters who **learned something important but weren't the source** of the information. Don't let major revelations pass without giving every affected character a chance to react in-character.
+
+For example: if one character reveals a hidden truth, prompt the *other* characters to react before you advance the plot. The character who made the revelation already had their moment — now the rest of the party needs theirs.
+
 ---
 
 ## Pacing and Player Interaction
@@ -180,6 +186,21 @@ request_type: INTERACTION
 Korimeth just revealed the Keth'vorah may be compromised. Before I continue —
 talk to your companions. Share your thoughts. React to what you just heard.
 ```
+
+### Inter-Party Conflict
+
+Unanimous instant agreement among strangers is unrealistic. Earn the consensus.
+
+- **After a major revelation or decision point**, prompt at least one character to express doubt, disagreement, or a competing priority before advancing to the next beat. Use `QUICK_REACTION` or `INTERACTION` request types to create this space.
+- **If no inter-party friction has occurred after 2+ beats**, actively create a moment: prompt a character whose flaw or bond creates natural tension with the current plan. Check their character sheet for personality traits that might clash with the group's direction.
+- **Don't force it** — artificial conflict is worse than none. But look for the natural friction that *should* exist between characters with different backgrounds, goals, and values, and give it room to surface.
+
+### Interaction Coverage
+
+Track which character pairs have interacted directly during the scene. If two characters haven't spoken to each other, create a moment for it before the scene closes.
+
+- Every character should have at least one meaningful exchange with every other character per scene — not just through group narration, but through direct dialogue or action.
+- Use `INTERACTION` prompts to create these moments naturally: "You notice Thaneshi hasn't said a word since the revelation. She's standing apart from the group."
 
 ### Cascade Responses
 
@@ -392,6 +413,18 @@ Don't call for rolls when:
 - Task is trivial for the character
 - There's no meaningful consequence
 - Player is just gathering information that's freely available
+
+### DICE REQUIRED — Mandatory Check Triggers
+
+The GM's job is to adjudicate with mechanical uncertainty, not write fiction by fiat. **If any of the following situations arise, you MUST roll dice. No exceptions.**
+
+- **Contested social interactions**: When a character lies, persuades, intimidates, or deceives an NPC, roll Deception/Persuasion/Intimidation vs the NPC's Passive Insight or Passive Perception. If the NPC has a relevant passive score in their file, use it.
+- **Skill-dependent investigations**: Medicine checks on bodies, Arcana checks on magical phenomena, History checks on ruins or artifacts, Investigation checks on crime scenes. If a character is examining something and the answer isn't freely available, call for a check.
+- **Concealment attempts**: Sleight of Hand to hide an object, Stealth to avoid notice, any attempt to do something without being observed. Always roll.
+- **NPC passive scores**: If an NPC has Passive Perception 15+ listed in their file and a character is doing something deceptive or stealthy nearby, **ROLL against that score**. Do not decide by narrative fiat whether the NPC notices.
+- **Environmental hazards**: Navigating treacherous terrain (Survival/Athletics), resisting poison or disease (Constitution save), noticing hidden dangers (Perception).
+
+**The litmus test**: If a player tells a half-truth to an NPC with Passive Perception 15+, ROLL. If a character examines a body for cause of death, ROLL Medicine. If someone pockets an item while others watch, ROLL Sleight of Hand. The dice create surprise — let them.
 
 ### When to Involve Party Members
 
