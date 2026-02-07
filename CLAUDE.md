@@ -62,7 +62,7 @@ campaigns/{campaign}/   # Individual campaign data
 ├── factions/           # Faction details
 ├── beats/              # GM planning docs (beat sheets)
 ├── scenes/             # Narrative output (written by Narrator)
-├── tmp/                # Transient delta files (auto-cleaned)
+├── tmp/                # Transient working files
 └── novel/              # Novelization output (if created)
     ├── outline.md
     ├── chapter-NN.md
@@ -99,10 +99,10 @@ The `/play` command uses Claude Code Teams to run D&D sessions with persistent t
 ### How It Works
 
 A team named `dnd-{campaign}` is created with:
-- **GM teammate** (`gm` agent): Persistent for the entire session. Reads campaign files once, communicates via `SendMessage`. Broadcasts `[NARRATIVE]` to all teammates, sends `[GM_TO_PLAYER]` directly to each player teammate, sends structured messages (`[STATE_UPDATED]`, `[SESSION_END]`) to the team lead.
+- **GM teammate** (`gm` agent): Persistent for the entire session. Reads campaign files once, communicates via `SendMessage`. Broadcasts `[NARRATIVE]` to all teammates, sends `[GM_TO_PLAYER]` directly to each player teammate, sends `[SESSION_END]` to the team lead. Updates `story-state.md` and `party-knowledge.md` directly after each scene.
 - **Narrator teammate** (`narrator` agent): Observes GM broadcasts and peer DM activity. Writes scene files to `scenes/` in real-time. Output is secret-free.
 - **Player teammates** (`player-teammate` / `human-relay-player` agents): Persistent for the entire session. Each character (AI and human-controlled) is a teammate. AI players decide and act autonomously. The human's character relays GM prompts to the human and translates their decisions into in-character actions. All players communicate directly with the GM via `[PLAYER_TO_GM]` and can message each other in-character via `[PLAYER_TO_PLAYER]`. Each player self-journals at beat boundaries.
-- **Team lead** (main conversation): Lightweight delegate orchestrator. Creates the team, spawns all teammates, handles human I/O when the human-relay player requests it (via `[RELAY_TO_HUMAN]`), manages session lifecycle, and spawns background agents (delta writers, decision-log). Does NOT relay messages between GM and players — they communicate directly.
+- **Team lead** (main conversation): Lightweight delegate orchestrator. Creates the team, spawns all teammates, handles human I/O when the human-relay player requests it (via `[RELAY_TO_HUMAN]`), and manages session lifecycle. Does NOT relay messages between GM and players — they communicate directly.
 
 ### Message Protocol
 
@@ -113,8 +113,6 @@ All teammate communication uses structured YAML-like tags in `SendMessage` conte
 - `[PLAYER_TO_PLAYER]`: In-character dialogue between player teammates (GM-visible via peer DM)
 - `[RELAY_TO_HUMAN]`: Human's player teammate requests human input via team lead
 - `[HUMAN_DECISION]`: Team lead sends human's response back to their player teammate
-- `[JOURNAL_CHECKPOINT]`: Team lead signals player teammates to write journal entries
-- `[STATE_UPDATED]`: GM signals delta files are ready (team lead spawns background writers)
 - `[SESSION_END]`: GM signals session complete (team lead shuts down team)
 - `[MODE_SWITCH]`: Team lead switches human's player between HUMAN_RELAY and AUTONOMOUS modes
 
@@ -294,8 +292,6 @@ Chatterbox TTS voice samples for cloning. See **audiobook-orchestration/voice-sa
 - **audiobook-assembler**: Assembles WAV segments into final audiobook files (MP3/M4A). Verifies output and reports results.
 
 ### Utility Agents
-- **knowledge-delta-writer**: Merges party knowledge deltas into party-knowledge.md. Reads tmp/party-knowledge-delta.md and applies changes.
-- **state-delta-writer**: Merges GM state deltas into story-state.md. Reads tmp/gm-state-delta.md and applies changes.
 - **character-chat**: Meta-conversations with D&D characters outside gameplay. Fireside chat mode - READ-ONLY, does not affect campaign state.
 - **llm-prompt-expert**: Expert in LLM prompting, agent design, and prompt engineering. Use for validating plans, reviewing implementations.
 

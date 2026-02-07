@@ -13,15 +13,12 @@ Persistent player teammates retain full session context, but saves are still cri
 - Surviving context compaction (teammates re-read saved state to recover)
 - Session resume (between play sessions, teammates start fresh)
 - The narrator's scene files (durable record of what happened)
-- Background delta writers that merge incremental updates
 
 `story-state.md` and `party-knowledge.md` are the canonical game state. Always keep them current.
 
-## Automatic State Updates
+## How State Updates Work
 
-State updates happen automatically when the GM writes delta files. The GM sends `[STATE_UPDATED]` to the team lead after writing delta files. The team lead spawns background `state-delta-writer` and `knowledge-delta-writer` Tasks to merge changes into `story-state.md` and `party-knowledge.md` without blocking play.
-
-**Manual saves are still available** for situations where you need immediate updates or want to save outside the normal flow. The triggers below remain valid for manual intervention.
+The GM updates `story-state.md` and `party-knowledge.md` directly after each scene closes (or when meaningful state changes accumulate). No intermediate delta files or background agents are needed — the GM writes to the canonical files as part of the normal play loop.
 
 ## Mandatory Save Triggers
 
@@ -79,4 +76,4 @@ At each save point:
 
 ## Related Skills
 
-- **play-orchestration**: Handles `[STATE_UPDATED]` messaging and background task spawning
+- **play-orchestration**: Core session loop and lifecycle management

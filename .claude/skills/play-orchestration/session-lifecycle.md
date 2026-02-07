@@ -14,16 +14,15 @@ Detailed procedures for starting, saving, ending, and recovering D&D sessions us
 ```
 1. Validate campaign
 2. Load preferences (or ask player)
-3. Clean orphaned files
-4. Create team
-5. Determine AI-controlled characters
-6. Spawn GM teammate
-7. Spawn Narrator teammate
-8. Spawn human-relay player teammate
-9. Spawn AI player teammates (parallel)
-10. Send session-start to GM
-11. Wait for opening [NARRATIVE]
-12. Display to human, begin core loop
+3. Create team
+4. Determine AI-controlled characters
+5. Spawn GM teammate
+6. Spawn Narrator teammate
+7. Spawn human-relay player teammate
+8. Spawn AI player teammates (parallel)
+9. Send session-start to GM
+10. Wait for opening [NARRATIVE]
+11. Display to human, begin core loop
 ```
 
 ### Step-by-Step
@@ -45,15 +44,7 @@ Read `campaigns/{campaign}/preferences.md` for:
 
 Save any new preferences to the file.
 
-#### 3. Clean Orphaned Files
-
-```bash
-rm -f campaigns/{campaign}/tmp/*-delta.md 2>/dev/null || true
-```
-
-Do NOT delete `gm-context.md` if it exists — it may contain continuity notes from a previous session that the GM can use.
-
-#### 4. Create Team
+#### 3. Create Team
 
 ```
 TeamCreate:
@@ -77,7 +68,7 @@ AskUserQuestion:
 If "Start fresh": TeamDelete the old team first, then TeamCreate.
 If "Resume": Skip to step 10 (re-read team config to find existing teammates).
 
-#### 5. Determine AI Characters
+#### 4. Determine AI Characters
 
 ```
 List: campaigns/{campaign}/party/*.md (exclude *-journal.md)
@@ -85,7 +76,7 @@ Remove: {player_character} from list
 Result: AI-controlled character list
 ```
 
-#### 6. Spawn GM Teammate
+#### 5. Spawn GM Teammate
 
 ```
 Task:
@@ -100,7 +91,7 @@ Task:
     Read your campaign files and wait for the session-start message.
 ```
 
-#### 7. Spawn Narrator Teammate
+#### 6. Spawn Narrator Teammate
 
 ```
 Task:
@@ -117,7 +108,7 @@ Task:
     and continue numbering from the highest existing number + 1.
 ```
 
-#### 8. Spawn Human-Relay Player Teammate
+#### 7. Spawn Human-Relay Player Teammate
 
 ```
 Task:
@@ -137,7 +128,7 @@ Task:
     Read your character files and wait for the session to begin.
 ```
 
-#### 9. Spawn AI Player Teammates
+#### 8. Spawn AI Player Teammates
 
 For each AI-controlled character, spawn in parallel:
 
@@ -156,7 +147,7 @@ Task:
 
 **Spawn all AI player teammates in a single message with multiple Task calls** (parallel).
 
-#### 10. Send Session-Start
+#### 9. Send Session-Start
 
 ```
 SendMessage → gm:
@@ -170,16 +161,17 @@ SendMessage → gm:
     - {char2}
 ```
 
-#### 11-12. Wait and Display
+#### 10-11. Wait and Display
 
 Wait for the GM's opening `[NARRATIVE]` broadcast. Display it to the human. Begin the core loop.
 
 ## Session Save
 
-Saves can be triggered by:
-- **Human request**: Player says "let's save"
-- **GM initiative**: GM determines a save point (end of combat, scene transition, etc.)
-- **Automatic**: GM sends `[STATE_UPDATED]` after writing deltas
+Saves are handled directly by the GM:
+- **Human request**: Player says "let's save" — team lead sends `[SESSION_COMMAND] save` to GM
+- **GM initiative**: GM saves at natural beat boundaries (end of combat, scene transition, etc.)
+
+The GM updates `story-state.md` and `party-knowledge.md` directly. No intermediate delta files or background agents are needed for state persistence.
 
 ### Human-Requested Save
 
@@ -192,37 +184,7 @@ SendMessage → gm:
   reason: "Player requested save"
 ```
 
-The GM will:
-1. Write delta files to `tmp/`
-2. Send `[STATE_UPDATED]` to team lead
-3. Continue the session
-
-### GM-Initiated Save
-
-The GM sends `[STATE_UPDATED]` on its own at save points. The team lead handles it identically to a human-requested save response.
-
-### Processing [STATE_UPDATED]
-
-1. Spawn `state-delta-writer` (background)
-2. Spawn `knowledge-delta-writer` (background)
-3. Spawn `decision-log` (background, if player actions preceded)
-4. Send `[JOURNAL_CHECKPOINT]` to each player teammate (all characters, AI and human-relay):
-   ```
-   SendMessage → {character}:
-     [JOURNAL_CHECKPOINT]
-     campaign: {campaign}
-     scene_number: {scene_number}
-     scene_slug: {scene_slug}
-     trigger: state_updated
-   ```
-5. Continue the session immediately — do not wait for background tasks or journal confirmations
-
-### Tracking Player Action Cycles
-
-To determine if journaling and decision-log are needed:
-- Set `last_beat_had_player_actions = true` when you observe that the GM has been receiving `[PLAYER_TO_GM]` messages (via teammate activity indicators or when `[STATE_UPDATED]` arrives after a beat that involved player prompts)
-- Set `last_beat_had_player_actions = false` after sending `[JOURNAL_CHECKPOINT]`
-- When `[STATE_UPDATED]` arrives, check this flag to decide whether to send checkpoints
+The GM will update `story-state.md` and `party-knowledge.md` directly and continue the session.
 
 ## Session End
 
@@ -239,7 +201,7 @@ SendMessage → gm:
 
 The GM will:
 1. Find a narratively appropriate stopping point
-2. Perform a final save (write deltas, update story-state.md directly)
+2. Update `story-state.md` and `party-knowledge.md` directly
 3. Send `[SESSION_END]` with summary and next_hook
 
 ### Processing [SESSION_END]
@@ -255,10 +217,8 @@ next_hook: "The tunnel stretches into darkness. Something is breathing down ther
 
 1. **Display summary**: Show the session summary to the human
 2. **Display next hook**: Show the cliffhanger/hook for the next session
-3. **Process any pending [STATE_UPDATED]**: Ensure delta writers are spawned
-4. **Send final journal checkpoints**: Send `[JOURNAL_CHECKPOINT]` with `trigger: session_end` to all player teammates
-5. **Wait for background tasks**: Give background agents time to complete (check periodically)
-6. **Shutdown all teammates**:
+3. **Spawn decision-log** (background): Record session decisions for context reconstruction
+4. **Shutdown all teammates**:
 
 ```
 SendMessage:
@@ -284,14 +244,14 @@ SendMessage:
 (... for each player teammate)
 ```
 
-7. **Wait for shutdown confirmations** from all teammates
-8. **Delete team**:
+5. **Wait for shutdown confirmations** from all teammates
+6. **Delete team**:
 
 ```
 TeamDelete
 ```
 
-9. **Final message to human**: "Session saved. See you next time!"
+7. **Final message to human**: "Session saved. See you next time!"
 
 ### Abrupt End (Error Recovery)
 
@@ -300,7 +260,6 @@ If the session needs to end unexpectedly (error, crash, etc.):
 1. Send `[SESSION_COMMAND] command: end` to GM if it's still responsive
 2. If GM responds with `[SESSION_END]`, follow normal shutdown
 3. If GM is unresponsive:
-   - Check if delta files exist in `tmp/` and process them manually
    - Force shutdown all teammates
    - TeamDelete
    - Inform the human that the session ended abnormally and state may not be fully saved
@@ -358,8 +317,6 @@ Check: ~/.claude/tasks/dnd-{campaign}/ should not exist
 ```
 
 Campaign files (`campaigns/{campaign}/`) are NOT deleted — they persist between sessions.
-
-The `tmp/` directory may still have files from background agents that completed after shutdown. These are harmless and will be cleaned at next session start.
 
 ## Quick Reference: Lifecycle Commands
 

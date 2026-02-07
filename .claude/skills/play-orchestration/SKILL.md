@@ -5,7 +5,7 @@ description: Core orchestration loop for Teams-based D&D play sessions. Use when
 
 # Play Orchestration Skill
 
-Core orchestration logic for running D&D sessions using Claude Code Teams. The team lead is a **lightweight delegate** — it creates the team, spawns all teammates (GM, Narrator, and player characters), handles human I/O via the human-relay player, manages session lifecycle, and spawns background agents. The GM and players communicate directly; the team lead does NOT relay messages between them.
+Core orchestration logic for running D&D sessions using Claude Code Teams. The team lead is a **lightweight delegate** — it creates the team, spawns all teammates (GM, Narrator, and player characters), handles human I/O via the human-relay player, and manages session lifecycle. The GM and players communicate directly; the team lead does NOT relay messages between them.
 
 All characters (AI and human) are persistent teammates. The GM messages players directly. The team lead is a lightweight orchestrator in delegate mode.
 
@@ -13,16 +13,13 @@ All characters (AI and human) are persistent teammates. The GM messages players 
 
 Use this skill when:
 - Starting a new D&D play session via `/play`
-- A teammate sends a message to the team lead (GM state updates, human relay requests, session end)
+- A teammate sends a message to the team lead (human relay requests, session end)
 - Context has been compacted during a long session (re-invoke to restore orchestration patterns)
 
 ## Quick Reference: The Orchestration Loop
 
 ```
 /play {campaign}
-    |
-    v
-Clean up orphaned delta files (rm -f tmp/*-delta.md)
     |
     v
 Load Preferences (or ask player)
@@ -57,12 +54,6 @@ All players send [PLAYER_TO_GM] directly to GM          |
     v                                                   |
 GM broadcasts [NARRATIVE] (with woven player actions)   |
     |                                                   |
-    +---> [STATE_UPDATED] handler:                      |
-    |     - state-delta-writer (background)             |
-    |     - knowledge-delta-writer (background)         |
-    |     - decision-log (background)                   |
-    |     - [JOURNAL_CHECKPOINT] to player teammates    |
-    |                                                   |
     v                                                   |
 Display narrative to human  ────────────────────────────┘
     |
@@ -75,24 +66,12 @@ Loop until [SESSION_END]
 **CRITICAL**: When the GM sends multiple messages in sequence, process them in this order:
 
 1. **Display first**: Always display `[NARRATIVE]` to the human immediately upon receipt
-2. **Then act**: Process `[STATE_UPDATED]`, `[ASK_PLAYER]`, or `[RELAY_TO_HUMAN]` messages
+2. **Then act**: Process `[ASK_PLAYER]` or `[RELAY_TO_HUMAN]` messages
 3. **No relay needed for player I/O**: The GM and players communicate directly
 
 The GM will send messages in this canonical order:
 1. `[NARRATIVE]` broadcast (for display, narrator capture, and player awareness)
 2. `[GM_TO_PLAYER]` directly to players (team lead NOT involved)
-3. `[STATE_UPDATED]` to team lead (if delta files were written)
-
-## Step 0: Session Start Cleanup
-
-Before loading preferences, clean up orphaned files from previous sessions:
-
-```bash
-# Delete any orphaned delta files from previous sessions
-rm -f campaigns/{campaign}/tmp/*-delta.md 2>/dev/null || true
-```
-
-**Rationale**: Stale deltas from previous sessions may contain outdated information.
 
 ## Step 1: Load Preferences
 
@@ -264,7 +243,6 @@ Reference: **messaging-protocol** skill for full message protocol (all tag forma
 | `[NARRATIVE]` | GM (broadcast or direct) | Display to human |
 | `[RELAY_TO_HUMAN]` | Human's player teammate | Show to human, collect input, send `[HUMAN_DECISION]` back |
 | `[ASK_PLAYER]` | GM (direct) | Convert to AskUserQuestion, send `[PLAYER_ANSWER]` to GM |
-| `[STATE_UPDATED]` | GM (direct) | Spawn background delta writers, send `[JOURNAL_CHECKPOINT]` to players |
 | `[SESSION_END]` | GM (direct) | Display summary, shutdown team |
 
 ### Messages the Team Lead Does NOT Handle
@@ -413,78 +391,7 @@ SendMessage:
   summary: "Player answered: {brief answer}"
 ```
 
-## Step 7: Handling [STATE_UPDATED]
-
-When the GM sends `[STATE_UPDATED]`, it means delta files have been written to `campaigns/{campaign}/tmp/`. Spawn background agents to process them and signal players to journal.
-
-### Parse the Message
-
-```
-[STATE_UPDATED]
-deltas_written:
-  - gm-state-delta.md
-  - party-knowledge-delta.md
-characters_involved:
-  - tilda-brannock
-  - grimjaw-ironforge
-```
-
-### Spawn Background Agents
-
-Spawn ALL of these in a single message (parallel, all `run_in_background: true`):
-
-**State Delta Writer:**
-```
-Task:
-  subagent_type: state-delta-writer
-  run_in_background: true
-  prompt: "Campaign: {campaign}"
-```
-
-**Knowledge Delta Writer:**
-```
-Task:
-  subagent_type: knowledge-delta-writer
-  run_in_background: true
-  prompt: "Campaign: {campaign}"
-```
-
-**Decision-Log (if player actions preceded this state update):**
-```
-Task:
-  subagent_type: decision-log
-  run_in_background: true
-  prompt: |
-    Campaign: {campaign}
-    Scene: {scene_number} - {scene_slug}
-    Characters involved: {characters_involved list}
-```
-
-### Send Journal Checkpoints to Player Teammates
-
-After spawning background agents, signal all player teammates to write journal entries:
-
-```
-SendMessage:
-  type: message
-  recipient: {character-1}
-  content: |
-    [JOURNAL_CHECKPOINT]
-    campaign: {campaign}
-    scene_number: {scene_number}
-    scene_slug: {scene_slug}
-    trigger: state_updated
-  summary: "Journal checkpoint"
-```
-
-Send one `[JOURNAL_CHECKPOINT]` to each player teammate (AI and human-relay). Each player writes their own journal entry. **Do not wait for journal confirmations** — they are fire-and-forget from the team lead's perspective.
-
-### When to Skip Journaling
-
-- If `[STATE_UPDATED]` arrives without a preceding player action cycle (e.g., pure atmospheric narration with a state save), still spawn delta writers but skip `[JOURNAL_CHECKPOINT]`
-- Track whether the most recent beat involved player actions to determine this
-
-## Step 8: Handling [SESSION_END]
+## Step 7: Handling [SESSION_END]
 
 When the GM sends `[SESSION_END]`:
 
@@ -506,12 +413,11 @@ See [session-lifecycle.md](session-lifecycle.md) for the full shutdown procedure
 Quick reference:
 1. Display the session summary to the human
 2. Display the next hook (cliffhanger for next session)
-3. Send final `[JOURNAL_CHECKPOINT]` with `trigger: session_end` to all player teammates
-4. Wait for any running background tasks to complete
-5. Send `shutdown_request` to all teammates (GM, Narrator, all player teammates)
-6. After all teammates confirm shutdown, call TeamDelete
+3. Spawn decision-log agent (background) to record final session decisions
+4. Send `shutdown_request` to all teammates (GM, Narrator, all player teammates)
+5. After all teammates confirm shutdown, call TeamDelete
 
-## Step 9: Handling [MODE_SWITCH] (Human Player Away/Back)
+## Step 8: Handling [MODE_SWITCH] (Human Player Away/Back)
 
 When the human player steps away or returns, send a mode switch to their character teammate:
 
@@ -562,7 +468,7 @@ SendMessage:
   summary: "Player requests save"
 ```
 
-The GM will write delta files and send `[STATE_UPDATED]`.
+The GM will update `story-state.md` and `party-knowledge.md` directly.
 
 ### "I want to stop" / "Let's end the session"
 
@@ -577,7 +483,45 @@ SendMessage:
   summary: "Player requests session end"
 ```
 
-The GM will find a good stopping point, perform a final save, and send `[SESSION_END]`.
+The GM will find a good stopping point, save state directly to campaign files, and send `[SESSION_END]`.
+
+## Full-Auto Mode (All AI Players)
+
+When running a session with no human player (all characters are AI-controlled):
+
+### Startup Differences
+- Skip player character selection (no human character)
+- Do NOT spawn a `human-relay-player` teammate
+- All characters use `player-teammate` agent type
+- Team lead is a pure observer/orchestrator — no human I/O
+
+### Session Start Message
+
+```
+[SESSION_COMMAND]
+command: start
+campaign: {campaign}
+mode: full_auto
+narrative_style: {style}
+ai_characters:
+  - {char1}
+  - {char2}
+  - {char3}
+  - {char4}
+```
+
+### During Session
+- No `[RELAY_TO_HUMAN]` messages to handle
+- Display `[NARRATIVE]` broadcasts to the human observer
+- The human observer can send `[SESSION_COMMAND] save` or `end` at any time
+- The human observer does NOT control any character
+
+### GM Pacing Guidance
+Without a human creating natural pauses, the GM must self-pace:
+- Allow 2-3 exchanges of inter-party dialogue between plot beats
+- Use `INTERACTION` request type to create deliberate breathing room
+- Don't advance to the next scene until player reactions have settled
+- Target 2-4 major beats per scene, not more
 
 ## Post-Compaction Recovery
 
@@ -655,8 +599,6 @@ If a message from a teammate doesn't start with a recognized tag:
 | Task Type | Details |
 |-----------|---------|
 | **Player teammate spawning** | All player teammates spawn simultaneously at session start |
-| **Background agents** | Delta writers, decision-log all spawn in parallel |
-| **Journal checkpoints** | All player teammates receive checkpoints simultaneously |
 | **GM + Player communication** | Happens directly; team lead not involved |
 
 ### What Must Be Sequential
@@ -666,33 +608,11 @@ If a message from a teammate doesn't start with a recognized tag:
 | **Team creation before teammate spawning** | Team must exist before spawning members |
 | **GM spawned before session-start message** | GM must be active to receive messages |
 | **Narrative displayed before human input collected** | Human must read the scene before deciding |
-| **Delta files written before journal checkpoints** | Players may re-read party-knowledge during journaling |
 
 ### Fire-and-Forget Tasks
 
 These run in background without blocking the session:
-- **Decision-log**: Records player decisions
-- **Delta writers**: Merge state/knowledge changes
-- **Journal entries**: Players self-journal (no orchestration needed beyond the checkpoint signal)
-
-### Background Agent Failure Detection
-
-**Known issue**: Background agents spawned in delegate mode may inherit the team lead's delegate permissions and fail to write files. If delta files still exist in `campaigns/{campaign}/tmp/` after background agents complete, the deltas were not applied.
-
-**Fallback**: Send a `[SESSION_COMMAND] save` to the GM asking it to update `story-state.md` and `party-knowledge.md` directly (the GM always has write access to campaign files).
-
-```
-SendMessage:
-  type: message
-  recipient: gm
-  content: |
-    [SESSION_COMMAND]
-    command: save
-    reason: "Background delta writers failed — please apply pending changes from tmp/ directly to story-state.md and party-knowledge.md, then delete the delta files."
-  summary: "Fallback save — delta writers failed"
-```
-
-**Note**: At session end, the GM is instructed to always write state directly regardless of background agents, so this fallback is primarily needed for mid-session saves.
+- **Decision-log**: Records player decisions (spawned at session end)
 
 ## Scene Flow: PC Actions Before NPC Responses
 

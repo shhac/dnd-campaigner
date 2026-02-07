@@ -26,7 +26,6 @@ Canonical reference for all structured message types used in Teams-based D&D ses
 | [`[NARRATIVE]`](#narrative) | GM | All (broadcast) | broadcast |
 | [`[GM_TO_PLAYER]`](#gm_to_player) | GM | Specific player | message |
 | [`[ASK_PLAYER]`](#ask_player) | GM | Team lead | message |
-| [`[STATE_UPDATED]`](#state_updated) | GM | Team lead | message |
 | [`[SESSION_END]`](#session_end) | GM | Team lead | message |
 | [`[NARRATOR_NOTE]`](#narrator_note) | GM or Player | Narrator | message |
 | [`[DICE_RESULT]`](#dice_result) | Team lead | GM | message |
@@ -39,7 +38,6 @@ Canonical reference for all structured message types used in Teams-based D&D ses
 | [`[PLAYER_TO_PLAYER]`](#player_to_player) | Player teammate | Player teammate | message |
 | [`[RELAY_TO_HUMAN]`](#relay_to_human) | Human's player teammate | Team lead | message |
 | [`[NARRATOR_REQUEST]`](#narrator_request) | Narrator | GM | message |
-| [`[JOURNAL_CHECKPOINT]`](#journal_checkpoint) | Team lead | Player teammates | message |
 
 ---
 
@@ -59,18 +57,18 @@ Player-facing narration broadcast to all teammates.
 [NARRATIVE]
 
 {Full narrative prose using session's narrative style}
-
-**What do you do?**
 ```
 
 No structured fields — the entire content after the tag is free-form narrative prose.
+
+**IMPORTANT:** Do not include action prompts ("What do you do?") in broadcasts. Use `[GM_TO_PLAYER]` for action requests. Broadcasts are for scene awareness only.
 
 **When sent:** After the GM narrates a scene beat, describes an outcome, or opens a new scene. The GM should include woven-in player actions and dialogue from the current beat.
 
 **Expected responses:**
 - Team lead: Strips tag, displays to human.
 - Narrator: Captures to scene file.
-- Player teammates: Receive scene awareness.
+- Player teammates: Receive scene awareness. **Players must NOT respond to broadcasts — they wait for direct `[GM_TO_PLAYER]` prompts.**
 
 **Split party exception:** During split party scenarios, the GM sends `[NARRATIVE]` as a **direct message** to the team lead (not broadcast) to avoid leaking group-specific narrative to all players. Include a note indicating which group the narrative is for. Send `[NARRATOR_NOTE]` separately so the narrator can capture both threads.
 
@@ -104,9 +102,18 @@ scene_slug: the-warehouse-heist
 **Fields:**
 | Field | Required | Description |
 |-------|----------|-------------|
-| `request_type` | Yes | One of: `QUICK_REACTION`, `FULL_CONTEXT`, `COMBAT_ACTION`, `SECRET_ACTION` |
+| `request_type` | Yes | One of: `QUICK_REACTION`, `FULL_CONTEXT`, `COMBAT_ACTION`, `SECRET_ACTION`, `OPTIONAL_REACTION`, `REFLECTION`, `INTERACTION` |
 | `scene_number` | Yes | Current scene number (zero-padded, e.g., `005`) |
 | `scene_slug` | Yes | Scene slug (kebab-case, e.g., `the-warehouse-heist`) |
+
+**Request type descriptions:**
+- **QUICK_REACTION** — Brief 1-2 sentence response. Player can veto for full context.
+- **FULL_CONTEXT** — Full engagement. Player takes their time making decisions.
+- **COMBAT_ACTION** — Player's combat turn. State action, target, abilities.
+- **SECRET_ACTION** — Private action opportunity. Player responds honestly based on character.
+- **OPTIONAL_REACTION** — Respond if you have something to add; fine to skip entirely.
+- **REFLECTION** — Share internal experience, not action. Character development moment.
+- **INTERACTION** — Talk to party members via `[PLAYER_TO_PLAYER]`, not to the GM.
 
 **When sent:** When the GM needs a specific character's input — reactions, combat actions, decisions, or secret actions.
 
@@ -146,43 +153,6 @@ options:
 **When sent:** When the GM needs structured input from the human (character selection, binary choices, etc.).
 
 **Expected response:** Team lead converts to `AskUserQuestion`, then sends `[PLAYER_ANSWER]` to GM.
-
----
-
-### `[STATE_UPDATED]` {#state_updated}
-
-Signal that delta files have been written to disk.
-
-- **Sender**: GM
-- **Recipient**: Team lead
-- **Transport**: `SendMessage` with `type: message`
-
-**Payload:**
-```
-[STATE_UPDATED]
-deltas_written:
-  - gm-state-delta.md
-  - party-knowledge-delta.md
-characters_involved:
-  - tilda-brannock
-  - grimjaw-ironforge
-```
-
-**Fields:**
-| Field | Required | Description |
-|-------|----------|-------------|
-| `deltas_written` | Yes | List of delta files written to `campaigns/{campaign}/tmp/` |
-| `characters_involved` | Yes | Characters affected by the state change |
-
-**CRITICAL:** The GM must finish writing ALL delta files to disk BEFORE sending this message.
-
-**When sent:** After the GM narrates an outcome that involves meaningful state changes (HP, knowledge, quest progress, etc.).
-
-**Expected response:** Team lead spawns background agents:
-- `state-delta-writer` (processes `gm-state-delta.md`)
-- `knowledge-delta-writer` (processes `party-knowledge-delta.md`)
-- `decision-log` (if player action cycle preceded)
-- Sends `[JOURNAL_CHECKPOINT]` to all player teammates (players self-journal)
 
 ---
 
@@ -308,7 +278,7 @@ Additional fields for `start` command:
 - `end`: When human wants to end the session
 
 **Expected response:**
-- `save`: GM writes delta files, sends `[STATE_UPDATED]`
+- `save`: GM updates `story-state.md` and `party-knowledge.md` directly
 - `end`: GM finds stopping point, performs final save, sends `[SESSION_END]`
 
 ---
@@ -577,58 +547,28 @@ reason: "Player stepped away"
 
 ---
 
-### `[JOURNAL_CHECKPOINT]` {#journal_checkpoint}
-
-Signal for persistent player teammates to write journal entries.
-
-- **Sender**: Team lead
-- **Recipient**: All player teammates
-- **Transport**: `SendMessage` with `type: message` (to each player individually)
-
-**Payload:**
-```
-[JOURNAL_CHECKPOINT]
-campaign: the-rot-beneath
-scene_number: 005
-scene_slug: the-warehouse-heist
-trigger: state_updated | session_end | manual
-```
-
-**Fields:**
-| Field | Required | Description |
-|-------|----------|-------------|
-| `campaign` | Yes | Campaign directory name |
-| `scene_number` | Yes | Current scene number |
-| `scene_slug` | Yes | Current scene slug |
-| `trigger` | Yes | What triggered the checkpoint |
-
-**When sent:** After `[STATE_UPDATED]` (if preceded by player action cycle), at session end, or when manually triggered.
-
-**Expected response:** Each player teammate writes a journal entry to their own journal file (`party/{character}-journal.md`).
-
----
-
 ## Message Sequencing
 
 ### Standard Beat
 
 ```
-1. GM broadcasts [NARRATIVE]          → All teammates receive
+1. GM broadcasts [NARRATIVE]          → All teammates receive (awareness only)
 2. GM sends [GM_TO_PLAYER] to each    → Character-specific prompts
 3. Human's teammate sends [RELAY_TO_HUMAN] → Team lead shows to human
 4. Team lead sends [HUMAN_DECISION]   → Back to human's teammate
 5. All players send [PLAYER_TO_GM]    → Direct to GM
 6. GM broadcasts [NARRATIVE]          → Outcome with woven player actions
-7. GM sends [STATE_UPDATED]           → Team lead spawns background writers
-8. Team lead sends [JOURNAL_CHECKPOINT] → Players self-journal
+7. GM updates story-state.md and party-knowledge.md directly
 ```
+
+Players journal autonomously at natural beat boundaries — no external signal needed.
 
 ### Processing Order
 
 When the GM sends multiple messages in sequence:
 
 1. **Display first**: Always display `[NARRATIVE]` to the human immediately
-2. **Then act**: Process `[STATE_UPDATED]`, `[ASK_PLAYER]`, `[RELAY_TO_HUMAN]`
+2. **Then act**: Process `[ASK_PLAYER]`, `[RELAY_TO_HUMAN]`
 
 ---
 
