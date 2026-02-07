@@ -37,6 +37,8 @@ If no destination is provided, you'll be asked where to put it.
 ├── overview.md
 ├── story-state.md
 ├── party-knowledge.md         # Shared knowledge for AI players
+├── world-primer.md            # Common world knowledge for AI players
+├── decision-log.md            # Character decisions for context reconstruction
 ├── preferences.md             # Narrative style, player character
 ├── party/
 │   ├── {character}.md         # Character sheets
@@ -57,8 +59,6 @@ If no destination is provided, you'll be asked where to put it.
 │   ├── player-teammate.md          # AI player teammate
 │   ├── human-relay-player.md       # Human player teammate
 │   ├── decision-log.md             # Records character decisions
-│   ├── state-delta-writer.md       # Writes story state updates
-│   ├── knowledge-delta-writer.md   # Writes party knowledge updates
 │   ├── character-creator.md        # For adding new characters
 │   └── dnd-enthusiast.md           # For rules/design feedback
 ├── skills/
@@ -172,8 +172,6 @@ Copy these agents (no modification needed):
 - `.claude/agents/decision-log.md`
 - `.claude/agents/character-creator.md`
 - `.claude/agents/dnd-enthusiast.md`
-- `.claude/agents/state-delta-writer.md`
-- `.claude/agents/knowledge-delta-writer.md`
 
 Copy skills (no modification needed):
 - `.claude/skills/dice-roll/SKILL.md`

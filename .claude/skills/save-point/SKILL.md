@@ -67,6 +67,7 @@ At each save point:
 ```
 [ ] story-state.md updated
 [ ] party-knowledge.md updated
+[ ] relationships.md updated (if social dynamics changed — NPC dispositions, party bonds, faction standings)
 ```
 
 ## Detailed Procedures

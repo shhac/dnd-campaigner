@@ -88,6 +88,8 @@ Each turn:
 
 Request actions from ALL AI players simultaneously. Send `[GM_TO_PLAYER]` with `request_type: COMBAT_ACTION` to each player teammate directly. Players respond via `[PLAYER_TO_GM]`.
 
+**Note**: Simultaneous prompting is specific to combat (`COMBAT_ACTION`). In narrative beats, the GM should stagger prompts to create interaction windows — see the GM agent's "Simultaneous vs Staggered Prompts" section.
+
 **Character naming**: Always use full hyphenated names matching the character sheet filename.
 
 Players respond in parallel. Batch their actions in narrative.
@@ -97,13 +99,13 @@ Players respond in parallel. Batch their actions in narrative.
 Post-combat checklist:
 
 1. **Confirm resolution** - Enemies defeated, fled, or surrendered
-2. **Write delta files** (`tmp/gm-state-delta.md` and `tmp/party-knowledge-delta.md`):
+2. **GM updates state directly** — update `story-state.md` and `party-knowledge.md`:
    - [ ] Final HP for all party members
    - [ ] Resources expended (spell slots, abilities)
    - [ ] Combat outcome summary
    - [ ] Loot acquired
-   - [ ] Combat results visible to the party (party-knowledge delta)
-3. **Send `[STATE_UPDATED]`** to team lead — triggers background delta writers and journal checkpoints. Player teammates self-journal.
+   - [ ] Combat results visible to the party (in party-knowledge)
+3. **Player teammates self-journal** at the natural beat boundary.
 
 ## Detailed Procedures
 
@@ -114,5 +116,5 @@ Post-combat checklist:
 
 ## Related Skills
 
-- **play-orchestration**: Handles `[GM_TO_PLAYER]` messaging and `[STATE_UPDATED]` processing
+- **play-orchestration**: Handles `[GM_TO_PLAYER]` messaging and session orchestration
 - **quick-or-veto**: AI player reaction pattern for combat turns

@@ -1,6 +1,6 @@
 ---
 name: messaging-protocol
-description: Canonical reference for the structured message protocol used by all Teams-based D&D agents. Defines every message tag, its sender/recipient, payload format, and routing rules. Referenced by GM, players, narrator, and team lead.
+description: Canonical reference for the structured message protocol used by all Teams-based D&D agents. Defines every message tag ([NARRATIVE], [GM_TO_PLAYER], [PLAYER_TO_GM], [PLAYER_TO_PLAYER], [RELAY_TO_HUMAN], [SESSION_END], [SESSION_COMMAND], [ASK_PLAYER], [NARRATOR_NOTE], etc.), its sender/recipient, payload format, and routing rules.
 ---
 
 # Messaging Protocol
@@ -85,7 +85,7 @@ Character-specific prompt sent to a single player.
 **Payload:**
 ```
 [GM_TO_PLAYER]
-request_type: QUICK_REACTION | FULL_CONTEXT | COMBAT_ACTION | SECRET_ACTION
+request_type: QUICK_REACTION | FULL_CONTEXT | COMBAT_ACTION | SECRET_ACTION | OPTIONAL_REACTION | REFLECTION | INTERACTION
 scene_number: 005
 scene_slug: the-warehouse-heist
 
