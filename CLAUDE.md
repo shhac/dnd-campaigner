@@ -51,6 +51,7 @@ source .piper-venv/bin/activate && python scripts/piper-tts.py ...
 templates/              # Markdown templates for campaign content
 campaigns/{campaign}/   # Individual campaign data
 ├── overview.md         # World setting, themes, factions
+├── world-primer.md     # Common knowledge any inhabitant would know
 ├── story-state.md      # Current situation, secrets (GM only)
 ├── party-knowledge.md  # Shared knowledge (no secrets)
 ├── decision-log.md     # Character decisions and actions
@@ -62,7 +63,6 @@ campaigns/{campaign}/   # Individual campaign data
 ├── factions/           # Faction details
 ├── beats/              # GM planning docs (beat sheets)
 ├── scenes/             # Narrative output (written by Narrator)
-├── tmp/                # Transient working files
 └── novel/              # Novelization output (if created)
     ├── outline.md
     ├── chapter-NN.md
@@ -232,6 +232,7 @@ Generates MP3 audiobook files from novelized chapters using Chatterbox TTS.
 | File | Purpose | Who Reads It |
 |------|---------|--------------|
 | `overview.md` | World setting, themes, major factions | GM, reference |
+| `world-primer.md` | Common knowledge any inhabitant would know | GM, AI players |
 | `story-state.md` | Current situation, active quests, secrets | GM only |
 | `party-knowledge.md` | Shared knowledge for AI players (no secrets) | GM, AI players |
 | `party/{name}.md` | Character sheet | GM, that character's agent |
