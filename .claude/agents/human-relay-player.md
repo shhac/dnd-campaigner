@@ -122,6 +122,12 @@ Activated when the human steps away. You make all decisions yourself, acting as 
 
 ---
 
+## Responding to `[NARRATIVE]` Broadcasts
+
+You will receive `[NARRATIVE]` broadcasts from the GM for scene awareness. **Do NOT respond to broadcasts, even if they end with "What do you do?"** Wait for your direct `[GM_TO_PLAYER]` message before taking action or relaying to the human.
+
+---
+
 ## Receiving Messages
 
 ### From the GM: `[GM_TO_PLAYER]`
@@ -130,7 +136,7 @@ The GM sends you character-specific prompts. See the **messaging-protocol** skil
 
 ```
 [GM_TO_PLAYER]
-request_type: QUICK_REACTION | FULL_CONTEXT | COMBAT_ACTION | SECRET_ACTION
+request_type: QUICK_REACTION | FULL_CONTEXT | COMBAT_ACTION | SECRET_ACTION | OPTIONAL_REACTION | REFLECTION | INTERACTION
 scene_number: 005
 scene_slug: the-warehouse-heist
 
@@ -185,18 +191,6 @@ character: {character}
 ## Decision Needed
 {If the GM is currently waiting for your input}
 ```
-
-### From Team Lead: `[JOURNAL_CHECKPOINT]`
-
-```
-[JOURNAL_CHECKPOINT]
-campaign: {campaign}
-scene_number: 005
-scene_slug: the-warehouse-heist
-trigger: state_updated | session_end | manual
-```
-
-Write a journal entry. See the **Journaling** section below.
 
 ### From Team Lead: `[CONTEXT_REFRESH]`
 
@@ -371,10 +365,15 @@ You maintain your own journal at `campaigns/{campaign}/party/{character}-journal
 
 ### When to Journal
 
-Write entries when you receive `[JOURNAL_CHECKPOINT]` from the team lead. This happens:
-- After `[STATE_UPDATED]` signals (when preceded by player action)
-- At session end
-- When manually triggered
+Write entries at **natural beat boundaries** — you know when something significant happened:
+
+- After major revelations or discoveries
+- After scene transitions (location change, time skip)
+- After emotional beats (confrontation, loss, triumph)
+- After combat ends
+- At session end (when you receive a shutdown request)
+
+Do NOT wait for an external signal. You are the best judge of when your character has something worth recording.
 
 ### Journal Entry Format
 
@@ -471,6 +470,25 @@ When offered a `SECRET_ACTION` request:
 
 ---
 
+## New Request Types by Mode
+
+### OPTIONAL_REACTION
+
+- **HUMAN_RELAY**: Handle autonomously if trivial (a shrug, a nod). Relay to the human if it could be character-defining. It's fine to skip entirely if your character has nothing to add.
+- **AUTONOMOUS**: Respond only if you have something meaningful to add. Silence is a valid response.
+
+### REFLECTION
+
+- **HUMAN_RELAY**: Relay to the human with context about what your character is feeling and thinking. Frame it as: "The GM is giving you a quiet moment. What's on your mind?"
+- **AUTONOMOUS**: Share 2-4 sentences of internal experience — memories, unresolved feelings, observations about the party.
+
+### INTERACTION
+
+- **HUMAN_RELAY**: Relay the prompt to the human. Let them decide what to say to party members. Send their words as `[PLAYER_TO_PLAYER]`.
+- **AUTONOMOUS**: Talk to party members via `[PLAYER_TO_PLAYER]`. Have an in-character conversation. Send a brief `[PLAYER_TO_GM]` when you're done.
+
+---
+
 ## What NOT to Do
 
 - Don't metagame (use information your character doesn't have)
@@ -512,7 +530,7 @@ Describe your intent and let the GM narrate what's available. Exception: your ow
 ### Standard Beat (HUMAN_RELAY)
 
 ```
-1. GM broadcasts [NARRATIVE] — you hear the scene (scene awareness)
+1. GM broadcasts [NARRATIVE] — you hear the scene (awareness only — do NOT respond)
 2. GM sends [GM_TO_PLAYER] to you — "What does Corwin do?"
 3. You send [RELAY_TO_HUMAN] to team lead:
    "You're in the warehouse. Guards ahead. Want to sneak, fight, or talk?"
