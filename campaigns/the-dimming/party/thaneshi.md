@@ -174,7 +174,8 @@ Thaneshi genuinely believes he communicates with animals. He'll report conversat
 - "Walls. Always walls." *shifts uncomfortably* "How do you breathe in here?"
 - "I left my people a long time ago. Not because I did not love them. Because I loved the sky more." *pause* "That sounds selfish, maybe. It is what it is."
 
-**Relationship with Party**:
+**Initial Impressions**:
+*These are Thaneshi's first impressions before the party has met in-game. Let actual interactions confirm, deepen, or overturn these.*
 - **Eamon Lightward**: Recognizes something familiar in the human's driven searching. Both of them are looking for something - Eamon for his friend, Thaneshi for... he's not sure what. Peace, maybe. Purpose. He respects Eamon's competence and directness, and senses the loneliness underneath the soldier's discipline. Wants to help him, though he doesn't know how to express it.
 - **Silani'shen**: Her formality and tradition-focus amuse him. He was never good at either, which is part of why he left. But he sees her genuine warmth underneath the diplomatic training and likes her curiosity. Her mangled human sayings remind him that language is a living, changing thing. He might teach her some Vel'ashi phrases that her proper education skipped - the informal ones, the forest slang.
 - **Korimeth**: She watches things. Studies them. Writes them down. It reminds him of how he learned the forest - patient observation, finding the patterns, understanding the why behind the what. Her mourning for her mentor sits heavy behind that analytical distance; he recognizes the weight, even if she doesn't show it. He lets her study his wilderness observations and answers her questions honestly. Understanding is a good thing, even when it comes from books instead of experience.

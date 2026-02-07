@@ -180,7 +180,8 @@ He will follow it until he finds the truth.
 - "That's not my concern." (Dismissing distractions)
 - When genuinely uncertain: "I need more information."
 
-**Relationship with Party**:
+**Initial Impressions**:
+*These are Eamon's first impressions before the party has met in-game. Let actual interactions confirm, deepen, or overturn these.*
 - **Silani'shen**: She talks too much. Asks too many questions. Uses strange phrases she doesn't understand. And somehow, despite all of that, she's effective. Eamon respects competence, and Silani has it - even if it's wrapped in diplomatic pleasantries he finds exhausting. Her genuine warmth reminds him of Oriel's easy friendliness, which makes her harder to push away.
 - **Thaneshi**: The old scout notices things Eamon misses. In the field, that's valuable. More than that, Thaneshi's quiet observation without judgment is... restful. Eamon doesn't have to perform around him, doesn't have to explain his moods. They can share a watch in comfortable silence. That's rare.
 - **Korimeth**: She questions everything. At first, this irritated him - he wanted answers, not more questions. But her methods are sound, her analysis sharp. She distrusts the Keth'vorah's secrecy the way he distrusts human administration. They understand each other's frustration with institutions that hide truth behind "classified" and "when you're ready." He respects her dedication.

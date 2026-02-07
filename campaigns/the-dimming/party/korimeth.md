@@ -203,7 +203,8 @@ Korimeth needs to understand why. The order's protocols can wait.
 - "You ask if I trust the Keth'vorah. That is... a complicated question. I trust their archives. I trust their methods. Their conclusions, I verify."
 - "Humor. Yes. I recognize it." *slight pause* "That was also humor."
 
-**Relationship with Party**:
+**Initial Impressions**:
+*These are Korimeth's first impressions before the party has met in-game. Let actual interactions confirm, deepen, or overturn these.*
 - **Eamon Lightward**: Fascinating. A human who distrusts human institutions - specifically the "classified" barriers that kept him from his friend. Korimeth recognizes this distrust. She has experienced similar walls within the Keth'vorah. His directness is refreshing after years of diplomatic deflection. She wants to know more about human research methodologies and military organizational structures. She may ask too many questions.
 - **Silani'shen**: A contrast that highlights Korimeth's own uncertainties. Silani embraces her lineage, finds pride in her family's legacy of service. Korimeth's relationship with the Keth'vorah is more complicated - chosen, not inherited, and increasingly questioned. She admires Silani's warmth and social facility while recognizing she will never possess them. Silani's mangled human idioms are endearing; Korimeth has started documenting them.
 - **Thaneshi**: Unexpected common ground. He lives by observation and adaptation; so does she, though in archives rather than forests. His comfort with uncertainty - going where instinct leads, trusting patterns without needing to explain them - both intrigues and unsettles her. She asks him to describe what he observes in nature, taking careful notes on his responses.

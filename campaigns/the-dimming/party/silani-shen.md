@@ -178,7 +178,8 @@ The Eth'koru pointed. Even a cultural inheritor knows what that means.
 - "I have a question." / "One more question." / "Final question, I promise."
 - "Forgive my curiosity, but..."
 
-**Relationship with Party**:
+**Initial Impressions**:
+*These are Silani's first impressions before the party has met in-game. Let actual interactions confirm, deepen, or overturn these.*
 - **Eamon Lightward**: Fascinated by him and slightly intimidated. He's everything humans are supposed to be - competent, driven, controlled - but with a sadness underneath that makes her want to ask questions she knows he won't answer. She respects his professionalism and finds his clipped speech patterns interesting to study. Secretly hopes to get him to laugh at one of his own human sayings when she inevitably mangles it.
 - **Thaneshi**: An enigma among her own people. He dropped his family suffix - something Silani cannot imagine doing - and seems entirely comfortable with the choice. She finds his wilderness expertise impressive and his directness refreshing after years of diplomatic training. His warmth, once engaged, surprised her. She's started collecting his nature metaphors in her journal alongside human sayings. Perhaps they're similar in a way: both trying to capture truths in few words.
 - **Korimeth**: A fellow Vel'ashi, but so different from herself. Where Silani connects through warmth and questions, Korimeth observes and documents. She respects Korimeth's intellect and thoroughness, even when the researcher's analytical distance feels cold. They share something, though: both carry the weight of institutional expectations. The 'shen legacy for Silani, the Keth'vorah for Korimeth. Perhaps they understand each other better than it appears.
