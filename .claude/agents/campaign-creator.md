@@ -175,6 +175,7 @@ Use templates from `templates/` directory. Read them before generating content.
 - `templates/npc.md`
 - `templates/location.md`
 - `templates/faction.md`
+- `templates/item.md` — Use when the campaign includes notable starting items (artifacts, quest items, magical equipment). Create item files at `campaigns/{campaign}/items/{item-name}.md`.
 
 ## Naming Things
 

@@ -12,9 +12,12 @@ Examples of when to veto and when to give quick reactions.
 
 **Response:**
 ```markdown
-[VETO - need more input]
+[PLAYER_TO_GM]
+type: VETO
+character: {character}
 
 Need to know more about this mercenary. My bond is hunting a specific mercenary captain who betrayed my company.
+I need full context to respond properly.
 ```
 
 ### Moral Dilemma Touching Ideal
@@ -25,7 +28,9 @@ Need to know more about this mercenary. My bond is hunting a specific mercenary 
 
 **Response:**
 ```markdown
-[VETO - need more input]
+[PLAYER_TO_GM]
+type: VETO
+character: {character}
 
 This directly conflicts with my ideal about redemption. I need to engage with this decision fully.
 ```
@@ -38,7 +43,9 @@ This directly conflicts with my ideal about redemption. I need to engage with th
 
 **Response:**
 ```markdown
-[VETO - need more input]
+[PLAYER_TO_GM]
+type: VETO
+character: {character}
 
 My flaw about being unable to resist treasure is directly triggered. I need to roleplay this properly.
 ```
@@ -120,14 +127,19 @@ Why: Having an opinion doesn't mean needing full spotlight.
 
 **Correct:**
 ```markdown
-[VETO - need more input]
+[PLAYER_TO_GM]
+type: VETO
+character: tilda-brannock
 
 This merchant is from my hometown. My bond says I'm searching for someone there.
+I need full context to respond properly.
 ```
 
 **Incorrect (includes full response):**
 ```markdown
-[VETO - need more input]
+[PLAYER_TO_GM]
+type: VETO
+character: tilda-brannock
 
 This merchant is from my hometown!
 

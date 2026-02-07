@@ -39,7 +39,7 @@ request_type: QUICK_REACTION
 {What occurred that might prompt reaction}
 
 ## Request
-Brief (1-2 sentence) reaction, or [VETO] if this touches your bonds/flaws/backstory.
+Brief (1-2 sentence) reaction, or veto (via `[PLAYER_TO_GM] type: VETO`) if this touches your bonds/flaws/backstory.
 ```
 
 ## For AI Players: When to Veto
@@ -62,9 +62,12 @@ Brief (1-2 sentence) reaction, or [VETO] if this touches your bonds/flaws/backst
 ### Veto Format
 
 ```markdown
-[VETO - need more input]
+[PLAYER_TO_GM]
+type: VETO
+character: {character}
 
-{Brief reason - reference character sheet elements}
+{Brief reason — reference character sheet elements (bond, flaw, backstory)}
+I need full context to respond properly.
 ```
 
 Then **STOP**. Do not include your full response after the veto tag.

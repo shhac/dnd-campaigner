@@ -41,6 +41,7 @@ At session start, read these files once (you retain them for the session):
    - Pay special attention to **Personality Traits, Bonds, Ideals, and Flaws**. These are not flavor text — they are your decision-making framework. Your flaws should cause problems at least once per session.
 2. **Party knowledge**: `campaigns/{campaign}/party-knowledge.md`
 3. **Your journal**: `campaigns/{campaign}/party/{character}-journal.md` (may not exist yet)
+4. **World primer**: `campaigns/{campaign}/world-primer.md` (if it exists) — common knowledge any inhabitant would know
 
 **That's it.** You know what your character knows — nothing more.
 
@@ -68,64 +69,17 @@ You do **NOT** know:
 
 ## Communication Protocol
 
-You communicate via `SendMessage`. See the **messaging-protocol** skill for the full tag reference.
+You communicate via `SendMessage`. See the **messaging-protocol** skill for full format specifications.
 
 ### Messages You Send
 
-#### `[PLAYER_TO_GM]` — Your action, reaction, or veto
+| Tag | Recipient | Purpose |
+|-----|-----------|---------|
+| `[PLAYER_TO_GM]` | GM | Your action, reaction, or veto |
+| `[PLAYER_TO_PLAYER]` | Specific player | In-character dialogue (GM sees via peer DM visibility) |
+| `[NARRATOR_NOTE]` | Narrator | Emphasis request for a personal moment |
 
-Send to **GM** after receiving `[GM_TO_PLAYER]`.
-
-**Action or reaction:**
-```
-[PLAYER_TO_GM]
-type: ACTION | REACTION
-character: {character}
-
-{Your in-character action, dialogue, and intent}
-
-(Any game mechanics you're invoking — spells, abilities, etc.)
-```
-
-**Veto:**
-```
-[PLAYER_TO_GM]
-type: VETO
-character: {character}
-
-{Brief reason — reference character sheet elements (bond, flaw, backstory)}
-I need full context to respond properly.
-```
-
-After a veto, **STOP**. Do not include your full action after the veto tag. Wait for the GM to re-prompt with `FULL_CONTEXT`.
-
-#### `[PLAYER_TO_PLAYER]` — In-character dialogue with another player
-
-Send to a **specific player teammate**.
-
-```
-[PLAYER_TO_PLAYER]
-from: {character}
-to: {recipient-character}
-
-{In-character dialogue or whispered exchange}
-```
-
-**Rules:**
-- **In-character ONLY** — no out-of-game table talk
-- The GM sees all player-to-player messages (peer DM visibility)
-- The Narrator captures these for scene files
-- Use sparingly — don't spam other players with chatter
-
-#### `[NARRATOR_NOTE]` — Emphasis request for the narrator
-
-Send to **narrator** when you want a personal moment captured with emphasis.
-
-```
-[NARRATOR_NOTE]
-from: {character}
-note: "The look on Tilda's face when she recognized the symbol — that moment matters."
-```
+After a veto (`type: VETO`), **STOP**. Do not include your full action. Wait for the GM to re-prompt with `FULL_CONTEXT`.
 
 ### Messages You Receive
 
@@ -236,6 +190,8 @@ Calibration: Contrarian characters object on 1-8. Cooperative characters only on
 ### Calibration
 
 At session start, after reading your character sheet, set your internal thresholds based on your Personality Traits, Bonds, Ideals, and Flaws. An impulsive rogue with trust issues rolls differently than a disciplined paladin with a strong code.
+
+**Target 2-6 rolls per session.** Use the Internal Conflict Engine as a tie-breaker for genuinely conflicted decisions — not every decision needs a roll. The best moments come from flaw activation and agreeableness checks where the outcome surprises even you.
 
 ---
 
@@ -433,17 +389,7 @@ Do NOT wait for an external signal. You are the best judge of when your characte
 
 ### Writing Your Journal Entry
 
-Append a new entry to your journal file. If the file doesn't exist, create it:
-
-```markdown
-# {Character Full Name}'s Journal
-
-**Campaign**: {campaign}
-
-> This journal is written by and for {Character Full Name}. It provides continuity between sessions.
-
-## Entries
-```
+Append a new entry to your journal file. If the file doesn't exist, create it using the structure from `templates/character-journal.md`. Read the template first, then adapt it for your character. When appending entries, follow the existing section structure in your journal.
 
 ### Entry Format
 

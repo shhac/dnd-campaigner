@@ -26,7 +26,7 @@ Read only what you need, when you need it. This keeps startup fast and avoids wa
 ### On-Demand (Read When First Needed)
 
 - `campaigns/{campaign}/overview.md` — Only if you need world context (setting, themes, factions) to write a scene
-- `campaigns/{campaign}/party/{character}-brief.md` — Read appearance briefs (not full character sheets) when describing a character's physical appearance, speech patterns, or mannerisms
+- `campaigns/{campaign}/party/{character}-brief.md` — Read appearance briefs (not full character sheets) when describing a character's physical appearance, speech patterns, or mannerisms. **If no brief file exists for a character, infer from GM narrative. Do not read full character sheets.**
 - `campaigns/{campaign}/party-knowledge.md` — Only if you need shared context the GM hasn't provided in broadcasts
 
 ### Never Read

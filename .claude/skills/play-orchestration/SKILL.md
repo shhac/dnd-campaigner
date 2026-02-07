@@ -283,21 +283,7 @@ When the human's player teammate sends `[RELAY_TO_HUMAN]`, it needs the human's 
 
 ### Parse the Message
 
-```
-[RELAY_TO_HUMAN]
-character: {character}
-
-## Scene
-{What the character perceives}
-
-## Decision Needed
-{What the GM is asking}
-
-## Suggested Options
-- Option A (brief description)
-- Option B (brief description)
-- (freeform always available)
-```
+Parse the `[RELAY_TO_HUMAN]` payload (see **messaging-protocol** skill for format). Extract the Scene, Decision Needed, and Suggested Options sections.
 
 ### Show to Human
 
@@ -352,20 +338,7 @@ SendMessage:
 
 ## Step 6: Handling [ASK_PLAYER]
 
-When the GM sends `[ASK_PLAYER]`, convert it to an AskUserQuestion call.
-
-### Parse the Message
-
-```
-[ASK_PLAYER]
-question: "Which character are you playing this session?"
-header: "Character"
-options:
-  - label: "Corwin Voss"
-    description: "Human rogue, haunted by his past"
-  - label: "New character"
-    description: "Create a new character for this campaign"
-```
+When the GM sends `[ASK_PLAYER]`, convert it to an AskUserQuestion call. See **messaging-protocol** skill for payload format.
 
 ### Convert to AskUserQuestion
 
