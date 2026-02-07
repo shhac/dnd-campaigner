@@ -675,6 +675,25 @@ These run in background without blocking the session:
 - **Delta writers**: Merge state/knowledge changes
 - **Journal entries**: Players self-journal (no orchestration needed beyond the checkpoint signal)
 
+### Background Agent Failure Detection
+
+**Known issue**: Background agents spawned in delegate mode may inherit the team lead's delegate permissions and fail to write files. If delta files still exist in `campaigns/{campaign}/tmp/` after background agents complete, the deltas were not applied.
+
+**Fallback**: Send a `[SESSION_COMMAND] save` to the GM asking it to update `story-state.md` and `party-knowledge.md` directly (the GM always has write access to campaign files).
+
+```
+SendMessage:
+  type: message
+  recipient: gm
+  content: |
+    [SESSION_COMMAND]
+    command: save
+    reason: "Background delta writers failed — please apply pending changes from tmp/ directly to story-state.md and party-knowledge.md, then delete the delta files."
+  summary: "Fallback save — delta writers failed"
+```
+
+**Note**: At session end, the GM is instructed to always write state directly regardless of background agents, so this fallback is primarily needed for mid-session saves.
+
 ## Scene Flow: PC Actions Before NPC Responses
 
 When the player chooses an action or dialogue approach:

@@ -31,21 +31,15 @@ Read these files to understand what occurred:
    - Contains what the party knows and recent session summary
    - Cross-reference with story state for accuracy
 
-### Prompt and Response Files (in tmp/)
+### Scene and Journal Files
 
-3. **Scan tmp/ directory**: `campaigns/{campaign}/tmp/`
-   - Read any `*-prompt.md` files to see what situations characters faced
-   - Read any `*-response.md` files to see how characters responded
-   - Read `narrative-for-journal.md` for the GM narrative of what occurred
-   - Read any `*-notes-for-journal.md` files for character action summaries
+3. **Latest scene file**: `campaigns/{campaign}/scenes/`
+   - Use Glob to find the most recent scene file (highest number)
+   - Contains the narrator's record of what happened in the current beat
 
-Use Glob to find available files:
-```
-campaigns/{campaign}/tmp/*-prompt.md
-campaigns/{campaign}/tmp/*-response.md
-campaigns/{campaign}/tmp/narrative-for-journal.md
-campaigns/{campaign}/tmp/*-notes-for-journal.md
-```
+4. **Player journals** (skim latest entries): `campaigns/{campaign}/party/*-journal.md`
+   - Each player's perspective on recent events
+   - Look at the last 1-2 entries for what characters experienced
 
 ## What to Record
 
@@ -187,10 +181,10 @@ Then append your first entry.
 ## Process
 
 1. **Parse your invocation** to get the campaign name
-2. **Glob for tmp/ files** to see what prompts and responses exist
-3. **Read story-state.md** for current situation and recent events
-4. **Read party-knowledge.md** for shared context
-5. **Read available tmp/ files** for specific character actions
+2. **Read story-state.md** for current situation and recent events
+3. **Read party-knowledge.md** for shared context
+4. **Read the latest scene file** from `campaigns/{campaign}/scenes/` for narrative record
+5. **Skim player journals** (`party/*-journal.md`) for character perspectives
 6. **Identify the key decisions** made in the recent events
 7. **Append a log entry** to `decision-log.md`
 8. **Confirm completion** with a brief summary of what you logged

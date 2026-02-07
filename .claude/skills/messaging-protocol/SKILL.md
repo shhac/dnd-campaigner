@@ -29,7 +29,6 @@ Canonical reference for all structured message types used in Teams-based D&D ses
 | [`[STATE_UPDATED]`](#state_updated) | GM | Team lead | message |
 | [`[SESSION_END]`](#session_end) | GM | Team lead | message |
 | [`[NARRATOR_NOTE]`](#narrator_note) | GM or Player | Narrator | message |
-| [`[PLAYER_ACTION]`](#player_action) | Team lead | GM | message |
 | [`[DICE_RESULT]`](#dice_result) | Team lead | GM | message |
 | [`[PLAYER_ANSWER]`](#player_answer) | Team lead | GM | message |
 | [`[SESSION_COMMAND]`](#session_command) | Team lead | GM | message |
@@ -215,33 +214,6 @@ next_hook: "The tunnel stretches into darkness. Something is breathing down ther
 **When sent:** After the GM finds a good stopping point, performs a final save, and writes comprehensive state.
 
 **Expected response:** Team lead displays summary and hook to human, waits for background tasks, sends `shutdown_request` to all teammates, calls `TeamDelete`.
-
----
-
-### `[PLAYER_ACTION]` {#player_action}
-
-Human player's declared action, forwarded by the team lead.
-
-- **Sender**: Team lead
-- **Recipient**: GM
-- **Transport**: `SendMessage` with `type: message`
-
-**Payload:**
-```
-[PLAYER_ACTION]
-character: corwin-voss
-action: "I want to sneak through the shelves toward the back, looking for the crate."
-```
-
-**Fields:**
-| Field | Required | Description |
-|-------|----------|-------------|
-| `character` | Yes | Full hyphenated character name |
-| `action` | Yes | The human player's declared action (verbatim or lightly formatted) |
-
-**When sent:** After the team lead collects human input following a `[NARRATIVE]` prompt.
-
-**Expected response:** GM processes the action, narrates outcome, broadcasts `[NARRATIVE]`.
 
 ---
 
