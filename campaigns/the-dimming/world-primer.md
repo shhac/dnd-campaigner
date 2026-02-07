@@ -51,3 +51,14 @@ An ancient Vel'ashi scholarly order that preserves what remains of pre-Collapse 
 ## Dustmeet
 
 A native-run trading post at the crossroads of three ancient paths, half a day south of Third Anchor. Neutral ground where Vel'ashi and humans trade. The architecture shifts subtly — walls change shape, colors follow the light. The Dustmeet Council governs, wanting peace and profitable trade above all.
+
+## Distances and Travel
+
+- **Dustmeet to Third Anchor**: Half a day's travel north along a well-trafficked road
+- **Dustmeet to First Anchor**: Two days east through settled Vel'ashi lowlands
+- **Dustmeet to Second Anchor**: Four to five days west on foot, through the Shimmerwood and over the highland Pale Reach
+- **The Shimmerwood**: Dense forest west of Dustmeet with light-refracting bark that disorients travelers. Half a day to enter from Dustmeet; the trail passes through it for roughly two days
+- **The Pale Reach**: Highland wilderness between the Shimmerwood and the western canyons. Exposed, windy, with razorwing territory. Another two to three days beyond the forest
+- **Second Anchor**: Lies in a mineral-rich canyon system at the far end of the Pale Reach
+
+Travel assumes on foot at a normal pace. Mounted travel (on shimmerbeasts, if available) roughly halves the time.
