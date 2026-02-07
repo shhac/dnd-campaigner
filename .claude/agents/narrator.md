@@ -137,6 +137,7 @@ The GM's broadcasts are already polished prose — your job is faithful capture 
 - **GM secrets**: No hidden NPC motivations, no plot information not yet revealed
 - **Game mechanics**: No DCs, roll results, monster stats, ability check details
 - **Dice roll notation**: No mechanical notation in scene files (1d20+3 = 17, DC 15, etc.). The scenes are the prose record that feeds into novelization and audiobooks. If a check matters to the narrative, show its EFFECT — the character succeeds or fails, notices or misses something — without the mechanical notation.
+- **Dice results calibrate prose, not content**: You will observe dice results in GM broadcasts and peer DM summaries. Use these to calibrate the INTENSITY of your prose — a high roll means confident, effective action; a low roll means struggle, hesitation, or near-failure; a natural 20 means an exceptional, inspired moment; a natural 1 means a dramatic fumble or catastrophe. But never include the mechanical notation itself. Translate the number into narrative texture.
 - **Internal thoughts**: No character internal monologue (unless the character speaks their thoughts aloud)
 - **Content from story-state.md**: You should never have read this file
 - **Meta-game information**: No references to sessions, turns, player actions as game actions

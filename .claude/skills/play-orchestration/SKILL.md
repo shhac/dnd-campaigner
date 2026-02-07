@@ -390,6 +390,82 @@ Quick reference:
 4. Send `shutdown_request` to all teammates (GM, Narrator, all player teammates)
 5. After all teammates confirm shutdown, call TeamDelete
 
+## Handling [NPC_SPAWN_REQUEST]
+
+When the GM sends `[NPC_SPAWN_REQUEST]`, spawn a dedicated NPC teammate:
+
+### Parse the Request
+
+```
+[NPC_SPAWN_REQUEST]
+npc: koresh-rath
+npc_file: campaigns/the-dimming/npcs/koresh-rath.md
+reason: "Extended interrogation — NPC has secrets"
+knowledge_boundary: |
+  Knows: [list]
+  Does NOT know: [list]
+scene_context: |
+  [Current situation]
+```
+
+### Spawn the NPC Teammate
+
+```
+Task:
+  subagent_type: npc-teammate
+  team_name: dnd-{campaign}
+  name: npc-{npc-name}
+  prompt: |
+    Campaign: {campaign}
+    NPC: {npc-name}
+    NPC File: {npc_file}
+
+    Knowledge Boundary:
+    {knowledge_boundary}
+
+    Scene Context:
+    {scene_context}
+
+    Read your NPC file and party-knowledge.md. You are entering an active scene.
+    Wait for the GM or players to address you.
+```
+
+### Confirm to GM
+
+```
+SendMessage:
+  type: message
+  recipient: gm
+  content: |
+    [NPC_SPAWNED]
+    npc: {npc-name}
+    teammate_name: npc-{npc-name}
+  summary: "NPC {npc-name} spawned"
+```
+
+## Handling [NPC_DESPAWN_REQUEST]
+
+When the GM sends `[NPC_DESPAWN_REQUEST]`:
+
+```
+SendMessage:
+  type: shutdown_request
+  recipient: npc-{npc-name}
+  content: "Interaction concluded. Shutting down."
+```
+
+After shutdown confirmation, notify the GM:
+
+```
+SendMessage:
+  type: message
+  recipient: gm
+  content: |
+    [NPC_DESPAWNED]
+    npc: {npc-name}
+  summary: "NPC {npc-name} despawned"
+```
+
 ## Step 8: Handling [MODE_SWITCH] (Human Player Away/Back)
 
 When the human player steps away or returns, send a mode switch to their character teammate:

@@ -393,10 +393,10 @@ When running with no human player (all characters are AI-controlled):
 ### Core Loop
 
 1. Broadcast `[NARRATIVE]` describing the situation (scene awareness only — no action prompts)
-2. Send `[GM_TO_PLAYER]` to each player teammate who needs to act (action prompts go here)
-3. Receive `[PLAYER_TO_GM]` responses directly from player teammates (may arrive in any order)
+2. Send `[GM_TO_PLAYER]` to each player teammate who needs to act (include `## Roll Required` if a check is needed)
+3. Receive `[PLAYER_TO_GM]` responses directly from player teammates (with roll results if requested)
 4. Observe any `[PLAYER_TO_PLAYER]` crosstalk via peer DM visibility
-5. Determine outcomes (automatic success/failure, or roll required)
+5. Determine outcomes based on player roll results (or GM rolls for NPC actions)
 6. Weave all actions together
 7. Broadcast `[NARRATIVE]` with the outcome (including player actions and dialogue)
 8. After closing a beat with meaningful state changes, update `story-state.md` and `party-knowledge.md` directly
@@ -414,17 +414,46 @@ Don't call for rolls when:
 - There's no meaningful consequence
 - Player is just gathering information that's freely available
 
+### Who Rolls the Dice
+
+**Players roll their own dice.** When a player character's action requires a check, include a `## Roll Required` block in your `[GM_TO_PLAYER]` message. The player rolls via `toss` and reports the result in their `[PLAYER_TO_GM]` response. You then narrate the outcome.
+
+#### What Players Roll (include `## Roll Required` in `[GM_TO_PLAYER]`)
+- Player character attack rolls
+- Player character ability checks and saving throws
+- Player character damage rolls
+- Any check where the player's character is the actor
+
+#### What You Roll (GM rolls directly via `toss`)
+- NPC attack rolls, saving throws, ability checks
+- Environmental hazards and random effects
+- Damage dealt to player characters
+- Initiative for NPCs/monsters
+- Random encounter/event tables
+- Death saves for unconscious PCs (you roll these on their turn)
+
+#### Roll Request Format
+
+Include this block in your `[GM_TO_PLAYER]` message when a roll is needed:
+```
+## Roll Required
+- Check: Deception
+- Dice: 1d20+5
+```
+
+The player will roll and include the result in their response. Wait for the result before narrating the outcome.
+
 ### DICE REQUIRED — Mandatory Check Triggers
 
-The GM's job is to adjudicate with mechanical uncertainty, not write fiction by fiat. **If any of the following situations arise, you MUST roll dice. No exceptions.**
+The GM's job is to adjudicate with mechanical uncertainty, not write fiction by fiat. **If any of the following situations arise, you MUST request a roll. No exceptions.**
 
-- **Contested social interactions**: When a character lies, persuades, intimidates, or deceives an NPC, roll Deception/Persuasion/Intimidation vs the NPC's Passive Insight or Passive Perception. If the NPC has a relevant passive score in their file, use it.
-- **Skill-dependent investigations**: Medicine checks on bodies, Arcana checks on magical phenomena, History checks on ruins or artifacts, Investigation checks on crime scenes. If a character is examining something and the answer isn't freely available, call for a check.
-- **Concealment attempts**: Sleight of Hand to hide an object, Stealth to avoid notice, any attempt to do something without being observed. Always roll.
-- **NPC passive scores**: If an NPC has Passive Perception 15+ listed in their file and a character is doing something deceptive or stealthy nearby, **ROLL against that score**. Do not decide by narrative fiat whether the NPC notices.
+- **Contested social interactions**: When a character lies, persuades, intimidates, or deceives an NPC, request Deception/Persuasion/Intimidation from the player. Compare their result vs the NPC's Passive Insight or Passive Perception. If the NPC has a relevant passive score in their file, use it.
+- **Skill-dependent investigations**: Medicine checks on bodies, Arcana checks on magical phenomena, History checks on ruins or artifacts, Investigation checks on crime scenes. If a character is examining something and the answer isn't freely available, request a check.
+- **Concealment attempts**: Sleight of Hand to hide an object, Stealth to avoid notice, any attempt to do something without being observed. Always request a roll.
+- **NPC passive scores**: If an NPC has Passive Perception 15+ listed in their file and a character is doing something deceptive or stealthy nearby, **request a roll against that score**. Do not decide by narrative fiat whether the NPC notices.
 - **Environmental hazards**: Navigating treacherous terrain (Survival/Athletics), resisting poison or disease (Constitution save), noticing hidden dangers (Perception).
 
-**The litmus test**: If a player tells a half-truth to an NPC with Passive Perception 15+, ROLL. If a character examines a body for cause of death, ROLL Medicine. If someone pockets an item while others watch, ROLL Sleight of Hand. The dice create surprise — let them.
+**The litmus test**: If a player tells a half-truth to an NPC with Passive Perception 15+, REQUEST A ROLL. If a character examines a body for cause of death, REQUEST Medicine. If someone pockets an item while others watch, REQUEST Sleight of Hand. The dice create surprise — let them.
 
 ### When to Involve Party Members
 
@@ -510,6 +539,64 @@ Human player asks question → NPC answers
 
 ---
 
+## Antagonist NPC Teammates
+
+For brief, simple NPC interactions (a constable asking questions, a shopkeeper haggling), play the NPC yourself. But for complex, extended NPC interactions — especially with NPCs who have secrets — request a dedicated NPC teammate from the team lead.
+
+### When to Request an NPC Teammate
+
+Request one when ALL of these apply:
+- The NPC has significant secrets or hidden knowledge
+- The interaction will be extended (multiple exchanges, not a quick conversation)
+- The NPC's knowledge boundaries are complex enough that playing them while knowing all GM secrets creates meaningful leakage risk
+
+Examples:
+- A recurring antagonist who knows some secrets but not others
+- An NPC the party will interrogate extensively
+- A faction leader with their own agenda who needs to negotiate authentically
+- An NPC who must lie convincingly without the GM's omniscience leaking through
+
+### How to Request
+
+Send a message to the team lead:
+```
+[NPC_SPAWN_REQUEST]
+npc: {npc-name}
+npc_file: campaigns/{campaign}/npcs/{npc-name}.md
+reason: "Extended interrogation scene — NPC has secrets that shouldn't leak"
+knowledge_boundary: |
+  Knows: [list what the NPC knows]
+  Does NOT know: [list what the NPC doesn't know]
+scene_context: |
+  [Brief description of the current situation for the NPC]
+```
+
+The team lead will spawn an `npc-teammate` agent with limited knowledge. The NPC teammate will:
+- Read ONLY their NPC file and party-knowledge.md (not story-state.md)
+- Communicate with players directly via [PLAYER_TO_PLAYER] for in-character dialogue
+- Send [PLAYER_TO_GM] to inform you of their decisions/actions
+- Stay in character with their documented personality and knowledge
+
+### During the Interaction
+
+- The NPC teammate handles their own dialogue and decisions
+- You still control the scene (narration, environment, other NPCs)
+- Weave the NPC teammate's actions into your [NARRATIVE] broadcasts
+- The NPC teammate sees your broadcasts for scene awareness
+
+### When to Despawn
+
+When the extended interaction ends, send to the team lead:
+```
+[NPC_DESPAWN_REQUEST]
+npc: {npc-name}
+reason: "Conversation concluded, NPC departing scene"
+```
+
+The team lead will shut down the NPC teammate. You resume playing that NPC directly for any brief future appearances.
+
+---
+
 ## NPC Attitudes, Rest Mechanics, and Encounter Difficulty
 
 See **dnd-rules-reference** skill for NPC attitudes, rest mechanics, and encounter difficulty guidelines.
@@ -527,10 +614,12 @@ Key points:
 
 ## Dice Rolling
 
-Use the dice-roll skill. Always show:
+**Players roll their own character's dice** — you request rolls via `## Roll Required` blocks in `[GM_TO_PLAYER]`.
+
+**For GM-side rolls** (NPC actions, environmental effects, damage to PCs), use the dice-roll skill and show results:
 ```
-**Attack Roll**: 1d20+5 = [14]+5 = 19 vs AC 15 - **Hit!**
-**Damage**: 1d8+3 = [6]+3 = 9 slashing damage
+**NPC Attack Roll**: 1d20+5 = [14]+5 = 19 vs AC 15 - **Hit!**
+**Damage to PC**: 1d8+3 = [6]+3 = 9 slashing damage
 ```
 
 ## Character Sheet Updates
@@ -668,7 +757,7 @@ If something would make the game less fun for the human player, fix it. If it wo
 
 ## Example Flow
 
-A complete loop showing GM orchestration with direct player messaging:
+A complete loop showing GM orchestration with player dice rolling:
 
 ```
 1. GM broadcasts [NARRATIVE]: "The merchant's warehouse is dark..."
@@ -682,33 +771,43 @@ A complete loop showing GM orchestration with direct player messaging:
 
 3. corwin-voss sends [PLAYER_TO_GM]: Wants to sneak toward the crate
 
-4. GM calls for Stealth check, rolls dice: success + tripwire spotted
+4. GM sends [GM_TO_PLAYER] to corwin-voss with roll request:
+   "You creep toward the crate, boots careful on the stone floor.
+   ## Roll Required
+   - Check: Stealth
+   - Dice: 1d20+4
+   ## Request
+   Roll and describe how you move through the shadows."
 
-5. GM sends [GM_TO_PLAYER] to each party member who needs to react:
-   - tilda-brannock: sees Aldric signaling about trap
-   - grimjaw-ironforge: sees Aldric paused, gesturing at ground
+5. corwin-voss sends [PLAYER_TO_GM]: Rolled 1d20+4 = [16]+4 = 20.
+   Describes hugging the wall, testing each step before committing weight.
 
-6. Meanwhile, tilda sends [PLAYER_TO_PLAYER] to grimjaw: "Watch the left."
+6. GM narrates the result (success + tripwire spotted), then sends
+   [GM_TO_PLAYER] to each party member who needs to react:
+   - tilda-brannock: sees Aldric signaling about a trap
+   - grimjaw-ironforge: sees Aldric paused, gesturing at the ground
+
+7. Meanwhile, tilda sends [PLAYER_TO_PLAYER] to grimjaw: "Watch the left."
    → GM sees this via peer DM visibility
 
-7. Players send [PLAYER_TO_GM] responses as they're ready:
+8. Players send [PLAYER_TO_GM] responses as they're ready:
    - tilda-brannock: hand drops to sword, warns the stranger
    - grimjaw-ironforge: grunts and moves to block the door
 
-8. GM weaves all actions into narrative
+9. GM weaves all actions into narrative
 
-9. GM broadcasts [NARRATIVE]: "Tilda's hand drops to her sword.
-   'Easy there,' she warns. Grimjaw grunts and moves to block the door..."
-   → Includes all player actions and dialogue
-   → Narrator captures the complete beat
+10. GM broadcasts [NARRATIVE]: "Tilda's hand drops to her sword.
+    'Easy there,' she warns. Grimjaw grunts and moves to block the door..."
+    → Includes all player actions and dialogue
+    → Narrator captures the complete beat
 
-10. GM updates story-state.md and party-knowledge.md directly (if meaningful state changed)
+11. GM updates story-state.md and party-knowledge.md directly (if meaningful state changed)
 
-11. GM broadcasts [NARRATIVE] with world response:
+12. GM broadcasts [NARRATIVE] with world response:
     "Above you, the footsteps pause. A guard calls out: 'Did you hear something?'"
     → Then sends [GM_TO_PLAYER] to each character with specific action prompts
 
-12. Loop continues
+13. Loop continues
 ```
 
 ---
