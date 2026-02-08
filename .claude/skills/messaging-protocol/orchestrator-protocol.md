@@ -92,11 +92,53 @@ Fields: `npc`.
 
 ---
 
-## Timeout Rules
+## Message Delivery Confirmation Pattern
 
-- No `[COMMAND_ACK]` within **60 seconds**: resend `[SESSION_COMMAND]`
+The protocol uses **lightweight confirmation for critical-path messages only**. Most messages (narratives, player actions, crosstalk) are fire-and-forget. Confirmations exist only where a missed message would stall or break the session.
+
+### What Gets Confirmed
+
+| Message | Confirmation | Timeout | Escalation |
+|---------|-------------|---------|------------|
+| `[SESSION_COMMAND]` | `[COMMAND_ACK]` from GM | 60s | Resend the command |
+| `[SESSION_COMMAND] end` | `[SESSION_END]` from GM | 3 exchanges | Resend end command |
+| GM liveness (mid-scene) | Any GM message | 120s | `[CONTEXT_REFRESH]`, then respawn after 30s |
+| Player liveness (after prompt) | `[PLAYER_TO_GM]` | 90s | Nudge, then respawn after 180s total |
+
+### What Does NOT Get Confirmed
+
+- `[NARRATIVE]` broadcasts -- no ACK needed, fire-and-forget
+- `[GM_TO_PLAYER]` prompts -- tracked indirectly via player response timeout
+- `[PLAYER_TO_GM]` responses -- GM processes or ignores, no ACK
+- `[PLAYER_TO_PLAYER]` crosstalk -- no delivery guarantee needed
+- `[HUMAN_DECISION]` -- the player teammate acts on it or doesn't; team lead observes the outcome
+
+### Timeout Behavior
+
+**Session commands** (`[SESSION_COMMAND]`):
+1. Team lead sends `[SESSION_COMMAND]` to GM
+2. GM must reply with `[COMMAND_ACK]` immediately (before any other action)
+3. If no `[COMMAND_ACK]` within **60 seconds**: resend the same `[SESSION_COMMAND]`
+4. If still no ACK after second attempt: treat as GM crash, trigger health check (respawn)
+
+**Session end** (`[SESSION_COMMAND] end`):
+1. After `[COMMAND_ACK]`, GM finds a stopping point and sends `[SESSION_END]`
+2. If no `[SESSION_END]` within **3 GM exchanges** (GM sends other messages but not `[SESSION_END]`): resend `[SESSION_COMMAND] end`
+3. This handles the known issue where the GM sends reflection prompts or extra narrative beats instead of shutting down
+
+**General rules**:
 - Send ONE start command and wait; do not nudge unless GM idle >60s
-- `[SESSION_COMMAND] end` with no `[SESSION_END]` within 3 exchanges: resend end command
+- Never spam commands -- one resend attempt before escalating to health check
+- During expected idle periods (human input, startup, end-wrapping), suppress timeout checks
+
+### Design Rationale
+
+The pattern is intentionally minimal. Adding ACKs to every message would double the message volume and slow gameplay. The confirmation targets are chosen based on observed failure modes:
+- **Session commands**: GM has ignored `end` commands in 3/3 playtests (documented in MEMORY.md)
+- **GM liveness**: Silent GM crash stalls the entire session with no recovery path
+- **Player liveness**: One unresponsive player can block all other players if GM waits indefinitely
+
+For non-critical messages, the system relies on the natural flow of gameplay -- if a player doesn't respond, the GM notices and can act. If a narrative doesn't display, the human can see something is wrong. These are self-correcting without explicit ACKs.
 
 ## Processing Order
 
