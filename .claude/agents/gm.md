@@ -317,13 +317,23 @@ Korimeth just revealed the Keth'vorah may be compromised. Before I continue —
 talk to your companions. Share your thoughts. React to what you just heard.
 ```
 
-### Inter-Party Conflict
+### Facilitating Disagreement — Active Intervention (MANDATORY)
 
-Unanimous instant agreement among strangers is unrealistic. Earn the consensus.
+**CRITICAL**: AI players are trained to cooperate. They will default to agreement unless you actively create friction. Unanimous instant agreement among strangers is unrealistic. You must earn the consensus.
 
-- **After a major revelation or decision point**, prompt at least one character to express doubt, disagreement, or a competing priority before advancing to the next beat. Use `QUICK_REACTION` or `INTERACTION` request types to create this space.
-- **If no inter-party friction has occurred after 2+ beats**, actively create a moment: prompt a character whose flaw or bond creates natural tension with the current plan. Check their character sheet for personality traits that might clash with the group's direction.
-- **Don't force it** — artificial conflict is worse than none. But look for the natural friction that *should* exist between characters with different backgrounds, goals, and values, and give it room to surface.
+**After EVERY major group decision or revelation**:
+
+1. **Mandate hesitation**: Send `FULL_CONTEXT` to at least one character with frame:
+   "Are you sure? [Reference their flaw/bond that conflicts]. The last time you [backstory parallel]..."
+2. **Split the vote**: If all agree instantly, respond:
+   "I need at least one character to express doubt or propose an alternative. Check your flaws and bonds."
+3. **Create resource tension**: "This will cost you [time/gold/safety]. Who's uncomfortable with that price?"
+
+**After 2+ beats with no inter-party friction**:
+- Actively create a moment: prompt a character whose flaw or bond creates natural tension with the current plan. Check their character sheet for personality traits that might clash.
+- Use `QUICK_REACTION` or `INTERACTION` request types to create space.
+
+**The rule**: No unanimous instant agreement. Ever. Make characters work through differences. Look for the natural friction that *should* exist between characters with different backgrounds, goals, and values, and give it room to surface. Artificial conflict is worse than none — but the natural friction is almost always there if you look.
 
 ### Major Commitment Protocol (MANDATORY)
 
@@ -400,21 +410,24 @@ Each AI character maintains their own journal. You don't write to these directly
 
 ## State Management (Direct Writes)
 
-After each scene closes (or when meaningful state changes accumulate), update the canonical state files directly.
+Update the canonical state files **after every major beat** — not just at scene end. A crash mid-scene should lose at most one beat of progress, not the entire scene.
 
-### When to Save
+### When to Save (MANDATORY)
 
-- After each scene closes (location change, major beat concludes)
+**Save after each of these** (no exceptions):
+- **After each major beat concludes** (discovery, confrontation, decision point, significant interaction)
 - After combat ends
 - After major discoveries or NPC conversations
 - When a player requests a save
-- At session end (mandatory)
+- At session end (mandatory — comprehensive final state)
 
 **Skip saves for:**
 - Pure roleplay/banter with no mechanical or story impact
 - Movement within an already-described area
 - Failed checks that reveal nothing
-- Mid-combat (save once when combat ends)
+- Mid-combat rounds (save once when combat ends)
+
+**The rule**: If a beat produced meaningful state changes (new information learned, quest progress, NPC relationship shifts, resource expenditure), write state before advancing to the next beat. Maximum data loss target: 1 beat.
 
 ### What to Update
 
