@@ -1,6 +1,6 @@
 ---
 name: messaging-protocol
-description: Canonical reference for the structured message protocol used by all Teams-based D&D agents. Defines every message tag ([NARRATIVE], [GM_TO_PLAYER], [PLAYER_TO_GM], [PLAYER_TO_PLAYER], [RELAY_TO_HUMAN], [SESSION_END], [SESSION_COMMAND], [ASK_PLAYER], [NARRATOR_NOTE], etc.), its sender/recipient, payload format, and routing rules.
+description: Canonical reference for the structured message protocol used by all Teams-based D&D agents. Defines every message tag ([NARRATIVE], [GM_TO_PLAYER], [PLAYER_TO_GM], [PLAYER_TO_PLAYER], [PLAYER_TO_PARTY], [RELAY_TO_HUMAN], [SESSION_END], [SESSION_COMMAND], [COMMAND_ACK], [ASK_PLAYER], [NARRATOR_NOTE], [NPC_SPAWN_REQUEST], [NPC_SPAWNED], [NPC_DESPAWN_REQUEST], [NPC_DESPAWNED], [PROTOCOL_WARNING], [DICE_RESULT], etc.), its sender/recipient, payload format, routing rules, and dice roll formatting.
 ---
 
 # Messaging Protocol
@@ -27,6 +27,7 @@ Canonical reference for all structured message types used in Teams-based D&D ses
 | [`[GM_TO_PLAYER]`](#gm_to_player) | GM | Specific player | message |
 | [`[ASK_PLAYER]`](#ask_player) | GM | Team lead | message |
 | [`[SESSION_END]`](#session_end) | GM | Team lead | message |
+| [`[COMMAND_ACK]`](#command_ack) | GM | Team lead | message |
 | [`[NARRATOR_NOTE]`](#narrator_note) | GM or Player | Narrator | message |
 | [`[DICE_RESULT]`](#dice_result) | Team lead | GM | message |
 | [`[PLAYER_ANSWER]`](#player_answer) | Team lead | GM | message |
@@ -38,6 +39,12 @@ Canonical reference for all structured message types used in Teams-based D&D ses
 | [`[PLAYER_TO_PLAYER]`](#player_to_player) | Player teammate | Player teammate | message |
 | [`[RELAY_TO_HUMAN]`](#relay_to_human) | Human's player teammate | Team lead | message |
 | [`[NARRATOR_REQUEST]`](#narrator_request) | Narrator | GM | message |
+| [`[PLAYER_TO_PARTY]`](#player_to_party) | Player teammate | All (broadcast) | broadcast |
+| [`[NPC_SPAWN_REQUEST]`](#npc_spawn_request) | GM | Team lead | message |
+| [`[NPC_SPAWNED]`](#npc_spawned) | Team lead | GM | message |
+| [`[NPC_DESPAWN_REQUEST]`](#npc_despawn_request) | GM | Team lead | message |
+| [`[NPC_DESPAWNED]`](#npc_despawned) | Team lead | GM | message |
+| [`[PROTOCOL_WARNING]`](#protocol_warning) | Any teammate | Any teammate | message |
 
 ---
 
@@ -184,6 +191,35 @@ next_hook: "The tunnel stretches into darkness. Something is breathing down ther
 **When sent:** After the GM finds a good stopping point, performs a final save, and writes comprehensive state.
 
 **Expected response:** Team lead displays summary and hook to human, waits for background tasks, sends `shutdown_request` to all teammates, calls `TeamDelete`.
+
+---
+
+### `[COMMAND_ACK]` {#command_ack}
+
+GM acknowledges receipt of a session command.
+
+- **Sender**: GM
+- **Recipient**: Team lead
+- **Transport**: `SendMessage` with `type: message`
+
+**Payload:**
+```
+[COMMAND_ACK]
+command: save | end
+estimated_turns: 2
+message: "Wrapping up the current beat, then I'll save."
+```
+
+**Fields:**
+| Field | Required | Description |
+|-------|----------|-------------|
+| `command` | Yes | The command being acknowledged (echoes the `[SESSION_COMMAND]` command field) |
+| `estimated_turns` | No | Estimated number of exchanges before the command completes (0-3) |
+| `message` | No | Human-readable status (what the GM is doing before completing the command) |
+
+**When sent:** Immediately upon receiving any `[SESSION_COMMAND]`. The GM must send this acknowledgment before performing any other action. For `end` commands, this is the GM's only permitted response before sending `[SESSION_END]`.
+
+**Expected response:** Team lead notes the acknowledgment. If no `[COMMAND_ACK]` is received within 60 seconds, team lead resends the `[SESSION_COMMAND]`.
 
 ---
 
@@ -451,6 +487,44 @@ Free-form in-character content follows the fields.
 
 ---
 
+### `[PLAYER_TO_PARTY]` {#player_to_party}
+
+In-character dialogue addressed to the entire party at once.
+
+- **Sender**: Player teammate
+- **Recipient**: All teammates (broadcast)
+- **Transport**: `SendMessage` with `type: broadcast`
+
+**Payload:**
+```
+[PLAYER_TO_PARTY]
+from: korimeth-talyss
+
+"We should rest before entering. I don't like how quiet this place is."
+```
+
+**Fields:**
+| Field | Required | Description |
+|-------|----------|-------------|
+| `from` | Yes | Sender's full hyphenated character name |
+
+Free-form in-character content follows the fields.
+
+**Rules:**
+- **In-character ONLY** — no out-of-game table talk
+- GM receives via broadcast (sees all party-addressed dialogue)
+- Narrator captures via broadcast observation for scene files
+- Use for group-directed dialogue (speeches, warnings, proposals to the party)
+- For private 1:1 conversations, use `[PLAYER_TO_PLAYER]` instead
+
+**When sent:** When a player character addresses the whole party — asking a question to the group, making a declaration, proposing a plan, or reacting to a shared event.
+
+**Expected responses:**
+- Other players may respond with `[PLAYER_TO_PLAYER]` (for 1:1 follow-up) or their own `[PLAYER_TO_PARTY]` (for group reply)
+- GM observes and may incorporate into narrative or prompt specific characters
+
+---
+
 ### `[RELAY_TO_HUMAN]` {#relay_to_human}
 
 Human's character teammate requests human input via the team lead.
@@ -575,4 +649,236 @@ When the GM sends multiple messages in sequence:
 ## Character Naming Convention
 
 All messages use **full hyphenated character names** matching the character sheet filename (e.g., `tilda-brannock`, not `Tilda` or `Tilda Brannock`). This ensures unambiguous routing and file lookups.
+
+---
+
+## NPC Lifecycle Messages
+
+These messages manage dedicated NPC teammates — spawned for extended interactions where information isolation is critical (recurring NPCs with secrets, lengthy interrogations, etc.). For brief or simple NPC interactions, the GM plays the NPC directly.
+
+**Orchestration details** (how to spawn/despawn the actual teammate) live in the play-orchestration skill. This section defines the message format and routing only.
+
+---
+
+### `[NPC_SPAWN_REQUEST]` {#npc_spawn_request}
+
+GM requests a dedicated NPC teammate for an extended interaction.
+
+- **Sender**: GM
+- **Recipient**: Team lead
+- **Transport**: `SendMessage` with `type: message`
+
+**Payload:**
+```
+[NPC_SPAWN_REQUEST]
+npc: koresh-rath
+npc_file: campaigns/the-dimming/npcs/koresh-rath.md
+reason: "Extended interrogation — NPC has secrets"
+knowledge_boundary: |
+  Knows: Town history, recent disappearances, council politics
+  Does NOT know: The true source of the Dimming, party members' backgrounds
+scene_context: |
+  The party has arrived at the Second Anchor tavern. Koresh is behind the bar.
+```
+
+**Fields:**
+| Field | Required | Description |
+|-------|----------|-------------|
+| `npc` | Yes | Full hyphenated NPC name (matching NPC file) |
+| `npc_file` | Yes | Path to the NPC's character file |
+| `reason` | Yes | Why a dedicated teammate is needed (not just GM-played) |
+| `knowledge_boundary` | Yes | Explicit list of what the NPC knows and does NOT know |
+| `scene_context` | Yes | Current scene situation for the NPC |
+
+**When sent:** When the GM determines an NPC interaction will be extended and the NPC has secrets that risk leaking through GM narration. Not needed for brief or simple NPC encounters.
+
+**Expected response:** Team lead spawns the NPC teammate, then sends `[NPC_SPAWNED]` to confirm.
+
+---
+
+### `[NPC_SPAWNED]` {#npc_spawned}
+
+Team lead confirms an NPC teammate is active and ready.
+
+- **Sender**: Team lead
+- **Recipient**: GM
+- **Transport**: `SendMessage` with `type: message`
+
+**Payload:**
+```
+[NPC_SPAWNED]
+npc: koresh-rath
+teammate_name: npc-koresh-rath
+```
+
+**Fields:**
+| Field | Required | Description |
+|-------|----------|-------------|
+| `npc` | Yes | Full hyphenated NPC name |
+| `teammate_name` | Yes | The teammate name used for messaging (always `npc-{name}`) |
+
+**When sent:** After the team lead successfully spawns the NPC teammate in response to `[NPC_SPAWN_REQUEST]`.
+
+**Expected response:** GM can now route messages to the NPC via `teammate_name`. Players can also message the NPC directly via `[PLAYER_TO_PLAYER]`.
+
+---
+
+### `[NPC_DESPAWN_REQUEST]` {#npc_despawn_request}
+
+GM requests that an NPC teammate be shut down (interaction concluded).
+
+- **Sender**: GM
+- **Recipient**: Team lead
+- **Transport**: `SendMessage` with `type: message`
+
+**Payload:**
+```
+[NPC_DESPAWN_REQUEST]
+npc: koresh-rath
+reason: "Conversation concluded, NPC leaves the scene"
+```
+
+**Fields:**
+| Field | Required | Description |
+|-------|----------|-------------|
+| `npc` | Yes | Full hyphenated NPC name |
+| `reason` | No | Why the NPC is being despawned |
+
+**When sent:** When the GM determines the NPC interaction is complete and the dedicated teammate is no longer needed.
+
+**Expected response:** Team lead sends `shutdown_request` to the NPC teammate, waits for confirmation, then sends `[NPC_DESPAWNED]` to the GM.
+
+---
+
+### `[NPC_DESPAWNED]` {#npc_despawned}
+
+Team lead confirms an NPC teammate has been shut down.
+
+- **Sender**: Team lead
+- **Recipient**: GM
+- **Transport**: `SendMessage` with `type: message`
+
+**Payload:**
+```
+[NPC_DESPAWNED]
+npc: koresh-rath
+```
+
+**Fields:**
+| Field | Required | Description |
+|-------|----------|-------------|
+| `npc` | Yes | Full hyphenated NPC name |
+
+**When sent:** After the team lead successfully shuts down the NPC teammate in response to `[NPC_DESPAWN_REQUEST]`.
+
+**Expected response:** GM resumes playing the NPC directly (if they appear again briefly) or removes them from the active scene.
+
+---
+
+## Protocol Infrastructure Messages
+
+---
+
+### `[PROTOCOL_WARNING]` {#protocol_warning}
+
+Signal a recoverable protocol violation to the offending agent.
+
+- **Sender**: Any teammate (typically GM or team lead)
+- **Recipient**: The teammate that violated protocol
+- **Transport**: `SendMessage` with `type: message`
+
+**Payload:**
+```
+[PROTOCOL_WARNING]
+violation: "Responded to [NARRATIVE] broadcast before receiving [GM_TO_PLAYER]"
+expected: "Wait for direct [GM_TO_PLAYER] prompt before sending [PLAYER_TO_GM]"
+severity: low | medium | high
+```
+
+**Fields:**
+| Field | Required | Description |
+|-------|----------|-------------|
+| `violation` | Yes | What the agent did wrong |
+| `expected` | Yes | What the agent should have done instead |
+| `severity` | Yes | `low` (minor, informational), `medium` (should correct behavior), `high` (blocking, must correct immediately) |
+
+**Common violations:**
+- Player responds to `[NARRATIVE]` broadcast instead of waiting for `[GM_TO_PLAYER]`
+- Agent sends unrecognized or malformed message tag
+- Player includes OOC (out-of-character) content in an in-character message
+- GM includes secret information in a player-facing message
+
+**When sent:** When any teammate detects another teammate violating the messaging protocol. Should be sent promptly so the violating agent can self-correct.
+
+**Expected response:** The violating agent acknowledges and adjusts behavior. No formal acknowledgment message is required — corrected behavior is sufficient.
+
+---
+
+## Dice Roll Formatting
+
+Standardized format for dice roll requests and results within protocol messages.
+
+### Roll Request Format (in `[GM_TO_PLAYER]`)
+
+When the GM requests a roll from a player, include a `## Roll Required` block in the `[GM_TO_PLAYER]` message:
+
+```
+## Roll Required
+- Check: Investigation
+- Dice: 1d20+3
+```
+
+**Fields:**
+| Field | Required | Description |
+|-------|----------|-------------|
+| `Check` | Yes | Skill or ability check name (e.g., `Investigation`, `Persuasion`, `Strength saving throw`) |
+| `Dice` | Yes | Dice notation with modifier (e.g., `1d20+5`, `1d20-1`) |
+
+The DC is determined by the GM but **not included in the roll request** sent to the player. The GM evaluates success/failure after receiving the result.
+
+**Example in context:**
+```
+[GM_TO_PLAYER]
+request_type: FULL_CONTEXT
+scene_number: 003
+scene_slug: the-second-anchor
+
+## Scene
+The artifact pulses with a faint violet light. Runes spiral across its surface.
+
+## Request
+You reach out to examine the Eth'koru. What do you make of it?
+
+## Roll Required
+- Check: Arcana
+- Dice: 1d20+6
+```
+
+### Roll Result Format (in `[PLAYER_TO_GM]`)
+
+When a player reports their roll result, include it at the end of their `[PLAYER_TO_GM]` message:
+
+```
+[PLAYER_TO_GM]
+type: ACTION
+character: korimeth-talyss
+
+Korimeth traces the runes with careful fingers, murmuring syllables of
+identification. The patterns remind her of pre-Sundering ward schemes.
+
+**Roll**: Arcana 1d20+6 = [14]+6 = 20
+```
+
+### GM-Side Roll Format (in `[NARRATIVE]`)
+
+When the GM rolls for NPCs or environmental effects, format results in the `[NARRATIVE]` broadcast:
+
+```
+**NPC Attack Roll**: 1d20+5 = [14]+5 = 19 vs AC 15 — Hit!
+**Damage**: 1d8+3 = [6]+3 = 9 slashing damage
+```
+
+### Player-Requested Rolls
+
+Players may request rolls in their `[PLAYER_TO_GM]` responses — e.g., `(Requesting Persuasion check)`. If the action is uncertain and stakes exist, the GM honors it by sending a follow-up `[GM_TO_PLAYER]` with a `## Roll Required` block.
 
