@@ -73,6 +73,24 @@ The artifact is warm to the touch and pulses with inner light. Even now, a needl
 | Human technology | [items/human-technology/index.md](items/human-technology/index.md) |
 | Second Anchor | [locations/second-anchor.md](locations/second-anchor.md) |
 
+## The Threat
+
+**Main Antagonist/Threat**: Hessa Tolvren-Nakamura and her research team at Second Anchor
+**Their Goal**: Disable the planetary nanomachine network they've discovered, believing it to be dangerous alien technology that should be neutralized
+**Timeline**: Weeks to months - they're close to a breakthrough but need more data
+**What Happens If They Succeed**: Ecological collapse. The nanomachines maintain Keth'toh's biosphere, the Vel'ashi's shape-shifting abilities, and countless other systems. Disabling them would be catastrophic.
+
+## Campaign Arc
+
+### Act 1: The Compass Points
+The party investigates Nethara'kora's death and follows the artifact's guidance. They learn the Keth'vorah have been tracking unusual energy fluctuations originating from human settlements. The compass leads them through ancient sites, revealing glimpses of what the Vel'ashi once were - and hints that the "magic" everyone takes for granted has a source.
+
+### Act 2: The Nature of Things
+The party discovers the truth: Keth'toh's "magic" comes from an ancient nanomachine network, and humans at Second Anchor are trying to shut it down. They believe it's a dangerous alien system, unaware that it's been maintaining the planet for millennia. The party must navigate growing tensions between species, factions within the Keth'vorah who have different ideas about how to respond, and the researchers who think they're saving everyone.
+
+### Act 3: The Choice
+The party must stop the researchers, but force isn't the only option. Hessa Tolvren-Nakamura isn't evil - she's afraid of what she doesn't understand. The party can reveal the truth, find a compromise, or take more drastic action. The climax forces a choice about Keth'toh's future: preserve comfortable ignorance, embrace dangerous knowledge, or find a third path.
+
 ## GM Notes (Secret)
 
 ### Hidden Information

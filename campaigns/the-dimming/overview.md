@@ -40,9 +40,9 @@ The artifact was brought to Dustmeet by Nethara'kora, a respected investigator o
 - **Relationship to Party**: Cautious allies - the party carries one of their investigator's final mission
 
 ### Human Research Team (Second Anchor)
-- **Type**: Secret research operation in abandoned settlement
-- **Goals**: Understand and neutralize what they see as dangerous alien technology
-- **Relationship to Party**: Unknown (but secretly the source of the threat)
+- **Type**: Rumored presence in abandoned settlement
+- **Goals**: Unknown
+- **Relationship to Party**: Unknown
 
 ### The Dustmeet Council
 - **Type**: Local governing body (Vel'ashi-led, humans tolerated)
@@ -59,24 +59,6 @@ The third and largest human settlement on Keth'toh, serving as the center of hum
 
 ### Second Anchor
 An abandoned mining settlement to the west, evacuated 70 years ago under mysterious circumstances. Now secretly occupied by Hessa Tolvren-Nakamura's research team, who chose it for its existing infrastructure and distance from oversight.
-
-## The Threat
-
-**Main Antagonist/Threat**: Hessa Tolvren-Nakamura and her research team at Second Anchor
-**Their Goal**: Disable the planetary nanomachine network they've discovered, believing it to be dangerous alien technology that should be neutralized
-**Timeline**: Weeks to months - they're close to a breakthrough but need more data
-**What Happens If They Succeed**: Ecological collapse. The nanomachines maintain Keth'toh's biosphere, the Vel'ashi's shape-shifting abilities, and countless other systems. Disabling them would be catastrophic.
-
-## Campaign Arc (GM Eyes Only)
-
-### Act 1: The Compass Points
-The party investigates Nethara'kora's death and follows the artifact's guidance. They learn the Keth'vorah have been tracking unusual energy fluctuations originating from human settlements. The compass leads them through ancient sites, revealing glimpses of what the Vel'ashi once were - and hints that the "magic" everyone takes for granted has a source.
-
-### Act 2: The Nature of Things
-The party discovers the truth: Keth'toh's "magic" comes from an ancient nanomachine network, and humans at Second Anchor are trying to shut it down. They believe it's a dangerous alien system, unaware that it's been maintaining the planet for millennia. The party must navigate growing tensions between species, factions within the Keth'vorah who have different ideas about how to respond, and the researchers who think they're saving everyone.
-
-### Act 3: The Choice
-The party must stop the researchers, but force isn't the only option. Hessa Tolvren-Nakamura isn't evil - she's afraid of what she doesn't understand. The party can reveal the truth, find a compromise, or take more drastic action. The climax forces a choice about Keth'toh's future: preserve comfortable ignorance, embrace dangerous knowledge, or find a third path.
 
 ## Notable Items
 

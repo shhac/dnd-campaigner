@@ -13,16 +13,17 @@ Detailed procedures for starting, saving, ending, and recovering D&D sessions us
 
 ```
 1. Validate campaign
-2. Load preferences (or ask player)
+2. Load preferences (or ask player) — includes verbosity setting
 3. Create team
 4. Determine AI-controlled characters
 5. Spawn GM teammate
 6. Spawn Narrator teammate
 7. Spawn human-relay player teammate
 8. Spawn AI player teammates (parallel)
-9. Send session-start to GM
-10. Wait for opening [NARRATIVE]
-11. Display to human, begin core loop
+9. File access audit (verify information isolation)
+10. Send session-start to GM (includes verbosity)
+11. Wait for opening [NARRATIVE]
+12. Display to human, begin core loop + health checks
 ```
 
 ### Step-by-Step
@@ -41,6 +42,7 @@ If the campaign doesn't exist, inform the player and suggest `/new-campaign`.
 Read `campaigns/{campaign}/preferences.md` for:
 - `narrative_style` — if missing, ask via AskUserQuestion
 - `player_character` — if missing, list party members and ask via AskUserQuestion
+- `verbosity` — if missing, default to `normal` (do not prompt; can be overridden via `/play` argument: `--quiet` or `--verbose`)
 
 Save any new preferences to the file.
 
@@ -156,6 +158,7 @@ SendMessage → gm:
   campaign: {campaign}
   player_character: {player_character}
   narrative_style: {narrative_style}
+  verbosity: {verbosity}
   ai_characters:
     - {char1}
     - {char2}
@@ -172,6 +175,8 @@ Saves are handled directly by the GM:
 - **GM initiative**: GM saves at natural beat boundaries (end of combat, scene transition, etc.)
 
 The GM updates `story-state.md` and `party-knowledge.md` directly. No intermediate delta files or background agents are needed for state persistence.
+
+**Write ownership**: The GM is the sole writer of `story-state.md`, `party-knowledge.md`, and `relationships.md`. The team lead never writes these files. See "State File Ownership" in the main orchestration skill for the full ownership table and recommended atomic write pattern.
 
 ### Human-Requested Save
 
@@ -259,10 +264,12 @@ If the session needs to end unexpectedly (error, crash, etc.):
 
 1. Send `[SESSION_COMMAND] command: end` to GM if it's still responsive
 2. If GM responds with `[SESSION_END]`, follow normal shutdown
-3. If GM is unresponsive:
+3. If GM is unresponsive (detected by health check — no response for 120+ seconds, then no response to `[CONTEXT_REFRESH]` after 30 seconds):
    - Force shutdown all teammates
    - TeamDelete
    - Inform the human that the session ended abnormally and state may not be fully saved
+
+**Note**: Health checks (see main orchestration skill) may trigger this path automatically if the GM crashes mid-session and cannot be respawned.
 
 ## Context Compaction Recovery
 
@@ -323,9 +330,21 @@ Campaign files (`campaigns/{campaign}/`) are NOT deleted — they persist betwee
 | Human Says | Team Lead Action |
 |------------|-----------------|
 | "/play {campaign}" | Full startup sequence |
+| "/play {campaign} --quiet" | Startup with quiet verbosity (narrative + prompts only) |
+| "/play {campaign} --verbose" | Startup with verbose verbosity (debug output) |
 | "Let's save" | Send `[SESSION_COMMAND] save` to GM |
 | "I want to stop" | Send `[SESSION_COMMAND] end` to GM |
 | "I need to step away" | Send `[MODE_SWITCH] AUTONOMOUS` to human's player |
 | "I'm back" | Send `[MODE_SWITCH] HUMAN_RELAY` to human's player |
 | (context compacted) | Re-read files, send `[CONTEXT_REFRESH]` to GM and players |
 | (GM unresponsive) | Try `[CONTEXT_REFRESH]`, then respawn if needed |
+
+## Quick Reference: Automated Monitoring
+
+| Condition | Timeout | Action |
+|-----------|---------|--------|
+| GM silent (mid-scene) | 120s | Send `[CONTEXT_REFRESH]`, wait 30s, then respawn |
+| Human-relay silent (mid-scene) | 120s | Send `[CONTEXT_REFRESH]`, wait 30s, then respawn |
+| Player no response to GM prompt | 90s | Nudge with `[CONTEXT_REFRESH]` |
+| Player still no response | 180s | Respawn agent, notify GM via `[SYSTEM_NOTE]` |
+| File isolation violation detected | immediate | Warn human, consider respawn |

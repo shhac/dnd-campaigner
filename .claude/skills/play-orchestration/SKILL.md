@@ -84,6 +84,7 @@ Check if `campaigns/{campaign}/preferences.md` exists.
 If the file exists, read it to extract:
 - `narrative_style`: The formatting style for dialogue and scenes
 - `player_character`: Which character the player controls
+- `verbosity`: Output verbosity level (`quiet`, `normal`, or `verbose`)
 
 ### Handle Narrative Style
 
@@ -119,6 +120,28 @@ If `player_character` is NOT set:
 - List character files in `campaigns/{campaign}/party/`
 - Use AskUserQuestion with the character names as options
 - Save to `campaigns/{campaign}/preferences.md`
+
+### Handle Verbosity
+
+Verbosity controls how much output the team lead displays to the human during the session.
+
+If `verbosity` is set in preferences:
+- Use the stored value
+
+If `verbosity` is NOT set:
+- Default to `normal` (do not prompt — this is a power-user setting)
+
+Verbosity can also be passed as a `/play` argument: `/play {campaign} --verbose` or `/play {campaign} --quiet`
+
+**Verbosity levels**:
+
+| Level | Team Lead Displays | Notes |
+|-------|-------------------|-------|
+| `quiet` | `[NARRATIVE]` text and `[RELAY_TO_HUMAN]` prompts only | No system messages, no health check logs, no agent spawn confirmations |
+| `normal` | Narrative + prompts + agent lifecycle messages (spawn, shutdown) | Default behavior — current standard |
+| `verbose` | Everything in `normal` + health check events, message routing notes, file access audit logs | Debug mode for diagnosing session issues |
+
+The team lead adjusts its own output based on verbosity. It also passes the verbosity level to the GM in the session-start message so the GM can adjust its broadcast detail level.
 
 ## Step 2: Create Team and Spawn Teammates
 
@@ -207,6 +230,31 @@ Task:
 
 **Spawn all player teammates in a single message with multiple Task calls** (parallel).
 
+### File Access Audit (Information Isolation Verification)
+
+After spawning player teammates, the team lead should verify information isolation by logging which files each agent reads at startup. This is a defense-in-depth measure — agents are instructed not to read forbidden files, but the audit catches violations.
+
+**Expected file access per agent**:
+
+| Agent | Allowed Reads | Forbidden Reads |
+|-------|--------------|-----------------|
+| GM | All campaign files | (none — GM sees everything) |
+| Narrator | `preferences.md`, `scenes/`, peer DM activity | `story-state.md`, `npcs/`, character sheets |
+| Player teammate | Own character sheet, own journal, `party-knowledge.md`, `world-primer.md` | `story-state.md`, other character sheets, `npcs/`, `beats/` |
+| Human-relay player | Own character sheet, own journal, `party-knowledge.md`, `world-primer.md` | `story-state.md`, other character sheets, `npcs/`, `beats/` |
+
+**Audit behavior**:
+- At `verbose` verbosity: Log each agent's file reads as they are observed (e.g., from teammate idle summaries or tool call reports)
+- At `normal` verbosity: Only log if a violation is detected
+- At `quiet` verbosity: Only log violations
+
+**If a violation is detected** (player reads `story-state.md`, another character's sheet, or NPC files):
+1. Display a warning to the human: `[ISOLATION VIOLATION] {agent} read {forbidden_file}`
+2. Consider respawning the agent with a stronger isolation reminder
+3. Do NOT shut down the session — the violation may have been harmless (e.g., agent read a filename but not its contents)
+
+**Note**: This audit relies on observing agent behavior through available channels (idle summaries, peer DM visibility). It is not a hard technical enforcement layer — it is a monitoring and alerting system.
+
 ### Send Session-Start Message to GM
 
 After all teammates are spawned:
@@ -221,6 +269,7 @@ SendMessage:
     campaign: {campaign}
     player_character: {player_character}
     narrative_style: {narrative_style}
+    verbosity: {verbosity}
     ai_characters:
       - {char1}
       - {char2}
@@ -534,6 +583,40 @@ SendMessage:
 
 The GM will find a good stopping point, save state directly to campaign files, and send `[SESSION_END]`.
 
+## State File Ownership
+
+Campaign state files have **exclusive write ownership** to prevent concurrent write corruption. No two agents should ever write to the same file.
+
+### Write Ownership Rules
+
+| File | Owner | Other Agents |
+|------|-------|-------------|
+| `story-state.md` | GM | Read-only (GM only reads it too — players never access) |
+| `party-knowledge.md` | GM | Read-only |
+| `relationships.md` | GM | Read-only |
+| `party/{character}-journal.md` | That character's player teammate | Read-only for others |
+| `scenes/scene-*.md` | Narrator | Read-only for others |
+| `preferences.md` | Team lead | Read-only during session |
+| `decision-log.md` | Decision-log agent (post-session) | Read-only |
+
+### Enforcement
+
+- The **team lead never writes** to `story-state.md`, `party-knowledge.md`, or `relationships.md` — these are exclusively GM-owned
+- Each **player teammate writes only** to their own journal file
+- The **narrator writes only** to `scenes/` directory
+- If two agents need to update the same file, that is a design error — flag it
+
+### Recommended Write Pattern
+
+When writing state files, agents should use an atomic write pattern to avoid partial writes on crash:
+
+```
+1. Write content to a temporary file: {filename}.tmp
+2. Rename temp file to target: mv {filename}.tmp {filename}
+```
+
+Rename is atomic on POSIX systems, so readers will always see either the old complete file or the new complete file, never a partial write.
+
 ## Full-Auto Mode (All AI Players)
 
 When running a session with no human player (all characters are AI-controlled):
@@ -613,26 +696,88 @@ SendMessage:
 
 ## Error Handling
 
+### Agent Health Checks (Heartbeat)
+
+The team lead monitors critical teammates for liveness during the session. This prevents silent crashes from stalling gameplay indefinitely.
+
+**Tracked agents** (critical):
+- GM
+- Human-relay player (if present)
+
+**Health check rules**:
+- Track the timestamp of the last message received from each critical teammate
+- After any period of **120 seconds** with no message from a critical teammate, take action:
+  1. Send a `[CONTEXT_REFRESH]` to the silent teammate
+  2. Wait 30 seconds for a response
+  3. If still silent, assume the teammate has crashed — respawn it (see "Teammate Goes Down" below)
+- Non-critical teammates (AI players, narrator) do not need proactive health checks — the GM will notice if a player stops responding and can request help
+
+**When to check**: After processing each incoming message, note the current time. If more than 120 seconds have elapsed since the last message from a critical teammate AND the session is mid-scene (not during expected idle periods like human input), trigger the health check.
+
+**Expected idle periods** (do NOT trigger health checks during these):
+- While waiting for human input via `[RELAY_TO_HUMAN]` / AskUserQuestion
+- During session startup (teammates loading campaign files)
+- After sending `[SESSION_COMMAND] end` (GM is wrapping up)
+
+### Player Response Timeout
+
+When the GM sends `[GM_TO_PLAYER]` prompts, players should respond within a reasonable window. The team lead monitors for stalls.
+
+**Timeout rules**:
+- **90 seconds** after a `[GM_TO_PLAYER]` is sent to any player: If no `[PLAYER_TO_GM]` response has been received, send a nudge to the silent player:
+
+```
+SendMessage:
+  type: message
+  recipient: {silent_player}
+  content: |
+    [CONTEXT_REFRESH]
+    campaign: {campaign}
+    note: "The GM is waiting for your response. Please reply with your action."
+  summary: "Nudge {silent_player} to respond"
+```
+
+- **180 seconds** with no response: Assume the player teammate has crashed. Trigger respawn (see "Teammate Goes Down" below). Notify the GM:
+
+```
+SendMessage:
+  type: message
+  recipient: gm
+  content: |
+    [SYSTEM_NOTE]
+    agent: {silent_player}
+    status: respawning
+    reason: "No response for 180 seconds. Agent is being respawned."
+  summary: "{silent_player} being respawned"
+```
+
+**Note**: The team lead does not directly observe `[GM_TO_PLAYER]` messages (they flow directly between GM and players). The team lead infers player responsiveness by monitoring whether the session is progressing. If the GM reports a stalled player, or if the GM itself goes silent after sending prompts, the team lead should investigate.
+
 ### GM Doesn't Respond
 
-If the GM doesn't send any message after a reasonable wait:
+If the GM doesn't send any message after 120 seconds (and no expected idle period applies):
 1. Send a `[CONTEXT_REFRESH]` message
-2. If still no response, check team config to verify GM is active
-3. If GM is not active, respawn it with session context
+2. Wait 30 seconds for a response
+3. If still no response, respawn the GM with session context (see "Teammate Goes Down")
 
 ### Player Teammate Stops Responding
 
-If a player teammate goes silent:
-1. Check team config to verify it's active
-2. If active, send `[CONTEXT_REFRESH]`
-3. If not active, respawn with character context. The player's journal serves as durable memory.
+If a player teammate goes silent and the GM reports a stall:
+1. Send `[CONTEXT_REFRESH]` to the player
+2. Wait 30 seconds for a response
+3. If still silent, respawn with character context. The player's journal serves as durable memory.
 
 ### Teammate Goes Down
 
-If a teammate stops unexpectedly:
+If a teammate stops unexpectedly or fails to respond after health check + nudge:
 - **GM**: Respawn with `[CONTEXT_REFRESH]`. GM re-reads campaign files and scene files to recover.
 - **Narrator**: Respawn with campaign context. Narrator reads existing scene files to continue numbering.
 - **Player teammate**: Respawn with character identity. Re-reads character sheet, party-knowledge, and journal.
+
+After respawning any teammate, log the event:
+```
+[Health Check] {teammate_name} respawned at {timestamp} — reason: {no response / crash detected}
+```
 
 ### Unrecognized Messages
 

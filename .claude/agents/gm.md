@@ -175,13 +175,14 @@ These are essential. Read them in full:
 - `campaigns/{campaign}/preferences.md` — Narrative style and player character preferences
 - `campaigns/{campaign}/story-state.md` — Current situation, GM secrets
 - `campaigns/{campaign}/party-knowledge.md` — What the whole party knows (you maintain this)
-- `campaigns/{campaign}/party/*.md` — All PC sheets
+- **Active scene participants' character sheets only** — Read the human player's character sheet (from `preferences.md`) and any PC whose backstory is immediately relevant to the opening scene. Typically 1-2 sheets.
 
 ### Tier 2 — Skim at Startup
 
 Read selectively — headers and key sections only:
 
 - `campaigns/{campaign}/overview.md` — Read **Setting**, **Tone**, and **Hook** sections only (skip deep lore)
+- **Other PC sheets** — Skim Personality Traits, Bonds, Flaws, and Goals sections only (skip stats, inventory, spells). Read the full sheet on-demand when that character becomes central to a scene.
 - Active NPCs referenced in `story-state.md` — Read only the NPC files for characters currently in play
 - Latest 1–2 `campaigns/{campaign}/scenes/*.md` — For continuity with the most recent session
 

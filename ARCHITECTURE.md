@@ -116,7 +116,15 @@ The `/play` command handles this orchestration automatically.
 
 ### Known Limitation: Split-Party Peer DM Leakage
 
-When the party splits, players in Group B may see idle summaries when the GM messages Group A. This is a platform limitation, not a design flaw. The information leaked is minimal (message activity, not content), but worth noting.
+When the party splits, players in Group B may see idle summaries when the GM messages Group A. This is a platform limitation of peer DM visibility, not a design flaw.
+
+**What leaks**: Players know that another group is receiving private prompts (message activity), but NOT the content of those messages. Example: "GM sent a message to Korimeth" -- not what was said.
+
+**Impact**: Minimal. Players learn that another group exists and is active, which they likely already know from the narrative. Content remains isolated.
+
+**Mitigation**: Players are trusted not to metagame based on activity signals. The prompt-based trust model handles this adequately for current use.
+
+**Alternative for extended splits**: Spawn temporary sub-teams for each group to eliminate cross-group visibility entirely. This adds orchestration complexity and is only warranted for splits lasting multiple scenes.
 
 ## Agent Descriptions
 
