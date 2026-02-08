@@ -77,6 +77,12 @@ Canonical reference for all structured message types used in Teams-based D&D ses
 
 Players journal autonomously at natural beat boundaries — no external signal needed.
 
+## Dice Roll Conventions
+
+Dice roll formatting (Roll Required blocks, roll results, NPC rolls) is documented in the role-specific files:
+- **GM**: `gm-protocol.md` § Dice Roll Formatting
+- **Players**: `player-protocol.md` § Reporting Roll Results
+
 ## Processing Order
 
 When the GM sends multiple messages in sequence:

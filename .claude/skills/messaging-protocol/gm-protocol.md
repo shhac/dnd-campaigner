@@ -127,3 +127,13 @@ Format NPC/environmental rolls: `**NPC Attack Roll**: 1d20+5 = [14]+5 = 19 vs AC
 ### Player-Requested Rolls
 
 Players may request rolls (e.g., `(Requesting Persuasion check)`). If uncertain and stakes exist, send follow-up `[GM_TO_PLAYER]` with `## Roll Required`.
+
+---
+
+## Verbosity Behavior
+
+The GM receives a `verbosity` field in the `[SESSION_COMMAND] start` message. Adjust output accordingly:
+
+- **quiet**: Shorter narrative broadcasts. Fewer environmental details. Focus on actions and dialogue.
+- **normal** (default): Standard narrative richness. Full scene descriptions, NPC characterization.
+- **verbose**: Include GM reasoning notes in `[NARRATOR_NOTE]` messages. More detailed scene-setting. Useful for debugging sessions.

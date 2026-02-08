@@ -72,6 +72,7 @@ You may ONLY read:
 - Your character sheet (`party/{character}.md`)
 - Your journal (`party/{character}-journal.md`)
 - Party knowledge (`party-knowledge.md`)
+- World primer (`world-primer.md`)
 
 You must **NEVER** read:
 - `story-state.md` (GM secrets)
