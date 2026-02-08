@@ -11,19 +11,36 @@ This repository manages D&D campaigns where:
 
 ## Prerequisites
 
-The `toss` CLI is required for dice rolling.
+### 1. Claude Code (Required)
 
-**Install via Homebrew:**
+Claude Code is Anthropic's official CLI for Claude. It orchestrates all agents, commands, and gameplay.
+
+**Install:** Follow the instructions at [claude.ai/claude-code](https://claude.ai/claude-code).
+
+**Verify:**
+```bash
+claude --version
+# Expected: a version number like 1.x.x
+```
+
+### 2. Dice Roller (Required)
+
+The `toss` CLI handles all dice rolls during gameplay.
+
+**Install:**
 ```bash
 brew tap shhac/tap && brew install toss
 ```
 
-**Verify installation:**
+**Verify:**
 ```bash
 toss 1d20
+# Expected: a dice roll result like [14] = 14
 ```
 
-### Python Virtual Environments
+### 3. Python Virtual Environments (Optional -- Audiobook Only)
+
+Only needed if you want to generate audiobooks from novelized campaigns. **Skip this for initial setup.**
 
 The repository includes Python virtual environments for TTS engines:
 
@@ -39,6 +56,8 @@ source .chatterbox-venv/bin/activate && python scripts/chatterbox-audiobook.py .
 # For Piper scripts
 source .piper-venv/bin/activate && python scripts/piper-tts.py ...
 ```
+
+Set these up later when you reach the `/audiobook` command. See [QUICKSTART.md](QUICKSTART.md) for the essential first-session prerequisites only.
 
 ## Directory Structure
 
@@ -78,49 +97,13 @@ campaigns/{campaign}/   # Individual campaign data
 
 **CRITICAL**: AI players must not have access to GM knowledge.
 
-### Knowledge Boundaries
-
 | Agent | Knows | Does NOT Know |
 |-------|-------|---------------|
-| GM | Everything - plot secrets, NPC plans, hidden content | N/A |
+| GM | Everything -- plot secrets, NPC plans, hidden content | N/A |
 | AI Player | Own character sheet, witnessed events, scene descriptions | Other PCs' secrets, GM notes, unopened plot |
 | Human Player | Whatever you choose to read | N/A (you have repo access) |
 
-### Enforcement
-
-Each player teammate only reads their own character sheet, their journal, and `party-knowledge.md`. The GM is trusted to include only character-appropriate information in `[GM_TO_PLAYER]` messages. Player teammates never read `story-state.md`, other character sheets, or NPC files.
-
-The `/play` command handles this orchestration automatically.
-
-## Teams Architecture
-
-The `/play` command uses Claude Code Teams to run D&D sessions with persistent teammates.
-
-### How It Works
-
-A team named `dnd-{campaign}` is created with:
-- **GM teammate** (`gm` agent): Persistent for the entire session. Reads campaign files once, communicates via `SendMessage`. Broadcasts `[NARRATIVE]` to all teammates, sends `[GM_TO_PLAYER]` directly to each player teammate, sends `[SESSION_END]` to the team lead. Updates `story-state.md` and `party-knowledge.md` directly after each scene.
-- **Narrator teammate** (`narrator` agent): Observes GM broadcasts and peer DM activity. Writes scene files to `scenes/` in real-time. Output is secret-free.
-- **Player teammates** (`player-teammate` / `human-relay-player` agents): Persistent for the entire session. Each character (AI and human-controlled) is a teammate. AI players decide and act autonomously. The human's character relays GM prompts to the human and translates their decisions into in-character actions. All players communicate directly with the GM via `[PLAYER_TO_GM]` and can message each other in-character via `[PLAYER_TO_PLAYER]`. Each player self-journals at beat boundaries.
-- **Team lead** (main conversation): Lightweight delegate orchestrator. Creates the team, spawns all teammates, handles human I/O when the human-relay player requests it (via `[RELAY_TO_HUMAN]`), and manages session lifecycle. Does NOT relay messages between GM and players — they communicate directly.
-
-### Message Protocol
-
-All teammate communication uses structured YAML-like tags in `SendMessage` content. See the **messaging-protocol** skill for the canonical reference. Key message types:
-- `[NARRATIVE]`: GM broadcasts player-facing narration (team lead displays, narrator captures, players receive awareness)
-- `[GM_TO_PLAYER]`: GM sends character-specific prompts directly to player teammates
-- `[PLAYER_TO_GM]`: Player teammates send actions/reactions/vetoes directly to GM
-- `[PLAYER_TO_PLAYER]`: In-character dialogue between player teammates (GM-visible via peer DM)
-- `[RELAY_TO_HUMAN]`: Human's player teammate requests human input via team lead
-- `[HUMAN_DECISION]`: Team lead sends human's response back to their player teammate
-- `[SESSION_END]`: GM signals session complete (team lead shuts down team)
-- `[MODE_SWITCH]`: Team lead switches human's player between HUMAN_RELAY and AUTONOMOUS modes
-
-### Human-Relay and Autonomous Modes
-
-The human's character teammate operates in one of two modes:
-- **HUMAN_RELAY** (default): Relays GM prompts to the human, translates human decisions into in-character actions. The human makes the choices; the teammate adds character voice, continuity, and personality.
-- **AUTONOMOUS**: When the human steps away, the character makes its own decisions based on personality, bonds, and flaws. Provides a "while you were away" summary when switching back.
+Each player teammate only reads their own character sheet, their journal, and `party-knowledge.md`. The `/play` command enforces this automatically. See [ARCHITECTURE.md](ARCHITECTURE.md) for the full isolation model.
 
 ## Rules System
 
@@ -146,13 +129,13 @@ toss 1d20 1d20     # Roll with advantage (take higher)
 ```
 /new-campaign
 ```
-Interactive process to design setting, themes, starting situation.
+Interactive process to design setting, themes, starting situation. **Time estimate:** 15-20 minutes.
 
 ### Creating Characters
 ```
 /new-character
 ```
-Creates PCs or NPCs with full sheets.
+Creates PCs or NPCs with full sheets. **Time estimate:** 10-15 minutes per character.
 
 ### Playing
 ```
@@ -160,29 +143,43 @@ Creates PCs or NPCs with full sheets.
 ```
 Starts a session using Claude Code Teams. All participants are persistent teammates: GM, Narrator, and every player character (AI and human). The GM messages players directly; players respond directly. The human's character operates in HUMAN_RELAY mode (relays decisions to/from the human) or AUTONOMOUS mode (acts independently when the human steps away). Players self-journal at beat boundaries. The team lead is a lightweight delegate handling human I/O and session lifecycle.
 
+**Time estimate:** 30-90 minutes per session (3-5 major scenes).
+
+### What Happens During a Play Session
+
+A session follows a repeating loop. The GM broadcasts a narrative scene describing the environment, NPCs, and events. This appears in the terminal for the human to read. The GM then sends direct prompts to each player character asking what they want to do. AI party members respond autonomously based on their personality, bonds, and flaws. The human's relay presents the prompt and waits for the human's decision, then translates it into an in-character action.
+
+All responses flow back to the GM, who weaves them into the next narrative beat -- describing consequences, advancing the story, and introducing complications. Dice rolls happen when outcomes are uncertain: ability checks, saves, attack rolls. The GM requests specific rolls and the `toss` CLI executes them.
+
+This cycle (narrative -> prompts -> responses -> narrative) repeats until a natural stopping point. The GM targets 3-5 major beats per session and actively looks for good stopping points after the third beat. The human can also end the session at any time by saying "end session."
+
+Between beats, AI players may talk to each other in character, journal significant moments, and the narrator writes scene files to `scenes/` for the permanent record. All campaign state is saved automatically -- `story-state.md`, `party-knowledge.md`, and character journals are updated so the next session picks up seamlessly.
+
+See [QUICKSTART.md](QUICKSTART.md) for a step-by-step first session walkthrough.
+
 ### Chatting with Characters
 ```
 /chat {campaign-name} {character-name}
 ```
-Have a fireside conversation with a D&D character outside of gameplay. Characters are safe, at rest, and willing to be vulnerable. READ-ONLY - does not affect campaign state.
+Have a fireside conversation with a D&D character outside of gameplay. Characters are safe, at rest, and willing to be vulnerable. READ-ONLY - does not affect campaign state. **Time estimate:** 10-30 minutes.
 
 ### Listing Campaigns
 ```
 /campaigns
 ```
-Shows all available campaigns and their status.
+Shows all available campaigns and their status. **Time estimate:** under 1 minute.
 
 ### Ejecting a Campaign
 ```
 /eject {campaign-name} [destination]
 ```
-Exports a campaign as a standalone project with all necessary agents, skills, and commands. The ejected campaign can be played independently of this repository.
+Exports a campaign as a standalone project with all necessary agents, skills, and commands. The ejected campaign can be played independently of this repository. **Time estimate:** 2-5 minutes.
 
 ### Novelizing a Campaign
 ```
 /novelize {campaign-name} [options]
 ```
-Converts campaign sessions into episodic novel chapters with editorial review.
+Converts campaign sessions into episodic novel chapters with editorial review. **Time estimate:** 1-3 hours depending on campaign length.
 
 **Options:**
 - `--auto`: Automatic mode - pause only for voice lock and blocking issues
@@ -210,7 +207,7 @@ Converts campaign sessions into episodic novel chapters with editorial review.
 ```
 /setup-voices {campaign-name}
 ```
-Generates `voices.yaml` for text-to-speech novel reading. Maps POV characters to Piper TTS voices based on gender detection from character sheets.
+Generates `voices.yaml` for text-to-speech novel reading. Maps POV characters to Piper TTS voices based on gender detection from character sheets. **Time estimate:** 5-10 minutes.
 
 After running, use `source scripts/piper-env.sh` to enable `read-chapter` and `read-novel` commands.
 
@@ -218,7 +215,7 @@ After running, use `source scripts/piper-env.sh` to enable `read-chapter` and `r
 ```
 /audiobook {campaign-name} [options]
 ```
-Generates MP3 audiobook files from novelized chapters using Chatterbox TTS.
+Generates MP3 audiobook files from novelized chapters using Chatterbox TTS. **Time estimate:** 2-6 hours depending on chapter count.
 
 **Options:**
 - `--chapter N`: Process only chapter N
@@ -263,61 +260,16 @@ Generates MP3 audiobook files from novelized chapters using Chatterbox TTS.
 
 Chatterbox TTS voice samples for cloning. See **audiobook-orchestration/voice-samples** skill for full reference including available samples, creation commands, and guidelines.
 
-## Agent Descriptions
+## Agents and Skills
 
-### Gameplay Agents
-- **campaign-creator**: Designs new campaigns through interactive Q&A
-- **character-creator**: Builds PCs/NPCs with proper D&D 5e stats
-- **gm**: Persistent GM teammate. Communicates via SendMessage, reads campaign files once, retains context for the entire session. Messages player teammates directly with `[GM_TO_PLAYER]`. Does not write scene files (narrator handles this).
-- **narrator**: Persistent Narrator teammate that observes all gameplay (GM broadcasts + peer DM visibility) and writes scene files in real-time. Output is secret-free — only externally observable behavior. Feeds the novelization and audiobook pipelines.
-- **player-teammate**: Persistent AI player teammate. Receives GM prompts directly, responds with actions/dialogue, can message other players in-character. Self-journals at beat boundaries. Maintains character personality across the entire session.
-- **human-relay-player**: Persistent human player teammate. Relays GM prompts to the human, translates human decisions into in-character actions. Supports HUMAN_RELAY and AUTONOMOUS modes. Indistinguishable from AI player teammates from the GM's perspective.
-- **dnd-enthusiast**: Experienced D&D player/DM offering feedback on campaign design, rules, and player experience
-- **decision-log**: Records character decisions and actions after significant events to help with context reconstruction
+Agent definitions live in `.claude/agents/` and skills in `.claude/skills/`. Skills are automatically discovered by Claude based on their description.
 
-### Novelization Agents
-- **novelizer-planner**: Creates and validates novel outlines from campaign content. Handles planning, validation, and outline extension.
-- **novelizer-writer**: Writes single chapter drafts from outline specs. Reads character sheets, decision-log, and previous chapters for continuity.
-- **novelizer-editor**: Improves prose mechanics (clarity, flow, engagement) without changing plot. Reads drafts, writes edited versions.
-- **novelizer-continuity**: Checks consistency across chapters. INCREMENTAL mode for quick checks every 2-3 chapters, FULL mode for complete analysis. Maintains continuity-manifest.md.
-- **novelizer-pattern-reviewer**: Scans all chapters for repetitive prose patterns (overused words, repeated constructions, character tic fatigue). Runs after continuity check, outputs pattern-report.md.
-- **novelizer-fixer**: Applies continuity corrections from approved fix requests to chapter drafts.
-- **novelizer-publisher**: Evaluates reader experience - "Is this worth reading?" Provides feedback on engagement, pacing, and what might make readers put the book down.
-- **novelizer-reviser**: Applies publisher feedback to improve chapter engagement and pacing without changing plot.
-- **novelizer-reader**: Beta reader providing emotional/experiential reactions from an enthusiastic fantasy fan perspective.
+For the full list of agents (gameplay, novelization, audiobook, utility) and skills (user-facing, orchestration, novelization), see [ARCHITECTURE.md](ARCHITECTURE.md).
 
-### Audiobook Agents
-- **audiobook-segmenter**: Parses novel chapter markdown, detects voice boundaries (dialogue, narration, internal thoughts), creates segment files for TTS.
-- **segment-reviewer**: Reviews audiobook segments - resolves pronouns to speakers, extracts speech verbs, strips dialogue tags for clean TTS, merges short segments.
-- **audiobook-generator**: Generates WAV audio from segments using Chatterbox TTS. Invokes CLI script, monitors progress, tracks per-segment status.
-- **audiobook-assembler**: Assembles WAV segments into final audiobook files (MP3/M4A). Verifies output and reports results.
+## Example Campaign
 
-### Utility Agents
-- **character-chat**: Meta-conversations with D&D characters outside gameplay. Fireside chat mode - READ-ONLY, does not affect campaign state.
-- **llm-prompt-expert**: Expert in LLM prompting, agent design, and prompt engineering. Use for validating plans, reviewing implementations.
+The [campaigns/the-dimming/](campaigns/the-dimming/) directory contains a complete campaign: world-building, four characters with distinct voices, session scenes, and decision logs. Browse it to understand what `/new-campaign` and `/play` produce, or play it directly:
 
-## Skills
-
-Skills are automatically discovered by Claude based on their description. Agents can also explicitly reference skills in their frontmatter.
-
-### User-Facing Skills
-- **dice-roll**: Intelligent `toss` CLI wrapper for D&D dice notation
-- **ability-check**: DC tables, saving throws, conditions, advantage/disadvantage, skill guidance
-- **dnd-rules-reference**: Quick reference for common D&D 5e mechanics (NPC attitudes, rest mechanics, encounter difficulty)
-- **name-generator**: Creates varied, original names by race/culture while avoiding duplicates
-- **random-events**: Generates weather, encounters, rumors, NPC moods to make the world feel alive
-
-### Orchestration Skills
-- **play-orchestration**: Core orchestration loop for Teams-based D&D play sessions. Creates a persistent team with all participants as teammates (GM, Narrator, player characters). Team lead is a lightweight delegate handling human I/O and session lifecycle. GM and players communicate directly. Used by `/play`.
-- **messaging-protocol**: Canonical reference for the structured message protocol used by all agents. Defines every message tag, sender/recipient, payload format, and routing rules. Referenced by GM, players, narrator, and team lead.
-- **ask-user-orchestration**: Orchestrates agents that need to ask users questions
-- **combat-orchestration**: Manages theater-of-mind D&D combat with threat assessment and pacing tiers
-- **gm-special-scenarios**: Handles GM edge cases (split parties, unconscious players, shopping/downtime, loot distribution, secret actions)
-- **save-point**: Manages session state persistence for D&D campaigns
-- **quick-or-veto**: The quick-or-veto pattern for AI player reactions
-- **narrative-formatting**: Formatting system for D&D narrative output
-- **audiobook-orchestration**: Orchestrates audiobook generation pipeline (segmentation, TTS generation, assembly)
-
-### Novelization Skills
-- **novelization-style**: Tone and style guidelines for converting campaigns into prose fiction
-- **novelization-mechanics**: Chapter types, prose translation of D&D mechanics, output format rules, quality checklists
+```
+/play the-dimming
+```
