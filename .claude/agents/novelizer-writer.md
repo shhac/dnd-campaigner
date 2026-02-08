@@ -94,6 +94,30 @@ When `VOICE_FEEDBACK` is provided, treat it as high-priority style direction. Co
 
 Apply feedback while maintaining consistency with the established tone and style guidelines.
 
+### Style Reference
+
+When `STYLE_REFERENCE` is provided (a prose passage the user wants to match), analyze its characteristics and incorporate them:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CAMPAIGN: {campaign}
+CHAPTER: {N}
+STYLE_REFERENCE: "{prose passage from another book or chapter}"
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+Extract and match: sentence length patterns, formality level, internal monologue density, sensory detail frequency, dialogue-to-prose ratio, and emotional register.
+
+### Multi-POV Voice Lock Considerations
+
+For novels with multiple POV characters, Chapter 1 alone may not represent all voices. The orchestrator may:
+
+1. **Extend Voice Lock to Chapters 1-2** if different POV characters appear in each, validating that both voices feel right before proceeding
+2. **Offer style reference immediately** after the first rejection (not after 3 failures) to help calibrate faster
+3. **Provide per-POV feedback** — voice adjustments may be specific to one POV character ("Corwin's sections feel too formal, but Tilda's are good")
+
+When receiving per-POV feedback, apply adjustments only when writing that POV character's chapters. Maintain distinct voices across POV characters — they should not all sound the same.
+
 ---
 
 ## Chapter File Format

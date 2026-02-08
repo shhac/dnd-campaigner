@@ -209,6 +209,27 @@ For each unresolved segment:
 | "there" | Convert to narration (see below) |
 | "they" | Use context - could be plural or non-binary, flag if unclear |
 
+### Speaker Attribution Confidence Scoring
+
+When resolving speakers (both from the segmenter's original attribution and your corrections), assign or update a `speaker_confidence` field in each dialogue segment YAML:
+
+| Confidence | Criteria |
+|------------|----------|
+| `high` | Explicit dialogue tag with named speaker; narrative speaker signal with named character; or your resolution is unambiguous (only one character of that gender in scene) |
+| `medium` | Action attribution (character acts before dialogue); alternating dialogue with exactly 2 speakers; or pronoun resolved with only one matching-gender candidate in scene |
+| `low` | Pronoun resolved with 2+ matching-gender candidates in scene; default to POV character; alternating dialogue with 3+ speakers; or resolution required cross-referencing distant context |
+
+**Update rules**:
+- If the segmenter already set `speaker_confidence`, only lower it (never upgrade from your review — the segmenter had full text context)
+- If `speaker_confidence` is missing (older segments), add it based on your assessment
+- All `low` confidence segments MUST appear in the "Manual Review Required" section of review-notes.md
+
+**Resolution note**: For every `low` or `medium` confidence resolution, add a `resolution_note` field explaining the reasoning:
+```yaml
+speaker_confidence: low
+resolution_note: "Resolved 'he' to corwin-voss, but gideon-harrowmoor also present in scene"
+```
+
 ### Handling "there"
 
 Segments with `voice: there` are narration misclassified as dialogue:
@@ -494,10 +515,10 @@ Write `review-notes.md` in the chapter directory:
 
 ## Speaker Resolutions
 
-| Segment | Original | Resolved | Context |
-|---------|----------|----------|---------|
-| 020 | she | lysara-vendrath | Lysara mentioned in segment 019 |
-| 034 | he | corwin-voss | POV character, only male in scene |
+| Segment | Original | Resolved | Confidence | Context |
+|---------|----------|----------|------------|---------|
+| 020 | she | lysara-vendrath | high | Only female in scene |
+| 034 | he | corwin-voss | low | Both Corwin and Gideon present |
 
 ## Dialogue Tags Processed
 
@@ -519,10 +540,11 @@ Write `review-notes.md` in the chapter directory:
 - [x] No unresolved pronouns
 - [x] No empty segments
 - [x] All speakers in character registry
+- [x] Speaker confidence scored for all dialogue segments
 - [x] Narrative context cross-checked
 - [x] Speaker distribution reasonable
 - [x] Scene presence validated
-- [ ] Manual review needed: 2 segments
+- [ ] Manual review needed: 2 segments (including 1 low-confidence)
 
 ## Speaker Distribution
 
@@ -552,6 +574,16 @@ Loaded {N} characters from campaign state:
 | 063 | Scene presence | Speaker gideon-harrowmoor not established in scene |
 | - | Distribution anomaly | old-wenna appears in narration but has 0 dialogue segments |
 
+## Attribution Confidence Summary
+
+| Confidence | Count | % of Dialogue |
+|------------|-------|---------------|
+| high | {N} | {N}% |
+| medium | {N} | {N}% |
+| low | {N} | {N}% |
+
+**Low-confidence segments requiring manual review**: {list segment numbers}
+
 ## Summary
 
 - Speakers resolved: {N}
@@ -562,6 +594,7 @@ Loaded {N} characters from campaign state:
 - Context mismatches: {N}
 - Scene presence violations: {N}
 - Distribution anomalies: {N}
+- Low-confidence attributions: {N}
 ```
 
 ---

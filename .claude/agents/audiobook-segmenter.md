@@ -66,6 +66,33 @@ For dialogue, detect the speaker:
 4. **Alternating dialogue**: In back-and-forth, alternate between last two speakers
 5. **Default**: If no speaker can be inferred, use POV character
 
+### Speaker Attribution Confidence
+
+For each dialogue segment, assign a confidence level based on how the speaker was identified:
+
+| Confidence | Detection Method | Example |
+|------------|-----------------|---------|
+| `high` | Explicit dialogue tag naming speaker | `"Hello," Sarah said.` |
+| `high` | Narrative speaker signal with named character | `Sarah continued. "Hello."` |
+| `medium` | Action attribution (character acts, then dialogue) | `Sarah stepped forward. "Hello."` |
+| `medium` | Alternating dialogue (2 speakers, clear pattern) | Third line in a back-and-forth |
+| `low` | Pronoun resolution with multiple same-gender candidates | `"Hello," he said.` (2+ males in scene) |
+| `low` | Default to POV character (no attribution found) | Unattributed dialogue |
+| `low` | Alternating dialogue (3+ speakers in scene) | Ambiguous who responds |
+
+Include `speaker_confidence` in the segment YAML:
+
+```yaml
+segment: 5
+type: dialogue
+voice: corwin-voss
+speaker: Corwin Voss
+speaker_confidence: high
+speech_verb: said
+```
+
+**Flag for review**: All `low` confidence segments should be noted in the manifest under a `low_confidence_segments` list for human verification before TTS generation.
+
 ### Narrative Speaker Signals
 
 Look for phrases in narration that signal an upcoming speaker. These are NOT traditional dialogue tags but contextual cues that appear in prose immediately before dialogue (within the same paragraph or the immediately preceding paragraph, with no intervening dialogue or scene break):
@@ -196,6 +223,7 @@ segment: 5
 type: dialogue
 voice: corwin-voss
 speaker: Corwin Voss
+speaker_confidence: high
 speech_verb: said
 
 settings:
@@ -251,6 +279,14 @@ voices_used:
 
 timing:
   total_estimated_duration_sec: 847.3
+
+low_confidence_segments:
+  - segment: 23
+    speaker: corwin-voss
+    reason: "Pronoun 'he' with multiple male characters in scene"
+  - segment: 41
+    speaker: corwin-voss
+    reason: "No attribution found, defaulted to POV character"
 
 status: complete
 ```
@@ -441,6 +477,8 @@ Before processing:
 
 During processing:
 - [ ] All dialogue attributed to a speaker (or defaulted appropriately)
+- [ ] All dialogue segments have `speaker_confidence` set (high, medium, or low)
+- [ ] Low-confidence segments listed in manifest `low_confidence_segments`
 - [ ] No segments below minimum length (merged)
 - [ ] No segments above maximum length (split)
 - [ ] Pause timing calculated for all transitions
