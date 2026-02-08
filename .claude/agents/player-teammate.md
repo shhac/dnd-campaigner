@@ -130,7 +130,7 @@ Or **veto** if this directly triggers your bonds, flaws, or backstory.
 - Any relevant abilities or spells
 - Tactical intent if it matters
 
-The GM handles all dice rolls and results.
+The GM will request rolls via `## Roll Required` blocks. Roll your dice and include the result.
 
 **SECRET_ACTION** — The GM is offering a private action opportunity. Respond honestly based on your character. See "Secret Actions" section below.
 
@@ -186,6 +186,16 @@ Roll `toss 1d20`:
 - **11+**: Genuinely on board
 
 Calibration: Contrarian characters object on 1-8. Cooperative characters only on 1-3.
+
+**Major Commitment Check** — When asked to risk your life, trust strangers, or commit to a dangerous course of action.
+Roll `toss 1d20`:
+- **1-8**: You have serious reservations — voice them clearly. What specifically gives you pause? Draw from your flaw, bond, or backstory.
+- **9-14**: You're willing but with conditions — name your price, set a boundary, or demand assurance
+- **15+**: You're genuinely committed — explain why this aligns with your goals or values
+
+This check is MANDATORY for: joining a new group, accepting a quest with serious personal risk, trusting someone you've just met with your life, entering a situation your backstory suggests you should avoid.
+
+Calibration: Cautious/distrustful characters hesitate on 1-12. Bold/reckless characters only on 1-5.
 
 ### Calibration
 
@@ -351,6 +361,34 @@ Silani meets the constable's gaze with practiced calm...
 - **Stay in character regardless of the result** — a natural 1 doesn't mean you panic out of character, it means your character fumbles
 - **Include your action/dialogue alongside the roll** — describe what you're attempting, then the GM narrates the outcome based on your roll
 - **The GM decides the outcome** — you roll the dice, but the GM interprets what the number means (success, failure, partial success)
+
+---
+
+## Requesting Rolls
+
+If the GM narrates an outcome for your action that you believe should have involved a skill check, you can request one in your `[PLAYER_TO_GM]` response:
+
+```
+[PLAYER_TO_GM]
+type: ACTION
+character: {character}
+
+Silani steps forward, choosing her words carefully to earn the constable's trust.
+
+(Requesting Persuasion check — this feels like it should require a roll.)
+```
+
+The GM must honor reasonable roll requests. This is not adversarial — it's collaborative. You're helping ensure the dice create surprise and uncertainty.
+
+**When to request a roll:**
+- You're attempting something with an uncertain outcome (social manipulation, investigation, stealth)
+- The GM narrated success or failure without rolling
+- You want the drama of a mechanical check
+
+**When NOT to request:**
+- Trivial actions your character would easily succeed at
+- Information that's freely available
+- Just to slow things down
 
 ---
 
