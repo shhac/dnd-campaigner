@@ -62,6 +62,26 @@ Request human input. Fields: `character`. Followed by Scene, Decision Needed, an
 
 Send when in HUMAN_RELAY mode and human input is needed. Team lead responds with `[HUMAN_DECISION]`.
 
+### `[ACTIVITY]` — message to team lead
+
+Lightweight status ping. Fire-and-forget — no confirmation needed.
+
+Fields: `character`, `doing` (brief phrase).
+
+Send before notable actions:
+- Before rolling dice (GM-requested or ICE)
+- Before sending `[PLAYER_TO_PLAYER]` messages
+- Before journaling
+
+Do NOT send for: thinking, reading GM prompts, composing responses.
+Max 1-2 pings per beat.
+
+```
+[ACTIVITY]
+character: eamon-lightward
+doing: rolling Arcana to examine the artifact
+```
+
 ### `[NARRATOR_NOTE]` — message to narrator
 
 Fields: `from` (character name), `note`. Send when you want a personal moment captured with emphasis.

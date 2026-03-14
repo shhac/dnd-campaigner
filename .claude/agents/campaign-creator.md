@@ -152,9 +152,17 @@ Once approved, create:
 
 2. **overview.md** - Full campaign document using template
 
-3. **story-state.md** - Initial state with starting location, situation, first quest
+3. **story-state.md** - Initial state with starting location, situation, first quest. This file should contain current situation only — no future arc secrets or hidden information sections. Those go in the story-arcs/ directory.
 
-4. **Subdirectories**: `party/`, `npcs/`, `locations/`, `factions/`, `items/`, `beats/`, `scenes/`
+4. **story-arcs/ directory** - Gated information architecture for campaign secrets:
+   - `story-arcs/UNLOCK.md` - Lists each act with UNLOCKED/LOCKED status, preconditions for unlocking, and brief foreshadowing hints (use `templates/story-arc-unlock.md`)
+   - `story-arcs/act-1.md` - Current act secrets, NPC hidden motivations, planned events (use `templates/story-arc.md`). Set status to UNLOCKED.
+   - `story-arcs/act-2.md` - Future act secrets, LOCKED (use `templates/story-arc.md`). Set status to LOCKED.
+   - `story-arcs/act-3.md` - Endgame secrets, LOCKED (use `templates/story-arc.md`). Set status to LOCKED.
+
+   The key principle: if information would be a spoiler for the current session, it goes in a locked act file. The GM only reads act files when they are unlocked.
+
+5. **Subdirectories**: `party/`, `npcs/`, `locations/`, `factions/`, `items/`, `beats/`, `scenes/`, `story-arcs/`
 
 5. **Initial NPCs** - 2-3 NPCs the party will likely meet first
 
@@ -176,6 +184,8 @@ Use templates from `templates/` directory. Read them before generating content.
 - `templates/location.md`
 - `templates/faction.md`
 - `templates/item.md` — Use when the campaign includes notable starting items (artifacts, quest items, magical equipment). Create item files at `campaigns/{campaign}/items/{item-name}.md`.
+- `templates/story-arc.md` — Template for individual act files in `story-arcs/`
+- `templates/story-arc-unlock.md` — Template for the story-arcs/UNLOCK.md file
 
 ## Naming Things
 

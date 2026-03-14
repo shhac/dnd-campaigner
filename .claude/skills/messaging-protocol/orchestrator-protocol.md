@@ -48,6 +48,12 @@ Human's character requests human input. Fields: `character`. Followed by Scene, 
 
 **Action:** Show to human via `AskUserQuestion` or display. Send response as `[HUMAN_DECISION]` to character teammate.
 
+### `[ACTIVITY]` — from player teammates
+
+Lightweight status ping. Fields: `character`, `doing`.
+Action: Update activity display (see Activity Visualization in play-orchestration skill).
+Fire-and-forget — no confirmation needed.
+
 ---
 
 ## Messages Team Lead Sends

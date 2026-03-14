@@ -13,6 +13,7 @@ Ensure you have read and understood:
 
 For Chapter 2+, also read:
 - [ ] **Previous chapter**: Read chapter-{N-1}.md for voice continuity
+- [ ] **Prose diversity**: Have I loaded the prose diversity skill and reviewed my avoidance list from the previous chapter?
 
 ## Before Finalizing Output
 
@@ -24,6 +25,7 @@ Verify the chapter meets these criteria:
 - [ ] **Emotional beats**: Internal moments from character journals are woven into the prose
 - [ ] **Word count target**: Within 20% of the target word count for the chapter type
 - [ ] **Appropriate ending**: The chapter ends matching the specified ending type (cliffhanger, emotional beat, quiet closure, or question)
+- [ ] **No forbidden phrases**: Does this chapter contain any phrases from the forbidden list? (Zero tolerance)
 
 ## Common Issues to Avoid
 

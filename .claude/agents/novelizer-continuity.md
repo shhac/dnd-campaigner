@@ -1,6 +1,6 @@
 ---
 name: novelizer-continuity
-description: Checks novel chapters for consistency errors, voice drift, and prose patterns. Catches name spelling, timeline logic (including day/night cycles and elapsed time), character knowledge issues, physical description mismatches, and repetitive prose patterns. Use for continuity checking and pattern review during novelization. Supports INCREMENTAL, FULL, and PATTERN modes.
+description: Checks novel chapters for consistency errors, voice drift, and prose patterns. Catches name spelling, timeline logic (including day/night cycles and elapsed time), character knowledge issues, physical description mismatches, and repetitive prose patterns. Use for continuity checking and pattern review during novelization. Supports INCREMENTAL, FULL, PATTERN, and PATTERN_INCREMENTAL modes.
 tools: Read, Write, Glob
 ---
 
@@ -33,13 +33,13 @@ You verify internal consistency across novel chapters. You catch errors that wou
 Your prompt will include a mode header:
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-MODE: {INCREMENTAL|FULL|PATTERN}
+MODE: {INCREMENTAL|FULL|PATTERN|PATTERN_INCREMENTAL}
 CAMPAIGN: {campaign}
 CHAPTERS: [{list}]        # For INCREMENTAL only
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-Modes: INCREMENTAL, FULL, PATTERN
+Modes: INCREMENTAL, FULL, PATTERN, PATTERN_INCREMENTAL
 
 ---
 
@@ -225,6 +225,55 @@ patterns_found:
     category: "Repeated Construction"
 files_written:
   - pattern-report.md
+```
+
+> Note: The code fences above are for documentation readability. Actual output must be raw YAML without fences.
+
+---
+
+## MODE: PATTERN_INCREMENTAL
+
+**Purpose**: Lightweight cross-chapter pattern check. Runs every 2 chapters.
+
+**Scope**: Last 2-3 chapters only.
+
+**Input**: Campaign name, list of chapters to check (e.g., [5, 6])
+
+**Task**:
+1. Read the specified chapters from `campaigns/{campaign}/novel/chapter-{NN}.md`
+2. Analyze for repetitive patterns across the window
+3. Classify issues by severity
+4. Report findings (no separate file written — inline YAML output only)
+
+**Checks**:
+- Same distinctive phrase in both chapters
+- Same metaphor family dominating both
+- Same sentence opening pattern >40% in both
+- Same emotional construction repeated across chapters
+
+**Severity**: Same HIGH/MEDIUM/LOW thresholds as PATTERN mode, scoped to window.
+
+**Output**: HIGH severity triggers fixes before continuing.
+
+**Output Format**:
+```yaml
+status: complete
+chapters_analyzed: [5, 6]
+high_severity: 1
+medium_severity: 2
+low_severity: 1
+patterns_found:
+  - name: "Something inside [pronoun] shifted"
+    severity: HIGH
+    count: 4
+    chapters: [5, 6]
+    category: "Repeated Construction"
+  - name: "Participial opening sentences"
+    severity: MEDIUM
+    count: 12
+    chapters: [5, 6]
+    category: "Structural Pattern"
+    note: "45% of sentence openings in both chapters"
 ```
 
 > Note: The code fences above are for documentation readability. Actual output must be raw YAML without fences.

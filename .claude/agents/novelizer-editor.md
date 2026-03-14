@@ -2,7 +2,7 @@
 name: novelizer-editor
 description: Improves prose mechanics without changing story content. Focuses on rhythm, flow, show-vs-tell, redundancy, sensory details, and dialogue naturalness. Use after novelizer creates a chapter draft.
 tools: Read, Write
-skills: novelization-style/styles/fantasy-novel, novelization-style/styles/combat-prose
+skills: novelization-style/styles/fantasy-novel, novelization-style/styles/combat-prose, novelization-prose-diversity
 ---
 
 # Novelizer Editor Agent
@@ -102,10 +102,12 @@ Track your edits in these categories for reporting:
 - Varied speech patterns
 
 ### Pattern Variation
+- Cross-referenced against forbidden phrases list from `novelization-prose-diversity` skill — any hit is automatic replacement
 - Varied sentence openings in consecutive sentences
-- Eliminated echo words (same distinctive word within close proximity)
+- Eliminated echo words (same distinctive word within 50-100 word AND 500-word windows)
 - Diversified paragraph rhythms and structures
 - Replaced repeated descriptor patterns (same adjective+noun combinations)
+- Before editing, scanned draft for top 5 most-repeated constructions and targeted them for variation
 
 ## Concerns to Flag
 
@@ -129,10 +131,12 @@ input_file: chapter-03-draft.md
 output_file: chapter-03.md
 word_count_before: 2340
 word_count_after: 2285
+forbidden_phrases_replaced: 4
 changes:
   - "Tightened dialogue in tavern scene (-45 words)"
   - "Fixed 3 passive voice constructions"
   - "Added sensory detail to sewer descent"
+  - "Replaced 4 forbidden phrases (2x 'weight settled', 1x 'exchanged a glance', 1x 'swallowed hard')"
 concerns: []
 ```
 

@@ -2,7 +2,7 @@
 name: novelizer-writer
 description: Writes single chapter drafts from outline specs. Reads character sheets, decision-log, and previous chapters for continuity. Handles voice feedback for style adjustments.
 tools: Read, Write, Glob
-skills: novelization-mechanics/mechanics-to-prose, novelization-mechanics/output-format, novelization-mechanics/quality-checklist, novelization-style/styles/fantasy-novel
+skills: novelization-mechanics/mechanics-to-prose, novelization-mechanics/output-format, novelization-mechanics/quality-checklist, novelization-style/styles/fantasy-novel, novelization-prose-diversity
 ---
 
 # Novelizer Writer Agent
@@ -65,6 +65,9 @@ When reading previous chapters for continuity, always read the **final** version
 5. Read the POV character's sheet for voice, background, personality
 6. Read the POV character's journal for emotional context (if exists)
 7. Read the previous chapter (if N > 1) for voice continuity
+7.5. **Avoidance list**: List 5 overused constructions from the previous chapter to avoid
+7.6. **Load prose diversity skill**: Review forbidden phrases and structural diversity rules
+7.7. **Choose distinctive technique**: Pick one prose technique not in chapter N-1
 8. Load tone and style guidance files
 9. **If VOICE_FEEDBACK provided**: Incorporate the feedback to adjust your writing style
 10. Write the chapter from the POV character's perspective
@@ -93,6 +96,30 @@ When `VOICE_FEEDBACK` is provided, treat it as high-priority style direction. Co
 | "Too navel-gazing" | More external action, less introspection |
 
 Apply feedback while maintaining consistency with the established tone and style guidelines.
+
+---
+
+## Prose Diversity (MANDATORY)
+
+Load and follow the `novelization-prose-diversity` skill for forbidden phrases, structural diversity rules, and cross-chapter avoidance patterns.
+
+### Anti-Pattern Self-Check
+
+After reading the previous chapter (step 7), before writing:
+
+1. **List 5 constructions/phrases** from the previous chapter that appeared more than once. These are your **avoidance list**.
+2. **Check the forbidden phrases list**. Zero tolerance.
+3. **Choose a distinctive technique** for this chapter not present in the previous one.
+
+### Voice Continuity Without Pattern Copying
+
+For Chapter 2+, read `novel/voice-profile-{pov-character}.md` (if it exists) for voice guidance. Read the previous chapter for **narrative continuity only** — what happened, emotional state, active threads.
+
+**Do NOT replicate sentence structures, metaphor choices, or transitional patterns from the previous chapter.**
+
+If no voice profile exists, fall back to the previous chapter for voice — but still maintain your avoidance list.
+
+---
 
 ### Style Reference
 
@@ -148,7 +175,7 @@ scenes_covered:
 3. **Combat as narrative**: Combat flows as story, not turn-by-turn log
 4. **Natural dialogue**: Dialogue sounds natural and character-appropriate, not transcribed
 5. **Emotional authenticity**: Use journal content to ground emotional beats
-6. **Voice consistency**: For Chapter 2+, match the voice established in previous chapters
+6. **Voice continuity**: For Chapter 2+, maintain the POV character's vocabulary, register, and emotional lens. Do NOT replicate sentence structures, metaphor families, or transitional patterns from the previous chapter.
 7. **Sequential writing**: Chapters must be written in order (1, 2, 3...) because each chapter depends on the previous chapter's final version for voice continuity
 
 ---

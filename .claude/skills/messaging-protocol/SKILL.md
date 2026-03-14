@@ -9,7 +9,7 @@ description: >
   [PLAYER_TO_PARTY], [RELAY_TO_HUMAN], [SESSION_END], [SESSION_COMMAND], [COMMAND_ACK],
   [ASK_PLAYER], [NARRATOR_NOTE], [NARRATOR_REQUEST], [NPC_SPAWN_REQUEST], [NPC_SPAWNED],
   [NPC_DESPAWN_REQUEST], [NPC_DESPAWNED], [PROTOCOL_WARNING], [DICE_RESULT],
-  [PLAYER_ANSWER], [CONTEXT_REFRESH], [HUMAN_DECISION], [MODE_SWITCH].
+  [PLAYER_ANSWER], [CONTEXT_REFRESH], [HUMAN_DECISION], [MODE_SWITCH], [ACTIVITY].
 ---
 
 # Messaging Protocol — Overview
@@ -52,6 +52,7 @@ Canonical reference for all structured message types used in Teams-based D&D ses
 | `[NPC_SPAWNED]` | Team lead | GM | message |
 | `[NPC_DESPAWN_REQUEST]` | GM | Team lead | message |
 | `[NPC_DESPAWNED]` | Team lead | GM | message |
+| `[ACTIVITY]` | Player teammate | Team lead | message |
 | `[PROTOCOL_WARNING]` | Any teammate | Any teammate | message |
 
 ## Role-Specific Files

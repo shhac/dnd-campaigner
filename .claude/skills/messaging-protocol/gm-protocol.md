@@ -18,6 +18,12 @@ Scene narration broadcast to all teammates. Free-form prose after the tag, no st
 - Do NOT include "What do you do?" — save action prompts for `[GM_TO_PLAYER]`
 - Broadcasts are for scene awareness only
 - **Split party:** Send as direct message to team lead (not broadcast) to prevent leaks. Send `[NARRATOR_NOTE]` separately for narrator coverage.
+- **Party Activity Footer**: After narrative prose, append a `## Party Activity` section summarizing what each character did during this beat. Include:
+  - Actions taken (with skill check results if any)
+  - Inter-player dialogue (brief note, not full text)
+  - Notable internal moments (ICE activations, journaling)
+  - Current state if relevant (watching door, meditating, etc.)
+  This is the human player's primary window into AI character actions.
 
 ### `[GM_TO_PLAYER]` — message to specific player
 
@@ -40,6 +46,22 @@ scene_slug: the-warehouse-heist
 **Request types:** QUICK_REACTION (1-2 sentences, vetoable), FULL_CONTEXT (full engagement), COMBAT_ACTION (combat turn), SECRET_ACTION (private opportunity), OPTIONAL_REACTION (skip-safe), REFLECTION (internal, not action), INTERACTION (talk to party via `[PLAYER_TO_PLAYER]`).
 
 **Information isolation (CRITICAL):** Include ONLY what this character would know. Never include `story-state.md` content, other characters' secrets, or NPC hidden motivations.
+
+**`## Dice` section (REQUIRED for FULL_CONTEXT and COMBAT_ACTION):**
+
+Every `[GM_TO_PLAYER]` with `request_type: FULL_CONTEXT` or `COMBAT_ACTION` MUST include a `## Dice` section:
+
+```
+## Dice
+- Roll Required: Persuasion (1d20+3)
+```
+OR
+```
+## Dice
+- No Roll Needed: "information is freely available"
+```
+
+If this section is missing, players are instructed to flag it: "(Requesting [check] — should there be a roll here?)"
 
 Player responds with `[PLAYER_TO_GM]`.
 

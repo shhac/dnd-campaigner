@@ -1,6 +1,8 @@
 # Story State: {Campaign Name}
 
 > **Last Updated**: {Date}
+>
+> This file contains current situation only. Future arc secrets live in story-arcs/.
 
 ## Current Situation
 
@@ -60,10 +62,6 @@
 
 ## GM Notes (Secret)
 
-### Hidden Information
-- {Secret 1 the party doesn't know}
-- {Secret 2}
-
 ### Character Secrets
 
 Track secret actions taken by AI characters. Each entry should note: what happened, when it could be discovered, and potential story hooks.
@@ -73,8 +71,8 @@ Track secret actions taken by AI characters. Each entry should note: what happen
 | {Name} | {What they did secretly} | {Trigger for revelation} | {Potential plot development} |
 
 ### Upcoming Planned Events
-- {What's about to happen if they go to X}
-- {What the villain is doing meanwhile}
+
+See story-arcs/act-{N}.md for current act secrets, NPC motivations, and planned events.
 
 ### Consequences Pending
 - {Actions that will have delayed consequences}
