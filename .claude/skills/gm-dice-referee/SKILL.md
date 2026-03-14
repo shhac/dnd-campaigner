@@ -112,3 +112,5 @@ The player rolls via `toss` and reports the result. Wait for the result before n
 - Damage dealt to player characters
 - Initiative for NPCs/monsters
 - Death saves for unconscious PCs
+- **NPC Passive Perception vs concealment**: When an NPC with high PP enters a scene where something was recently concealed (hidden artifact, stashed weapon, disguised identity), roll or check their PP against the concealer's Sleight of Hand/Stealth. Do this automatically — don't skip it because the narrative is flowing well.
+- **NPC Passive Insight vs deception**: When a player is being evasive or withholding information from an NPC with high Insight, check the NPC's Passive Insight against the player's implicit Deception. If the NPC would notice, narrate suspicion — don't let it slide.
