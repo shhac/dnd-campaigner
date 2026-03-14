@@ -66,3 +66,16 @@
 ## GM Notes
 
 {Secret motivations, hidden agendas, future plans for this NPC}
+
+## Party Interactions
+
+Record of encounters with the player party. Updated by GM after each meaningful NPC interaction.
+
+<!--
+### Session {N} — {date/context}
+- **Who spoke**: {characters who interacted}
+- **What happened**: {1-2 sentence summary}
+- **Promises made**: {any commitments, threats, or deals}
+- **Impression left**: {how the NPC now feels about the party}
+- **Information exchanged**: {what the NPC learned / what they shared}
+-->

@@ -29,9 +29,10 @@ CHAPTER: {N}
 3. **`campaigns/{campaign}/scenes/*.md`** - full GM prose narrative for relevant scenes (see Scene Files below)
 4. **`campaigns/{campaign}/party/{pov-character}.md`** - POV character sheet
 5. **`campaigns/{campaign}/party/{pov-character}-journal.md`** - emotional context (optional, may not exist)
-6. **`campaigns/{campaign}/novel/chapter-{N-1}.md`** - previous chapter's FINAL version for voice continuity (if N > 1; skip for Chapter 1)
-7. **`.claude/skills/novelization-style/tones/{tone}.md`** - tone guidance (tone from outline metadata)
-8. **`.claude/skills/novelization-style/styles/fantasy-novel.md`** - style guidance
+6. **`campaigns/{campaign}/novel/story-so-far.md`** - running plot/character summary for continuity context (if exists; especially useful for Chapter 3+)
+7. **`campaigns/{campaign}/novel/chapter-{N-1}.md`** - previous chapter's FINAL version for voice continuity (if N > 1; skip for Chapter 1)
+8. **`.claude/skills/novelization-style/tones/{tone}.md`** - tone guidance (tone from outline metadata)
+9. **`.claude/skills/novelization-style/styles/fantasy-novel.md`** - style guidance
 
 ### Scene Files
 
@@ -144,6 +145,52 @@ For novels with multiple POV characters, Chapter 1 alone may not represent all v
 3. **Provide per-POV feedback** — voice adjustments may be specific to one POV character ("Corwin's sections feel too formal, but Tilda's are good")
 
 When receiving per-POV feedback, apply adjustments only when writing that POV character's chapters. Maintain distinct voices across POV characters — they should not all sound the same.
+
+---
+
+## Permission to Invent
+
+You are a novelist, not a court reporter. The scene files and decision-log are your source material, but you are free to ADD:
+
+- **Internal monologue**: What the POV character was thinking during events. Draw from their character sheet (personality, bonds, flaws, ideals) and journal entries.
+- **Connective tissue**: Transitions between scenes — the walk between locations, the quiet moment before sleep, the meal where nothing happens but everything shifts.
+- **Backstory flashbacks**: When an event triggers a memory, write it. Use the character sheet's backstory section. Keep flashbacks under 300 words and always triggered by a present-moment stimulus.
+- **Sensory expansion**: The scene files describe what happened. You add what it smelled like, sounded like, felt like against skin.
+- **Subtext in dialogue**: Characters in the session said things plainly. In the novel, they can hedge, deflect, say one thing while meaning another. Use the character's personality traits to guide this.
+- **Reactions that weren't played**: If the session moved on before a character could react to something significant, give them that reaction in the novel.
+
+### What You Must NOT Invent
+- Plot events that didn't happen (don't add encounters, NPCs, or discoveries)
+- Character decisions that contradict the decision-log
+- Information the POV character doesn't know (maintain information isolation)
+- Romantic or intimate content not established in play
+- Deaths, injuries, or consequences not in the source material
+
+---
+
+## Compression and Expansion
+
+Not every game moment deserves equal page time.
+
+**Compress** (1 sentence to 1 paragraph):
+- Travel between locations
+- Shopping, inventory, and logistics
+- Mechanical checks with unremarkable results
+- Repeated discussions of the same topic
+- Combat rounds where nothing changes tactically
+
+**Expand** (1 game moment → 1-3 pages):
+- The moment a character makes a choice that defines them
+- A revelation that changes how the party understands the world
+- A genuine disagreement between characters
+- A check where the dice result genuinely surprised the table
+- A character's first encounter with something that triggers their backstory
+- Combat moments where someone almost died or made a heroic sacrifice
+
+**Standard** (roughly proportional to game time):
+- NPC conversations with new information
+- Environmental exploration and discovery
+- Group planning and strategy
 
 ---
 

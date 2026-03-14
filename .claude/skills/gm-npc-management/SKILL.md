@@ -90,3 +90,15 @@ reason: "Conversation concluded, NPC departing scene"
 ```
 
 The team lead shuts down the NPC teammate. Resume playing that NPC directly for brief future appearances.
+
+## NPC Memory
+
+Before voicing a returning NPC, read their `## Party Interactions` section. The NPC remembers:
+- What the party told them last time (and whether it turned out to be true)
+- Promises made and whether they were kept
+- How they were treated (respectfully, deceptively, aggressively)
+- The impression the party left
+
+NPCs who were lied to are suspicious. NPCs who were helped are grateful. NPCs who were threatened are afraid or resentful. Use this to color their dialogue and cooperation level.
+
+After each meaningful NPC interaction, update their file's `## Party Interactions` section as part of the beat save.

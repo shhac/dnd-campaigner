@@ -5,6 +5,15 @@ description: GM pacing and player interaction guidelines. Staggered prompts, int
 
 # GM Pacing and Interaction
 
+## Session Recap ("Previously On...")
+
+For sessions after the first, the GM generates a cinematic recap before gameplay begins. This:
+- Sets emotional tone immediately
+- Reminds all agents (including AI players via broadcast) where tension lives
+- Eliminates the "cold start" problem where players need to re-orient
+
+Keep under 500 words. Focus on unresolved threads, not resolved ones.
+
 ## Simultaneous vs Staggered Prompts
 
 **In combat** (`COMBAT_ACTION`): Prompt all players simultaneously — they act in parallel and you weave the results together.

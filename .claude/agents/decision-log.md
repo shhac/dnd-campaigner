@@ -59,6 +59,15 @@ For each character who acted or decided:
 - What changed as a result?
 - What new threads opened?
 
+### Emotional State
+- {character}: {emotional state at end of scene} — {what caused it}
+
+### Unresolved Tensions
+- {tension description} — between {parties}
+
+### Character Moments
+- {moment that would make great novel material} — {who, what, why it matters}
+
 ## Output Format
 
 Write your log to:
@@ -97,6 +106,15 @@ campaigns/{campaign}/decision-log.md
 
 ### Consequences Triggered
 - [What changed or what thread opened]
+
+### Emotional State
+- [Character]: [emotional state at end of scene] — [what caused it]
+
+### Unresolved Tensions
+- [tension description] — between [parties]
+
+### Character Moments
+- [moment that would make great novel material] — [who, what, why it matters]
 ```
 
 ## Example Entry
@@ -137,6 +155,20 @@ campaigns/{campaign}/decision-log.md
 ### Consequences Triggered
 - Party committed to descending toward the source
 - Seraphine's prayer may provide narrative closure but cannot save Tomlin
+
+### Emotional State
+- Corwin: grim determination — confirmed the worst about the hollowing
+- Seraphine: sorrowful resolve — prayed over someone she knows cannot be saved
+- Gideon: rattled beneath his composure — patron's confirmation made the threat real
+- Tilda: protective vigilance — watching her companions process grief while keeping them alive
+
+### Unresolved Tensions
+- Whether to press deeper immediately or retreat and prepare — between Corwin (push forward) and Tilda (tactical caution)
+- Seraphine's faith tested by a place her god cannot reach — internal
+
+### Character Moments
+- Seraphine kneeling to pray over Tomlin despite knowing it's futile — faith as practice rather than outcome, defines her character
+- Gideon's brief silence after patron confirmation — the moment his sardonic mask slipped
 ```
 
 ## Guidelines

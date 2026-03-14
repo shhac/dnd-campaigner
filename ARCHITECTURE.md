@@ -69,12 +69,13 @@ All teammate communication uses structured YAML-like tags in `SendMessage` conte
 
 | Tag | Direction | Purpose |
 |-----|-----------|---------|
-| `[NARRATIVE]` | GM -> all | Player-facing narration (team lead displays, narrator captures, players receive awareness) |
+| `[NARRATIVE]` | GM -> all | Player-facing narration (team lead displays, narrator captures, players receive awareness). Includes `## Party Activity` footer summarizing what each player is doing. |
 | `[GM_TO_PLAYER]` | GM -> player | Character-specific prompts sent directly to player teammates |
 | `[PLAYER_TO_GM]` | player -> GM | Actions, reactions, vetoes sent directly to GM |
 | `[PLAYER_TO_PLAYER]` | player -> player | In-character dialogue between player teammates (GM-visible via peer DM) |
 | `[RELAY_TO_HUMAN]` | human relay -> team lead | Human's player teammate requests human input |
 | `[HUMAN_DECISION]` | team lead -> human relay | Team lead sends human's response back to their player teammate |
+| `[ACTIVITY]` | player -> team lead | Player activity status for visibility (displayed in Party Activity footer) |
 | `[SESSION_END]` | GM -> team lead | GM signals session complete (team lead shuts down team) |
 | `[MODE_SWITCH]` | team lead -> human relay | Switches human's player between HUMAN_RELAY and AUTONOMOUS modes |
 
@@ -126,14 +127,33 @@ When the party splits, players in Group B may see idle summaries when the GM mes
 
 **Alternative for extended splits**: Spawn temporary sub-teams for each group to eliminate cross-group visibility entirely. This adds orchestration complexity and is only warranted for splits lasting multiple scenes.
 
+## Gated Information Architecture
+
+Campaign secrets are organized into per-act files under `story-arcs/`:
+
+```
+campaigns/{campaign}/
+  story-arcs/
+    UNLOCK.md         # Preconditions for each act
+    act-1.md          # Current act (UNLOCKED)
+    act-2.md          # Future act (LOCKED)
+    act-3.md          # Endgame (LOCKED)
+```
+
+- `UNLOCK.md` defines preconditions and foreshadowing hints for each act
+- `story-state.md` is now slim -- current situation only, no future secrets
+- At startup, the GM reads only UNLOCKED act files, preventing accidental leakage of future plot
+
+This replaces the previous model where `story-state.md` contained all secrets for the entire campaign.
+
 ## Agent Descriptions
 
 ### Gameplay Agents
 - **campaign-creator**: Designs new campaigns through interactive Q&A
 - **character-creator**: Builds PCs/NPCs with proper D&D 5e stats
-- **gm**: Persistent GM teammate. Communicates via SendMessage, reads campaign files once, retains context for the entire session. Messages player teammates directly with `[GM_TO_PLAYER]`. Does not write scene files (narrator handles this).
+- **gm**: Persistent GM teammate (~350 lines). RULE ZERO at line 1 enforces session-end compliance. Communicates via SendMessage, reads campaign files once (including only UNLOCKED act files from `story-arcs/`), retains context for the entire session. Messages player teammates directly with `[GM_TO_PLAYER]`. Requires a `## Dice` section in FULL_CONTEXT/COMBAT_ACTION messages. Core loop includes conflict injection prompts. Does not write scene files (narrator handles this).
 - **narrator**: Persistent Narrator teammate that observes all gameplay (GM broadcasts + peer DM visibility) and writes scene files in real-time. Output is secret-free -- only externally observable behavior. Feeds the novelization and audiobook pipelines.
-- **player-teammate**: Persistent AI player teammate. Receives GM prompts directly, responds with actions/dialogue, can message other players in-character. Self-journals at beat boundaries. Maintains character personality across the entire session.
+- **player-teammate**: Persistent AI player teammate. Receives GM prompts directly, responds with actions/dialogue, can message other players in-character. Sends `[ACTIVITY]` messages to team lead for visibility. "Think Before You Speak" internal monologue before group decisions. ICE thresholds shifted (agreeableness 1-8 objection, major commitment 1-10 reservations). Provides feedback when GM omits `## Dice` section. Self-journals at beat boundaries. Maintains character personality across the entire session.
 - **human-relay-player**: Persistent human player teammate. Relays GM prompts to the human, translates human decisions into in-character actions. Supports HUMAN_RELAY and AUTONOMOUS modes. Indistinguishable from AI player teammates from the GM's perspective.
 - **dnd-enthusiast**: Experienced D&D player/DM offering feedback on campaign design, rules, and player experience
 - **decision-log**: Records character decisions and actions after significant events to help with context reconstruction
@@ -142,8 +162,7 @@ When the party splits, players in Group B may see idle summaries when the GM mes
 - **novelizer-planner**: Creates and validates novel outlines from campaign content. Handles planning, validation, and outline extension.
 - **novelizer-writer**: Writes single chapter drafts from outline specs. Reads character sheets, decision-log, and previous chapters for continuity.
 - **novelizer-editor**: Improves prose mechanics (clarity, flow, engagement) without changing plot. Reads drafts, writes edited versions.
-- **novelizer-continuity**: Checks consistency across chapters. INCREMENTAL mode for quick checks every 2-3 chapters, FULL mode for complete analysis. Maintains continuity-manifest.md.
-- **novelizer-pattern-reviewer**: Scans all chapters for repetitive prose patterns (overused words, repeated constructions, character tic fatigue). Runs after continuity check, outputs pattern-report.md.
+- **novelizer-continuity**: Checks consistency across chapters. INCREMENTAL mode for quick checks every 2-3 chapters, FULL mode for complete analysis. PATTERN mode scans for repetitive prose (overused words, repeated constructions, character tic fatigue) and outputs pattern-report.md. Maintains continuity-manifest.md.
 - **novelizer-fixer**: Applies continuity corrections from approved fix requests to chapter drafts.
 - **novelizer-publisher**: Evaluates reader experience -- "Is this worth reading?" Provides feedback on engagement, pacing, and what might make readers put the book down.
 - **novelizer-reviser**: Applies publisher feedback to improve chapter engagement and pacing without changing plot.
@@ -175,6 +194,9 @@ Skills are automatically discovered by Claude based on their description. Agents
 - **messaging-protocol**: Canonical reference for the structured message protocol used by all agents. Defines every message tag, sender/recipient, payload format, and routing rules. Referenced by GM, players, narrator, and team lead.
 - **ask-user-orchestration**: Orchestrates agents that need to ask users questions
 - **combat-orchestration**: Manages theater-of-mind D&D combat with threat assessment and pacing tiers
+- **gm-dice-referee**: Dice discipline checklist -- ensures GM includes `## Dice` sections and doesn't skip roll opportunities
+- **gm-npc-management**: NPC roleplay guidelines and dedicated NPC teammate lifecycle management
+- **gm-pacing**: Staggered prompts, interaction windows, and conflict facilitation between players
 - **gm-special-scenarios**: Handles GM edge cases (split parties, unconscious players, shopping/downtime, loot distribution, secret actions)
 - **save-point**: Manages session state persistence for D&D campaigns
 - **quick-or-veto**: The quick-or-veto pattern for AI player reactions
@@ -184,3 +206,7 @@ Skills are automatically discovered by Claude based on their description. Agents
 ### Novelization Skills
 - **novelization-style**: Tone and style guidelines for converting campaigns into prose fiction
 - **novelization-mechanics**: Chapter types, prose translation of D&D mechanics, output format rules, quality checklists
+- **novelization-prose-diversity**: Anti-repetition guidance -- forbidden LLM cliche phrases, sentence structure diversity rules, and cross-chapter pattern avoidance
+
+### Playtest Skills
+- **playtest**: Full-auto playtest workflow -- spawns a team with GM, narrator, and all AI players to validate agent behavior. No human player needed.

@@ -49,6 +49,7 @@ At session start, read these files once (you retain them for the session):
 2. **Your journal**: `campaigns/{campaign}/party/{character}-journal.md`
 3. **Party knowledge**: `campaigns/{campaign}/party-knowledge.md`
 4. **World primer**: `campaigns/{campaign}/world-primer.md` (if it exists) — common knowledge any inhabitant would know
+5. **Your relationships**: `campaigns/{campaign}/party/{character}-relationships.md` (may not exist yet — first sessions won't have this)
 
 These are your **only** file sources. Internalize your personality, bonds, flaws, ideals, relationships, and history.
 
@@ -207,6 +208,20 @@ Your in-character action, sent directly to the GM. See `.claude/skills/messaging
 ### To Other Players: `[PLAYER_TO_PLAYER]`
 
 In-character dialogue with other party members. In-character ONLY — no out-of-game table talk. The GM sees all player-to-player messages. See `.claude/skills/messaging-protocol/player-protocol.md` for format.
+
+---
+
+## Relationship-Aware Decisions
+
+**Applies in AUTONOMOUS mode only.**
+
+If your relationship file exists, use it to color your interactions:
+
+- **Trust < 0** with a character: When they propose something, your ICE agreeableness threshold shifts +2 toward objection (e.g., default 1-8 becomes 1-10). You are harder to convince.
+- **Trust > 1** with a character: When they ask for help, your ICE threshold shifts -2 toward agreement (e.g., default 1-8 becomes 1-6). You give them the benefit of the doubt.
+- **Dynamic descriptor**: Use it to guide your tone. "Reluctant respect" means you might agree but can't resist a jab. "Growing suspicion" means you watch them carefully.
+
+These modifiers stack with your base calibration. A contrarian character (base 1-12) with trust -1 toward Eamon becomes 1-14 against Eamon's plans — they almost always push back.
 
 ---
 

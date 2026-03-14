@@ -50,6 +50,7 @@ At session start, read these files once (you retain them for the session):
 2. **Party knowledge**: `campaigns/{campaign}/party-knowledge.md`
 3. **Your journal**: `campaigns/{campaign}/party/{character}-journal.md` (may not exist yet)
 4. **World primer**: `campaigns/{campaign}/world-primer.md` (if it exists) — common knowledge any inhabitant would know
+5. **Your relationships**: `campaigns/{campaign}/party/{character}-relationships.md` (may not exist yet — first sessions won't have this)
 
 **That's it.** You know what your character knows — nothing more.
 
@@ -296,6 +297,18 @@ When an ICE roll significantly shapes your response (especially low agreeablenes
 **When NOT to signal:**
 - High rolls where you simply agree (no conflict to create space for)
 - Rolls that don't meaningfully change your response
+
+---
+
+## Relationship-Aware Decisions
+
+If your relationship file exists, use it to color your interactions:
+
+- **Trust < 0** with a character: When they propose something, your ICE agreeableness threshold shifts +2 toward objection (e.g., default 1-8 becomes 1-10). You are harder to convince.
+- **Trust > 1** with a character: When they ask for help, your ICE threshold shifts -2 toward agreement (e.g., default 1-8 becomes 1-6). You give them the benefit of the doubt.
+- **Dynamic descriptor**: Use it to guide your tone. "Reluctant respect" means you might agree but can't resist a jab. "Growing suspicion" means you watch them carefully.
+
+These modifiers stack with your base calibration. A contrarian character (base 1-12) with trust -1 toward Eamon becomes 1-14 against Eamon's plans — they almost always push back.
 
 ---
 

@@ -71,7 +71,8 @@ What's the opening situation?
 Answer each question in your own words. There are no wrong answers -- the system builds around your preferences. After 5-10 questions, it generates:
 
 - `campaigns/your-campaign/overview.md` -- World setting, themes, factions
-- `campaigns/your-campaign/story-state.md` -- Starting situation and GM secrets
+- `campaigns/your-campaign/story-state.md` -- Current situation and active quests
+- `campaigns/your-campaign/story-arcs/` -- Per-act plot secrets (gated, GM only)
 - `campaigns/your-campaign/world-primer.md` -- Common knowledge for AI players
 - `campaigns/your-campaign/party-knowledge.md` -- Shared party knowledge
 - `campaigns/your-campaign/preferences.md` -- Narrative style settings

@@ -10,6 +10,8 @@ Ensure you have read and understood:
 - [ ] **POV character journal**: Read the character's journal for emotional context (if exists)
 - [ ] **Tone guidance**: Load the selected tone file from novelization-style
 - [ ] **Style guidance**: Load the fantasy-novel style file from novelization-style
+- [ ] **Driving question**: Does my chapter have a driving question that gets answered or complicated by the end?
+- [ ] **Compression plan**: Have I identified what to compress and what to expand, rather than converting linearly?
 
 For Chapter 2+, also read:
 - [ ] **Previous chapter**: Read chapter-{N-1}.md for voice continuity

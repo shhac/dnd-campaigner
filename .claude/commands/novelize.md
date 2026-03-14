@@ -17,8 +17,9 @@ This command transforms your D&D campaign's decision logs and character journals
 4. **Continuity** - Consistency checking across chapters
 5. **Pattern Review** - Cross-chapter repetition analysis
 6. **Fixing** - Addressing blocking issues and pattern fixes
-7. **Publisher Review** - Reader experience assessment
-8. **Final Assembly** - Metadata and table of contents
+7. **Beta Reader** - Emotional/experiential reader reactions
+8. **Publisher Review** - Reader experience assessment
+9. **Final Assembly** - Metadata and table of contents
 
 ## Arguments
 
@@ -60,7 +61,11 @@ campaigns/{campaign}/novel/
 ├── publisher-feedback.md      # Reader experience assessment
 ├── metadata.yaml              # Final metadata
 ├── table-of-contents.md       # Final TOC
+├── story-so-far.md            # Running plot/character summary for writer context
 ├── novelization-state.yaml    # Progress tracking for resume
+├── reader-reactions/           # Beta reader reactions per chapter
+│   ├── chapter-01.md
+│   └── ...
 └── drafts/                    # Archived intermediate files
     ├── chapter-01-draft.md    # Original drafts (pre-editing)
     ├── chapter-02-draft.md
@@ -78,6 +83,7 @@ Note: During processing, draft files are created at the root level. Upon complet
 | Outline Approval | After Phase 1 | No |
 | Voice Lock | After Chapter 1 edited | No (critical) |
 | Continuity Review | After Phase 3 | No |
+| Beta Reader | After Phase 4 | Auto-mode: only blocks on severe concerns |
 | Publisher Review | After Phase 5 | Yes (--skip-publisher) |
 
 ---
@@ -482,6 +488,37 @@ For each chapter with approved fixes:
 5. Update state: fix_cycles, chapters.{N}.continuity = checked
 ```
 
+### Phase 4.5: Beta Reader
+
+For each chapter (or every 2-3 chapters for longer novels):
+
+```
+1. Spawn novelizer-reader:
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   MODE: CHAPTER
+   CAMPAIGN: {campaign}
+   CHAPTER: {N}
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+2. Receive status: overall feeling, keep_reading assessment, confusions, highlights
+
+3. Key signals to watch for:
+   - keep_reading = "probably_not" → BLOCKING concern
+   - Confusion points that indicate "reads like a session transcript, not a novel"
+   - Drift points suggesting pacing problems
+
+4. In auto mode: only pause for BLOCKING reader concerns
+   (keep_reading = "probably_not" or "reluctantly" on 2+ consecutive chapters)
+
+5. Not in auto mode: show reader reactions to user
+   - Display overall feeling, highlights, confusions
+   - Ask if user wants to address any reader feedback before continuing
+
+6. If reader flags BLOCKING concerns:
+   - Add to fix-requests-approved.md as reader-sourced issues
+   - These go through the normal fix cycle (Phase 4)
+```
+
 ### Phase 5: Publisher Review
 
 Skip if `--skip-publisher`.
@@ -714,6 +751,7 @@ Files:
   - `.claude/agents/novelizer-reviser.md` - Applying publisher/editorial revisions
   - `.claude/agents/novelizer-editor.md` - Prose quality editing
   - `.claude/agents/novelizer-continuity.md` - Consistency checking
+  - `.claude/agents/novelizer-reader.md` - Beta reader reactions
   - `.claude/agents/novelizer-pattern-reviewer.md` - Cross-chapter repetition analysis
   - `.claude/agents/novelizer-publisher.md` - Reader experience assessment
 - **Tone files**: `.claude/skills/novelization-style/tones/`

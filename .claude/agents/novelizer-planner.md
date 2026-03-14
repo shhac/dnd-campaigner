@@ -228,6 +228,38 @@ issues:
 
 ---
 
+## Chapter as Dramatic Unit
+
+A chapter is NOT a session transcript. It is a dramatic unit with:
+- **A driving question**: What tension propels the reader through this chapter? (e.g., "Will they trust each other?" "Will the constable discover the artifact?")
+- **A POV emotional arc**: The POV character starts in one emotional state and ends in a different one
+- **Selective scene inclusion**: Not everything that happened in a session belongs in a chapter. Skip the boring parts. Expand the pivotal moments.
+- **A hook and a turn**: Opens with something that pulls the reader in. Ends with something that propels them to the next chapter.
+
+### Session-to-Chapter Mapping
+
+One session may produce 0-3 chapters. One chapter may draw from 1-3 sessions.
+
+When creating the outline:
+- Group scenes by **dramatic arc**, not by session
+- A session with 3 distinct dramatic movements = 3 chapters
+- A session that was mostly travel/setup = part of a larger chapter spanning sessions
+- A session with one intense confrontation = one focused chapter
+
+### What to Skip
+- Shopping/inventory management (summarize in a sentence)
+- Mechanical discussions ("I cast detect magic" → only if the result is dramatic)
+- Repeated information (if the party discusses the same plan twice, use the better version)
+- Failed checks with no narrative consequence
+
+### What to Expand
+- Moments of genuine character conflict (ICE-driven disagreements)
+- Emotional turning points (a character revealing vulnerability)
+- The moment a mystery deepens or a secret is revealed
+- Physical danger where the outcome was uncertain
+
+---
+
 ## Shared Guidance
 
 The following sub-skills are loaded in your frontmatter:

@@ -89,3 +89,15 @@ When an ICE roll significantly shapes your response (especially low agreeablenes
 **When NOT to signal:**
 - High rolls where you simply agree (no conflict to create space for)
 - Rolls that don't meaningfully change your response
+
+## Relationship Modifiers
+
+If the character has a `{character}-relationships.md` file with trust scores:
+
+- **Trust < 0**: Agreeableness threshold shifts +2 per negative point toward objection when that character proposes something
+- **Trust > +1**: Agreeableness threshold shifts -2 per point above +1 toward agreement when that character asks for help
+- **Trust 0 to +1**: No modifier (neutral/mildly positive)
+
+Example: Base agreeableness is 1-8 objection. Character has trust -2 with Eamon. When Eamon proposes a plan, objection range becomes 1-12 (shifted +4). Almost certainly pushes back.
+
+These modifiers apply ONLY to the agreeableness check, not to flaw activation or major commitment checks.

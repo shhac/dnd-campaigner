@@ -11,6 +11,23 @@ The cardinal rule: **Never mention dice, rolls, HP, AC, or game mechanics.** Tra
 **Good**: "Her blade found the gap in his armor, and he staggered back with a gasp"
 **Bad**: "She rolled a 19 and hit for 12 damage"
 
+### Combat as Narrative Arc
+
+A fight in a novel is not a round-by-round transcript. It is a miniature story with:
+
+1. **Stakes establishment** (first paragraph): What happens if they lose? What are they fighting for?
+2. **Escalation** (middle): Things get worse. The enemy adapts. Someone takes a hit. A spell fails.
+3. **Turning point** (climax): The moment that decides the outcome — a critical hit, a clever tactic, a desperate sacrifice.
+4. **Resolution** (aftermath): Not just "they won." How are they changed? What did it cost?
+
+### Translation Rules for Combat
+- **Skip initiative order** — readers don't care who went first
+- **Combine rounds** — 3 rounds of "I attack, they attack" becomes one flowing paragraph of traded blows
+- **Focus on 2-3 key moments** — the hit that almost killed someone, the spell that turned the tide, the moment a character chose to protect another instead of attack
+- **Use the environment** — the session may not have described the terrain, but you should. Fights happen in places.
+- **Internal experience during combat** — fear, adrenaline, calculation, muscle memory. This is what distinguishes a novel fight from a game transcript.
+- **Injuries have weight** — a "7 damage" in game becomes a specific wound that affects the character for the rest of the chapter
+
 ## Ability Checks
 
 - Show the attempt and result through action

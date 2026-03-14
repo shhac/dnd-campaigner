@@ -68,6 +68,15 @@ At each save point:
 [ ] story-state.md updated
 [ ] party-knowledge.md updated
 [ ] relationships.md updated (if social dynamics changed — NPC dispositions, party bonds, faction standings)
+[ ] Update `## Party Interactions` in NPC files for any NPCs encountered this beat
+[ ] Update `faction-standings.md` if any faction-relevant decisions were made this beat
+[ ] Update `tmp/dashboard.md` with current scene, party status, quest progress, and session log
+```
+
+At session end (in addition to above):
+
+```
+[ ] Update each character's `{character}-relationships.md` based on significant interactions this session. Adjust trust scores and add key moments.
 ```
 
 ## Detailed Procedures

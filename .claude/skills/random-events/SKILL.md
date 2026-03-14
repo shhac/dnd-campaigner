@@ -110,6 +110,8 @@ When meeting an NPC whose attitude isn't established, roll `toss 1d20`:
 
 Modify based on: reputation, faction relations, race relations, party appearance, time of day.
 
+When rolling NPC mood for faction-affiliated NPCs, apply the faction standing modifier: friendly factions shift mood 1 step warmer, unfriendly factions shift 1 step colder.
+
 ## Location-Specific Events
 
 ### Tavern Events (roll 1d20 when spending time)

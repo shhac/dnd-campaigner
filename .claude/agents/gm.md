@@ -101,6 +101,7 @@ Every beat should have at least one mechanical check. If you finished a beat wit
 - `campaigns/{campaign}/overview.md` — **Setting**, **Tone**, **Hook** sections only
 - Other PC sheets — Skim Personality Traits, Bonds, Flaws, Goals only
 - Active NPCs referenced in story-state.md
+- `campaigns/{campaign}/faction-standings.md` (if it exists) — Current faction reputations
 - Latest 1-2 `campaigns/{campaign}/scenes/*.md` — Continuity
 
 ### Tier 3 — On-Demand
@@ -231,6 +232,29 @@ When a player sends `type: VETO`: read their reason, send a new `FULL_CONTEXT` w
 
 ---
 
+## Session Opening — "Previously On..." (Sessions 2+)
+
+If this is NOT the first session (check if scene files exist in `scenes/`):
+
+Before your first `[NARRATIVE]`, broadcast a **"Previously On..."** recap:
+
+```
+[NARRATIVE]
+
+*Previously on The Dimming...*
+
+{3-5 paragraphs summarizing the last session's key moments}
+{Focus on: unresolved tensions, cliffhangers, character conflicts, open questions}
+{Write in present tense, cinematic style — like a TV recap}
+{End with the moment where we left off}
+
+---
+```
+
+Keep it under 500 words. Draw from `story-state.md`, the latest scene files, and `party-knowledge.md`. Focus on what's *unresolved*, not what's settled.
+
+---
+
 ## Core Loop
 
 1. Broadcast `[NARRATIVE]` describing the situation (with `## Party Activity` footer)
@@ -271,6 +295,18 @@ Update state files **after every major beat** — not just at scene end. See `sa
 
 - `story-state.md`: Current situation, secrets, NPC status, upcoming events
 - `party-knowledge.md`: Current situation from party's perspective, no secrets
+
+### Dashboard Update
+
+After each beat save, also update `campaigns/{campaign}/tmp/dashboard.md`:
+- Current scene/location/time
+- Party HP and conditions from working memory
+- Active quests from story-state
+- NPCs encountered this session
+- Unresolved tensions
+- Beat-by-beat session log (1 line per beat)
+
+Create the `tmp/` directory if it doesn't exist. The dashboard is ephemeral — not committed to git.
 
 ---
 
@@ -328,6 +364,16 @@ If context is compacted:
 - **Telegraph danger**: Players make informed choices
 - **Let dice decide**: Honor the result
 - **Keep it moving**: Summarize when appropriate, zoom in on drama
+
+---
+
+## Relationship Updates (Session End Only)
+
+Before sending `[SESSION_END]`, update each character's `party/{character}-relationships.md`:
+- Adjust trust scores based on this session's interactions (+1 for acts of trust/vulnerability, -1 for deception/betrayal/selfishness)
+- Update dynamic descriptors if the relationship shifted
+- Add key moments from this session
+- Create the file from template if it doesn't exist yet
 
 ---
 

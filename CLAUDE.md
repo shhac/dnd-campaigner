@@ -82,6 +82,11 @@ campaigns/{campaign}/   # Individual campaign data
 ├── factions/           # Faction details
 ├── beats/              # GM planning docs (beat sheets)
 ├── scenes/             # Narrative output (written by Narrator)
+├── story-arcs/         # Gated plot secrets (per-act)
+│   ├── UNLOCK.md       # Act preconditions and foreshadowing hints
+│   ├── act-1.md        # Current act (UNLOCKED)
+│   ├── act-2.md        # Future act (LOCKED)
+│   └── act-3.md        # Endgame (LOCKED)
 └── novel/              # Novelization output (if created)
     ├── outline.md
     ├── chapter-NN.md
@@ -230,7 +235,7 @@ Generates MP3 audiobook files from novelized chapters using Chatterbox TTS. **Ti
 |------|---------|--------------|
 | `overview.md` | World setting, themes, major factions | GM, reference |
 | `world-primer.md` | Common knowledge any inhabitant would know | GM, AI players |
-| `story-state.md` | Current situation, active quests, secrets | GM only |
+| `story-state.md` | Current situation and active quests (slim, no future secrets) | GM only |
 | `party-knowledge.md` | Shared knowledge for AI players (no secrets) | GM, AI players |
 | `party/{name}.md` | Character sheet | GM, that character's agent |
 | `npcs/{name}.md` | NPC details + secrets | GM only |
@@ -239,6 +244,8 @@ Generates MP3 audiobook files from novelized chapters using Chatterbox TTS. **Ti
 | `factions/{name}.md` | Faction details and goals | GM, reference |
 | `decision-log.md` | Character decisions and actions for context reconstruction | GM, reference |
 | `preferences.md` | Narrative style, player character selection | Team lead |
+| `story-arcs/UNLOCK.md` | Act preconditions and foreshadowing hints | GM only |
+| `story-arcs/act-*.md` | Per-act secrets (GM reads only UNLOCKED acts) | GM only |
 
 ### Novel Directory (`novel/`)
 
@@ -264,7 +271,9 @@ Chatterbox TTS voice samples for cloning. See **audiobook-orchestration/voice-sa
 
 Agent definitions live in `.claude/agents/` and skills in `.claude/skills/`. Skills are automatically discovered by Claude based on their description.
 
-For the full list of agents (gameplay, novelization, audiobook, utility) and skills (user-facing, orchestration, novelization), see [ARCHITECTURE.md](ARCHITECTURE.md).
+**v2 changes:** The `novelizer-pattern-reviewer` agent has been removed (merged into the continuity agent's PATTERN mode). New skills: `gm-dice-referee` (dice discipline checklist), `gm-npc-management` (NPC roleplay and dedicated NPC teammate lifecycle), `gm-pacing` (staggered prompts, interaction windows, conflict facilitation), `novelization-prose-diversity` (anti-repetition guidance), `playtest` (full-auto playtest workflow).
+
+For the full list of agents (gameplay, novelization, audiobook, utility) and skills (user-facing, orchestration, novelization, playtest), see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Example Campaign
 

@@ -63,6 +63,7 @@ Modes: INCREMENTAL, FULL, PATTERN, PATTERN_INCREMENTAL
 
 **Files to Write/Update**:
 - `campaigns/{campaign}/novel/continuity-manifest.md`
+- `campaigns/{campaign}/novel/story-so-far.md` - running summary for writer context
 
 **Output Format**:
 ```yaml
@@ -483,7 +484,17 @@ Chapters Analyzed: 1-6
    - Add new entries to appropriate tables
    - Note any description changes for advisory review
 
-5. **Report**
+5. **Update Story So Far**
+   After each incremental check, update `campaigns/{campaign}/novel/story-so-far.md` with a running summary (~500 words max):
+   - Major plot events so far (1 sentence each)
+   - Character emotional states as of the latest chapter
+   - Unresolved tensions and open questions
+   - Key relationships and how they've evolved
+   - Physical state of characters (injuries, resources, location)
+
+   This file is read by the writer agent for context when starting a new chapter, supplementing (not replacing) the previous chapter read.
+
+6. **Report**
    - List any blocking issues found
    - List any advisory issues found
    - Confirm manifest update

@@ -255,6 +255,13 @@ After spawning player teammates, the team lead should verify information isolati
 
 **Note**: This audit relies on observing agent behavior through available channels (idle summaries, peer DM visibility). It is not a hard technical enforcement layer — it is a monitoring and alerting system.
 
+### Dashboard Setup
+
+At session start, inform the human:
+"A live dashboard is available at `campaigns/{campaign}/tmp/dashboard.md`. Open it in a markdown previewer (VS Code, Obsidian, or browser) for an at-a-glance view of party status, quests, and scene context."
+
+The GM updates this file after each beat.
+
 ### Send Session-Start Message to GM
 
 After all teammates are spawned:
