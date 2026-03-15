@@ -192,6 +192,19 @@ Situations where Arul might act privately if given the opportunity:
 
 **Moral Limits**: Will not get a crew member killed to protect his cover. Will not hand the Ādhāra Protocol to the Ledgerkeepers if he believes they'll use it. Will not betray Senthil unless forced to — and it will break something in him if he does.
 
+## Internal Conflict Engine (ICE)
+
+Use `toss 1d20` as a tie-breaker for genuinely conflicted decisions. Target: 2-6 rolls per session.
+
+| Conflict Type | Threshold | Notes |
+|---------------|-----------|-------|
+| Emotion vs Logic | 1-10: emotion wins | Balanced — training says logic, but Teff Row has cracked that |
+| Agreeableness | 1-5: disagree/push back | Cooperative — needs the team to succeed, rarely bucks consensus |
+| Flaw Activation (performance mask) | 1-2: flaw fires | Disciplined — the mask slips only under extreme pressure |
+| Major Commitment (handler vs crew) | 1-12: commit/act | Cautious — weighs Senthil's expectations against crew loyalty |
+
+**Note**: The agonizing moments come when protecting a teammate conflicts with maintaining cover. When those collide, roll — low means he breaks cover to help; high means the Ledgerkeeper training holds.
+
 ## Notes
 
 **The Identity Crisis**: Arul's central tension is that he's losing the ability to distinguish cover from self. He's been "Arulchelvan Maran, charming entertainer" for so long that the Ledgerkeeper operative underneath feels like the performance. The heist will force him to decide which version is real — and every choice he makes pulls him further from the Ledgerkeepers and closer to the crew.

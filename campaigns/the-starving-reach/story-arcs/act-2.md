@@ -25,6 +25,12 @@ LOCKED
 - Crown's Shadow makes their move. Ilmari reveals his mission and offers the party a deal: help him extract a Chorus sample and the Crown will send a full rescue for all survivors. The deal is genuine but the consequences would be catastrophic.
 - The Sinatl'e network shows visible signs of failure — the standing stones crack, the hum becomes a scream, the permafrost splits.
 
+## Character-Specific GM Guidance
+
+- **Ruska (Drift/Chorus)**: The Chorus has a perfect lever: Eero. It can mimic Eero's voice, offer information about Eero's location, promise Eero's safety. Every offer is a trap, but Ruska may not care.
+- **Vieno (Drift/Chorus)**: The greatest danger isn't that Vieno will fail a save; it's that she'll choose not to resist because she wants to understand what's talking to her.
+- **Tamar (Drift/Chorus)**: The Chorus may specifically attempt to reach her because she understands what it is. Her knowledge of the Mtskhuri makes her a more interesting target.
+
 ## Foreshadowing
 - Carvings in the ruin show figures walking into light and not emerging — but they're smiling
 - The deeper passages are warm, almost comfortable, despite being underground in permafrost

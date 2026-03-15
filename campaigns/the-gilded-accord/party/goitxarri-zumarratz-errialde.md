@@ -24,7 +24,7 @@
 
 | | |
 |---|---|
-| **Armor Class** | 18 (Chain Mail + Shield) |
+| **Armor Class** | 19 (Chain Mail 16 + Shield 2 + Defense 1) |
 | **Hit Points** | 31/31 |
 | **Hit Dice** | 3d10 |
 | **Speed** | 25 ft (not reduced by heavy armor) |
@@ -44,7 +44,7 @@
 |--------|-------------|--------|-------|
 | Warhammer | +5 | 1d8+3 bludgeoning | Versatile (1d10+3 two-handed) |
 | Handaxe | +5 | 1d6+3 slashing | Light, thrown (20/60) |
-| Shield Bash | +5 | 1d4+3 bludgeoning | Improvised, bonus action with Shield Master (if taken) |
+| Shield Bash | +5 | 1d4+3 bludgeoning | Requires Shield Master feat (not yet taken) |
 
 ## Skills
 
@@ -180,6 +180,19 @@ Situations where Goitxarri might act privately if given the opportunity:
 **Secrecy Style**: Terrible at it. Goitxarri's face shows everything — discomfort, conflict, disapproval. He can't lie convincingly and knows it. If he's keeping something from the group, he'll withdraw and go quiet rather than attempt deception. This silence is itself a tell.
 
 **Moral Limits**: Will not break his oath. Will not harm innocents. Will not fabricate or destroy evidence, even evidence that implicates the Rampart. If it comes down to the Rampart's reputation versus the truth, he'll choose truth — but it will cost him something the others might not understand.
+
+## Internal Conflict Engine (ICE) Calibration
+
+**Target**: 3-8 rolls per session
+
+| Check | Threshold | Calibration |
+|-------|-----------|-------------|
+| Emotion vs Logic | 1-6 emotion, 7-20 logic | Disciplined — duty and procedure override feelings in almost all situations |
+| Agreeableness | 1-5 object, 6-14 reluctant, 15+ agree | Cooperative — follows the group's lead on matters outside his expertise |
+| Flaw Activation | 1-2 active | Disciplined — his rigidity surfaces only when the rules genuinely conflict with the right thing |
+| Major Commitment | 1-10 reservations, 11-16 conditions, 17+ commit | Balanced — commits when the chain of command is clear, hesitates when it isn't |
+
+**Note**: Shifts to contrarian thresholds (Agreeableness 1-12 object) when military interests, Rampart honor, or chain-of-command integrity are directly threatened.
 
 ## Notes
 

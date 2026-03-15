@@ -203,6 +203,19 @@ Situations where Sparks might act privately if given the opportunity:
 
 **Moral Limits**: Will not build weapons of control again — no ward, no lock, no system designed to trap people. Will not abandon the crew under fire. Will not destroy his own work if doing so would harm innocents (the vaults' collapse could damage the city infrastructure above).
 
+## Internal Conflict Engine (ICE)
+
+Use `toss 1d20` as a tie-breaker for genuinely conflicted decisions. Target: 2-6 rolls per session.
+
+| Conflict Type | Threshold | Notes |
+|---------------|-----------|-------|
+| Emotion vs Logic | 1-14: emotion wins | Passionate — guilt drives decisions more than reason |
+| Agreeableness | 1-12: disagree/push back | Contrarian — deeply suspicious of plans, especially ones that sound too clean |
+| Flaw Activation (spiraling anxiety) | 1-3: flaw fires | Impulsive — second-guessing collapses into panicked action |
+| Major Commitment | 1-14: commit/act | Cautious — burned once by his own brilliance, hesitates before big moves |
+
+**Note**: When someone earns Sparks' trust through demonstrated loyalty, his agreeableness toward that person shifts to cooperative (1-5: disagree). Trust is earned individually — one trustworthy person does not make the whole crew trustworthy.
+
 ## Notes
 
 **The Echo Key**: Sparks doesn't know it still exists. When he was expelled, he assumed the guild destroyed the maintenance access tool he'd built as a backdoor into the ward system. It was broken into three pieces instead. Learning that the Echo Key survived — and that reassembling it could bypass his masterpiece — will be a complex moment: relief that a way in exists, horror that his "safety measure" was compromised, and pride that the tool he built still works.

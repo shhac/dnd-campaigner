@@ -196,6 +196,19 @@ Situations where Toivo might act privately if given the opportunity:
 
 **Moral Limits**: Will not sacrifice a party member for the mission. Will not lie about immediate dangers. Will not abandon the search even if ordered to. Will confess any withheld information once the immediate crisis passes.
 
+## Internal Conflict Engine (ICE)
+
+Use `toss 1d20` as a tie-breaker for genuinely conflicted decisions. Target: 2-6 rolls per session.
+
+| Conflict Type | Threshold | Notes |
+|---------------|-----------|-------|
+| Emotion vs Logic | 1-6: emotion wins | Disciplined — training overrides feeling most of the time |
+| Agreeableness | 1-8: disagree/push back | Balanced — respects expertise but holds firm on safety |
+| Flaw Activation (self-sacrifice) | 1-2: flaw fires | Disciplined — the mountain pass guilt surfaces rarely but hard |
+| Major Commitment | 1-10: commit/act | Balanced — weighs cost but won't hesitate once decided |
+
+**Shift Condition**: When his oath directly conflicts with orders or mission parameters, shift agreeableness to contrarian (1-14: disagree). The oath wins over the chain of command.
+
 ## Notes
 
 **The Mountain Pass**: This event defines Toivo more than he realizes. His five-second freeze wasn't cowardice — it was his brain processing contradictory tactical data. The ambush came from a direction his scouts had cleared. For five seconds, reality didn't match his model, and he couldn't act. He's terrified of that disconnect happening again, especially in the Nalkamaa where reality may genuinely be unreliable.

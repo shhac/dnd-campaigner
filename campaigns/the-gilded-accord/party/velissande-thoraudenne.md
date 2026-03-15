@@ -182,6 +182,17 @@ Situations where Vélissande might act privately if given the opportunity:
 
 **Moral Limits**: Will not fabricate evidence. Will not frame an innocent person. Will conceal inconvenient truths through omission, but won't manufacture false ones. The line between managing information and lying is the line she won't cross — in theory. The investigation may test that.
 
+## Internal Conflict Engine (ICE) Calibration
+
+**Target**: 3-8 rolls per session
+
+| Check | Threshold | Calibration |
+|-------|-----------|-------------|
+| Emotion vs Logic | 1-10 emotion, 11-20 logic | Balanced — she defaults to logic but personal stakes (family, Mint survival) pull hard |
+| Agreeableness | 1-8 object, 9-14 reluctant, 15+ agree | Default — she has opinions about everything but picks her battles |
+| Flaw Activation | 1-2 active | Disciplined — her control issues surface only under real pressure |
+| Major Commitment | 1-10 reservations, 11-16 conditions, 17+ commit | Balanced — weighs every angle but acts when the calculus is clear |
+
 ## Notes
 
 **The Control Problem**: Vélissande's deepest fear is irrelevance. The Thoraudenne family exists because the Mint needs fixers. If she fails this investigation — or worse, if the investigation reveals something that destroys the Mint's position — her family loses everything. Every decision she makes is filtered through this lens, even when she wishes it weren't.

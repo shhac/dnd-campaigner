@@ -202,6 +202,17 @@ Situations where Théodarrhe might act privately if given the opportunity:
 
 **Moral Limits**: Won't kill an innocent to protect the Veil's reputation. Won't destroy evidence that could prevent further deaths. Will withhold information if sharing it would compromise a Veil source — but draws the line at active harm. The patron's influence adds a wild card: the Hollow Monarch occasionally requests things, and Théodarrhe has not yet had to refuse.
 
+## Internal Conflict Engine (ICE) Calibration
+
+**Target**: 3-8 rolls per session
+
+| Check | Threshold | Calibration |
+|-------|-----------|-------------|
+| Emotion vs Logic | 1-10 emotion, 11-20 logic | Balanced — analytical by training, but the patron's influence and isolation create genuine emotional pulls |
+| Agreeableness | 1-12 object, 13-14 reluctant, 15+ agree | Contrarian — trusts no one, questions everything, default stance is skepticism |
+| Flaw Activation | 1-2 active | Balanced — their paranoia is deep but controlled; surfaces as withdrawal rather than outburst |
+| Major Commitment | 1-14 reservations, 15-16 conditions, 17+ commit | Cautious — commitment means vulnerability, and vulnerability is the thing they fear most |
+
 ## Notes
 
 **The Patron Problem**: The Hollow Monarch is an Archfey of forgotten things — secrets that were buried, names that were erased, truths that were deliberately lost. Théodarrhe's patron finds the investigation delicious. A three-hundred-year-old lie about to be unearthed? The Hollow Monarch is paying attention, and their attention always has a price. Théodarrhe may receive visions, whispers, or compulsions that advance the investigation in ways the party didn't expect — or want.

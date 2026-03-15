@@ -31,6 +31,8 @@
 - Successful misdirection or frame job: -1
 - Downtime spent laying low (per full day): -1
 
+**Natural Decay**: Heat decreases by 1 per full narrative day where the crew takes no faction-visible actions (no reconnaissance, no NPC meetings, no vault approach). The crew must actively "lay low" — staying in safe houses, avoiding known contacts.
+
 ## Active Quests
 
 ### Primary Quest: The Nallur Vault Job
@@ -48,14 +50,14 @@
 ## Party Status
 
 **Hit Points**:
-- Dawit Tessem: 12/12
-- Arulchelvan Maran: 9/9
-- Fikru (Sparks): 10/10
-- Kavitha Nair: 10/10
+- Dawit Tessem: 28/28
+- Arulchelvan Maran: 21/21
+- Fikru (Sparks): 24/24
+- Kavitha Nair: 24/24
 
 **Spell Slots Remaining**:
-- Arul: 1st: 2/2
-- Sparks: 1st: 2/2
+- Arul: 1st: 4/4, 2nd: 2/2
+- Sparks: 1st: 3/3
 
 **Resources**:
 - Gold: Individual starting funds (see character sheets)

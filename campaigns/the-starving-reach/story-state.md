@@ -25,15 +25,15 @@
 ## Party Status
 
 **Hit Points**:
-- Toivo Rautavaara: 12/12
-- Vieno Kettunen: 8/8
-- Tamar Dzvelishvili: 10/10
-- Ruska Pellervo: 15/15
+- Toivo Rautavaara: 28/28
+- Vieno Kettunen: 18/18
+- Tamar Dzvelishvili: 24/24
+- Ruska Pellervo: 35/35
 
 **Spell Slots Remaining**:
-- Toivo: 1st: 2/2
-- Vieno: 1st: 2/2
-- Tamar: 1st: 2/2
+- Toivo: 1st: 3/3
+- Vieno: 1st: 4/4, 2nd: 2/2
+- Tamar: 1st: 4/4, 2nd: 2/2
 
 **Resources**:
 - Rations: 10 days per person (40 total party rations)

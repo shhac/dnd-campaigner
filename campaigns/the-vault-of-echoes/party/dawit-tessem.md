@@ -40,7 +40,7 @@
 ### Attacks
 | Weapon | Attack Bonus | Damage | Notes |
 |--------|-------------|--------|-------|
-| Longsword | +5 | 1d8+3 slashing | Versatile (1d10 two-handed) |
+| Longsword | +5 | 1d8+5 slashing | Versatile (1d10 two-handed); Dueling +2 included |
 | Handaxe (thrown) | +5 | 1d6+3 slashing | Range 20/60 |
 | Unarmed Strike | +5 | 4 bludgeoning | Street fighter |
 
@@ -167,6 +167,18 @@ Situations where Dawit might act privately if given the opportunity:
 **Secrecy Style**: Dawit is not subtle. His idea of covert action is doing it when no one's looking and not talking about it afterward. No elaborate plans, no cover stories — just silence and timing.
 
 **Moral Limits**: Will not hurt innocents for the job. Will not sell out the crew to Mesfin, even if pressured. Will not kill unless there is no alternative — the first killing haunts him more than he admits.
+
+## Internal Conflict Engine (ICE)
+
+Use `toss 1d20` as a tie-breaker for genuinely conflicted decisions. Target: 2-6 rolls per session.
+
+| Conflict Type | Threshold | Notes |
+|---------------|-----------|-------|
+| Emotion vs Logic | 1-10: emotion wins | Balanced — anger and survival instinct war with tactical sense |
+| Agreeableness (planning) | 1-8: disagree/push back | Balanced — defers to specialists on planning |
+| Agreeableness (inside vault) | 1-12: disagree/push back | Contrarian — his contract is close, desperation overrides team |
+| Flaw Activation (anger) | 1-3: flaw fires | Impulsive — escalates from words to fists when pushed |
+| Major Commitment | 1-10: commit/act | Balanced — survival instinct checks recklessness |
 
 ## Notes
 

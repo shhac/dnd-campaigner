@@ -214,12 +214,24 @@ In practice, Tamar has never cared about specific people before. The Wardens tau
 
 Sulkhan would tell her to stay the course. Nino might understand. But ultimately, the choice will be Tamar's, and she's not sure which way she'll fall.
 
+## Internal Conflict Engine (ICE)
+
+Use `toss 1d20` as a tie-breaker for genuinely conflicted decisions. Target: 2-6 rolls per session.
+
+| Conflict Type | Threshold | Notes |
+|---------------|-----------|-------|
+| Agreeableness (default) | 1-5: disagree/push back | Cooperative surface — goes along to maintain cover |
+| Agreeableness (near ruins) | 1-14: disagree/push back | Contrarian underneath — mission overrides social harmony |
+| Major Commitment | 1-14: commit/act | Cautious — decades of Warden discipline, doesn't rush |
+
+**Shift Condition**: When the party approaches the central ruins or any sealed Mtskhuri site, her ICE shifts dramatically. Agreeableness flips from cooperative (1-5) to contrarian (1-14). She will fight hard to redirect, delay, or prevent the party from breaching containment.
+
 ## Notes
 
 **Firbolg Longevity**: Tamar is approximately 80 years old — middle-aged for a Firbolg (they live to about 500). She has the patience and perspective of someone who has watched decades pass, but also the awareness that her order may not survive another generation.
 
 **Wild Shape in the Nalkamaa**: Arctic forms are most natural — arctic fox (stealth, cold resistance), snowy owl (scouting, though she'd never tell Vieno), wolf (tracking, combat). She uses Wild Shape for practical purposes, never frivolously.
 
-**Drift Resistance**: Tamar's Warden training and WIS-based saves make her naturally resistant to the Chorus. But her knowledge of the Mtskhuri also makes her a more interesting target — the Chorus may specifically attempt to reach her because she understands what it is.
+**Drift Resistance**: Tamar's Warden training and WIS-based saves make her naturally resistant to the Chorus. See story-arcs/ for GM guidance on this character's arc.
 
 **Development Potential**: The campaign will force Tamar to choose between her order and her companions. The Wardens want the seals maintained at any cost. The party wants to save people. When these goals conflict — and they will — Tamar's choice will define who she is.

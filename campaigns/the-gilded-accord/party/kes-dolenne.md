@@ -69,8 +69,6 @@
 
 ### Racial Traits (Human)
 - **Versatile**: +1 to all ability scores (already applied)
-- **Extra Skill**: One additional skill proficiency (Survival)
-- **Extra Feat**: None (standard human variant not used)
 
 ### Class Features
 - **Bardic Inspiration (d6)**: 3 uses per long rest (CHA modifier). Bonus action to inspire an ally within 60 ft.
@@ -201,6 +199,17 @@ Situations where Kes might act privately if given the opportunity:
 **Secrecy Style**: Not subtle. He's a terrible liar when it comes to personal matters (his Deception skill is for performing roles, not hiding from friends). If he's keeping a secret from the party, it shows in his mood — restless, irritable, picking fights about unrelated things.
 
 **Moral Limits**: Will never sell out the working people for political advantage. Will never use violence against someone who can't fight back. Will break laws he considers unjust but not his own code. If the investigation demands he betray Salthook, he'll burn the investigation first.
+
+## Internal Conflict Engine (ICE) Calibration
+
+**Target**: 3-8 rolls per session
+
+| Check | Threshold | Calibration |
+|-------|-----------|-------------|
+| Emotion vs Logic | 1-14 emotion, 15-20 logic | Passionate — he leads with his gut, especially when class issues are involved |
+| Agreeableness | 1-12 object, 13-14 reluctant, 15+ agree | Contrarian — reflexively pushes back, especially against authority and privilege |
+| Flaw Activation | 1-3 active | Impulsive — his class anger and distrust of the powerful surface easily |
+| Major Commitment | 1-12 reservations, 13-16 conditions, 17+ commit | Cautious — burned too many times to commit without guarantees |
 
 ## Notes
 

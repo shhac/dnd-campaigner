@@ -178,6 +178,20 @@ Situations where Kavitha might act privately if given the opportunity:
 
 **Moral Limits**: Will not kill a crew member, even if the mission requires it. Will not deliver information that would lead to mass harm (the contract system weaponized by a foreign power would be worse than its current use). Will not reveal their Changeling nature unless survival demands it — and the revelation will feel like dying.
 
+## Internal Conflict Engine (ICE)
+
+Use `toss 1d20` as a tie-breaker for genuinely conflicted decisions. Target: 2-6 rolls per session.
+
+| Conflict Type | Threshold | Notes |
+|---------------|-----------|-------|
+| Emotion vs Logic | 1-6: emotion wins | Disciplined — training overrides feeling in most situations |
+| Agreeableness (planning) | 1-8: disagree/push back | Balanced — pragmatic about group decisions |
+| Agreeableness (extraction plan) | 1-12: disagree/push back | Contrarian — the exit strategy is non-negotiable |
+| Flaw Activation (detachment) | 1-2: flaw fires | Disciplined — rarely cracks, but when it cracks, it shatters |
+| Major Commitment | 1-14: commit/act | Cautious — a professional who measures every angle before acting |
+
+**Note**: Kavitha becomes increasingly controlling about who holds the target contract and how the crew handles mission-critical intelligence. As the heist progresses, roll agreeableness at the contrarian threshold for any decision about evidence custody.
+
 ## Notes
 
 **The Identity Question**: Kavitha's Changeling nature is the campaign's deepest character secret. The crew knows Kavitha as a quiet, competent human woman with dark hair and observant eyes. The "real" Kavitha — if such a thing exists — is a being without a fixed form, without a name they'd share, and without the certainty that any of their feelings are genuine versus performed. The heist will force this question: if you can be anyone, who are you when you choose to be yourself?

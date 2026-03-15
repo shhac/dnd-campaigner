@@ -39,9 +39,9 @@ The Counting Houses are four ancient mercantile dynasties that control Kanakkur'
 | Name | Role | Notes |
 |------|------|-------|
 | Thirunavukkarasu Selvan | Head of Selvan House | "The Composer" — first among equals, architect of the Ādhāra Protocol |
-| (Unnamed) | Head of Kovil House | Conservative traditionalist |
-| (Unnamed) | Head of Nallur House | Maintains the ward infrastructure |
-| (Unnamed) | Head of Pandyan House | Ambitious, overextended |
+| Vedhachalam Kovil | Head of Kovil House | Conservative traditionalist |
+| Meenakshisundaram Nallur | Head of Nallur House | Maintains the ward infrastructure |
+| Arunthathi Pandyan | Head of Pandyan House | Ambitious, overextended |
 
 ## Symbols & Recognition
 

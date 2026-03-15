@@ -194,11 +194,23 @@ Ruska's Barbarian path is not metaphorical. When she rages, the Pellervo ancesto
 
 If Eero dies, the ancestors will include her sibling. Ruska cannot imagine anything worse — not Eero's death, which would destroy her, but seeing Eero's ghost standing beside her in battle, confirming that she failed.
 
+## Internal Conflict Engine (ICE)
+
+Use `toss 1d20` as a tie-breaker for genuinely conflicted decisions. Target: 2-6 rolls per session.
+
+| Conflict Type | Threshold | Notes |
+|---------------|-----------|-------|
+| Emotion vs Logic | 1-14: emotion wins | Passionate — feels first, thinks second |
+| Agreeableness | 1-8: disagree/push back | Balanced — defers to specialists but pushes back on pace |
+| Flaw Activation (Eero override) | 1-3: flaw fires | Impulsive — anything involving Eero bypasses judgment |
+| Major Commitment (Eero involved) | 1-6: commit/act | Reckless — will charge in when her sibling is at stake |
+| Major Commitment (default) | 1-12: commit/act | Cautious — experienced survivor, doesn't rush without reason |
+
 ## Notes
 
 **The Previous Expedition**: Ruska's first trip into the deep Nalkamaa is her most closely guarded experience. The singing, the dreams, the two trappers who walked into the tundra — she's never told anyone the full story. If the party encounters similar phenomena, she'll recognize them before anyone else, but explaining how she knows means revisiting something she's buried.
 
-**Drift Vulnerability**: Ruska's WIS is average and her mental saves are unmodified. She is the party's most vulnerable member to the Chorus's influence. Worse, the Chorus has a perfect lever: Eero. It can mimic Eero's voice, offer information about Eero's location, promise Eero's safety. Every offer is a trap, but Ruska may not care.
+**Drift Vulnerability**: Ruska's WIS is average and her mental saves are unmodified. She is the party's most vulnerable member to the Chorus's influence. See story-arcs/ for GM guidance on this character's arc.
 
 **Goliath Among Humans**: Ruska is seven feet tall and built like a siege engine. In frontier communities, this is an asset. In the party, it means she can carry more, hit harder, and survive conditions that would kill anyone else. It also means she struggles to fit in gnome-sized tents, burns through rations faster, and stands out against the white tundra like a moving boulder.
 

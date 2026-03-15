@@ -66,7 +66,13 @@ The Commons Assembly's great hall, a converted amphitheater where public debates
 **Timeline**: 30 days from campaign start (urgent, with daily political developments)
 **What Happens If They Succeed**: Civil war along factional lines. The Mint seizes the treasury. The Rampart locks down the gates. The Commons erupts in riots. The Veil goes to ground. Three hundred years of fragile peace collapse in weeks.
 
-## Campaign Arc (GM Eyes Only)
+---
+
+## GM Eyes Only
+
+> **STOP**: Everything below this line is for the GM only. AI player agents must not read past this point.
+
+## Campaign Arc
 
 ### Act 1: The Thirty Days
 The investigation into Caudressô's death. Each faction assigns an operative. The four PCs must work together despite conflicting loyalties. Clues point in contradictory directions — deliberately. Someone is running a disinformation campaign.

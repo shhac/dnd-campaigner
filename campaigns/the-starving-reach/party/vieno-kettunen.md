@@ -205,12 +205,24 @@ Situations where Vieno might act privately if given the opportunity:
 
 **Moral Limits**: Will not withhold information that puts the party at direct risk. Will not destroy knowledge, ever. Will not use her divination magic to spy on party members. Will share everything eventually — she just needs to finish her notes first.
 
+## Internal Conflict Engine (ICE)
+
+Use `toss 1d20` as a tie-breaker for genuinely conflicted decisions. Target: 2-6 rolls per session.
+
+| Conflict Type | Threshold | Notes |
+|---------------|-----------|-------|
+| Emotion vs Logic | 1-14: emotion wins | Passionate — curiosity counts as emotion for Vieno |
+| Agreeableness | 1-12: disagree/push back | Contrarian — she has opinions and shares them |
+| Flaw Activation (curiosity overrides safety) | 1-3: flaw fires | Impulsive — walks toward the strange sound |
+| Major Commitment (retreat) | 1-6: commit to retreat | Reckless on knowledge — very reluctant to leave something unstudied |
+| Major Commitment (go deeper) | 1-14: commit to go deeper | Reckless on knowledge — will push into danger for understanding |
+
 ## Notes
 
 **Pikku the Owl**: Vieno's familiar is a snowy owl she's maintained through Find Familiar for two years. Pikku is her scout, her companion, and her emotional barometer — when Vieno is stressed, she sends Pikku to circle above, seeing through the owl's eyes to gain perspective (literally and figuratively). In the Nalkamaa, Pikku is invaluable for scouting terrain, spotting threats, and finding landmarks.
 
 **The Mtskhuri Obsession**: This is Vieno's life's work arriving at her doorstep. She has dreamed of standing inside a Mtskhuri ruin since she was fourteen. The academic in her wants to document everything carefully. The human in her wants to touch everything and see what happens. This tension will define her behavior at Tsikhe-Dzveli.
 
-**Drift Vulnerability**: Vieno's Gnome Cunning gives her advantage on mental saves against magic, which provides some protection against the Chorus. But her insatiable curiosity makes her a willing listener — and the Chorus is very, very interesting. The greatest danger isn't that Vieno will fail a save; it's that she'll choose not to resist because she wants to understand what's talking to her.
+**Drift Vulnerability**: Vieno's Gnome Cunning gives her advantage on mental saves against magic, which provides some protection against the Chorus. But her insatiable curiosity makes her a willing listener — and the Chorus is very, very interesting. See story-arcs/ for GM guidance on this character's arc.
 
 **Development Potential**: The campaign will force Vieno to confront the limits of academic detachment. The Mtskhuri weren't just a subject of study — they were people who made a terrible choice. Understanding them means understanding sacrifice, and Vieno has never had to sacrifice anything more significant than sleep.
