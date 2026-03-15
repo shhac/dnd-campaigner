@@ -161,7 +161,7 @@ describe("clear-interrupt", () => {
     expect(fileExists(config, "player-interrupt.json")).toBe(false);
   });
 
-  it("refuses to clear when id mismatches (newer interrupt)", async () => {
+  it("refuses to clear when id mismatches and returns newer interrupt", async () => {
     const config = tracked(makeConfig());
     writeFile(config, "player.lock");
     writeJsonFile(config, "player-interrupt.json", { message: "first" });
@@ -169,7 +169,11 @@ describe("clear-interrupt", () => {
     const check = await checkInterrupt(config, CAMPAIGN);
 
     // A new interrupt arrives before clear
-    writeJsonFile(config, "player-interrupt.json", { message: "second" });
+    writeJsonFile(config, "player-interrupt.json", {
+      message: "second — urgent!",
+      character: "eamon-lightward",
+      mode_change: "human",
+    });
 
     const result = await clearInterrupt(config, CAMPAIGN, check.id!);
 
@@ -178,6 +182,14 @@ describe("clear-interrupt", () => {
     // Files should still exist
     expect(fileExists(config, "player.lock")).toBe(true);
     expect(fileExists(config, "player-interrupt.json")).toBe(true);
+    // Should include the newer interrupt content
+    expect(result.new_interrupt).toBeDefined();
+    expect(result.new_interrupt!.interrupted).toBe(true);
+    expect(result.new_interrupt!.message).toBe("second — urgent!");
+    expect(result.new_interrupt!.character).toBe("eamon-lightward");
+    expect(result.new_interrupt!.mode_change).toBe("human");
+    expect(result.new_interrupt!.id).toBeTypeOf("string");
+    expect(result.new_interrupt!.id).not.toBe(check.id);
   });
 
   it("handles already-deleted files gracefully", async () => {

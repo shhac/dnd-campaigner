@@ -201,6 +201,8 @@ export async function checkInterrupt(
 export interface ClearInterruptResult {
   cleared: boolean;
   reason?: string;
+  /** On id_mismatch, includes the newer interrupt so the caller doesn't need another round trip */
+  new_interrupt?: CheckInterruptResult;
 }
 
 export async function clearInterrupt(
@@ -224,7 +226,19 @@ export async function clearInterrupt(
 
   const currentId = createHash("sha1").update(raw).digest("hex").slice(0, 12);
   if (currentId !== id) {
-    return { cleared: false, reason: "id_mismatch_newer_interrupt" };
+    let newData: Record<string, unknown> = {};
+    try { newData = JSON.parse(raw) as Record<string, unknown>; } catch {}
+    return {
+      cleared: false,
+      reason: "id_mismatch_newer_interrupt",
+      new_interrupt: {
+        interrupted: true,
+        id: currentId,
+        message: (newData.message as string) || null,
+        character: (newData.character as string) || null,
+        mode_change: (newData.mode_change as string) || null,
+      },
+    };
   }
 
   // Parse for mode change processing
