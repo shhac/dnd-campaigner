@@ -685,7 +685,8 @@ function showPromptBar(character, data) {
 
   document.documentElement.style.setProperty("--player-bar-height", "140px");
 
-  const deadline = data.timestamp + (data.timeout_seconds || 180) * 1000;
+  // deadline is epoch ms from CLI; show 15s less so UI expires before the CLI does
+  const deadline = (data.deadline || Date.now() + 180000) - 15000;
   updateCountdown(deadline, countdown);
   if (countdownInterval) clearInterval(countdownInterval);
   countdownInterval = setInterval(() => updateCountdown(deadline, countdown), 1000);

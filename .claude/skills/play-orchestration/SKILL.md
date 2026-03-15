@@ -5,7 +5,7 @@ description: Core orchestration loop for Teams-based D&D play sessions. Use when
 
 # Play Orchestration Skill
 
-Core orchestration logic for running D&D sessions using Claude Code Teams. The team lead is a **lightweight delegate** — it creates the team, spawns all teammates (GM, Narrator, and player characters), displays narrative to the human, and manages session lifecycle. Human input for player characters is handled by the player agent via the `ask_player` MCP tool. The GM and players communicate directly; the team lead does NOT relay messages between them.
+Core orchestration logic for running D&D sessions using Claude Code Teams. The team lead is a **lightweight delegate** — it creates the team, spawns all teammates (GM, Narrator, and player characters), displays narrative to the human, and manages session lifecycle. Human input for player characters is handled by the player agent via the `ask_player` CLI (Bash tool). The GM and players communicate directly; the team lead does NOT relay messages between them.
 
 ## When This Skill Activates
 
@@ -48,7 +48,7 @@ Loop until [SESSION_END]
 
 1. **Display first**: Always display `[NARRATIVE]` to the human immediately upon receipt
 2. **Then act**: Process `[ASK_PLAYER]` and other actionable messages
-3. **No relay needed for player I/O**: The GM and players communicate directly. Human input is handled by the player agent via `ask_player`.
+3. **No relay needed for player I/O**: The GM and players communicate directly. Human input is handled by the player agent via the `ask_player` CLI.
 
 ## Detailed Procedures
 

@@ -36,6 +36,9 @@ __pycache__/
 # Playwright MCP
 .playwright-mcp/
 
+# Node
+node_modules/
+
 # Intermediate Files
 campaigns/*/novel/**/*.m4a
 campaigns/*/novel/**/*.mp3

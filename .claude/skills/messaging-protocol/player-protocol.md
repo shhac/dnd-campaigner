@@ -2,7 +2,7 @@
 
 Messages player teammates send and receive. Applies to all player teammates (AI-controlled and human-controlled). For conventions and quick reference, see `SKILL.md`.
 
-**Human input**: Human-controlled characters use the `ask_player` MCP tool to get human input. This is handled internally by the player agent — no protocol messages are needed for human relay.
+**Human input**: Human-controlled characters use the `ask_player` CLI (via Bash tool) to get human input. This is handled internally by the player agent — no protocol messages are needed for human relay.
 
 ## Messages Players Send
 

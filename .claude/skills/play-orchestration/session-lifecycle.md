@@ -111,7 +111,7 @@ Task:
 
 #### 7. Spawn All Player Teammates
 
-Spawn all player teammates in parallel. The human's character and AI characters both use the `player-teammate` agent type. The human's character is distinguished by `Control: HUMAN` (it uses the `ask_player` MCP tool to get human input).
+Spawn all player teammates in parallel. The human's character and AI characters both use the `player-teammate` agent type. The human's character is distinguished by `Control: HUMAN` (it uses the `ask_player` CLI via Bash to get human input).
 
 ```
 Task:
@@ -124,7 +124,7 @@ Task:
     Control: HUMAN
 
     You are {player_character} in the "{campaign}" campaign.
-    The human player controls you. Use the ask_player MCP tool
+    The human player controls you. Use the ask_player CLI (via Bash tool)
     to get human input when the GM prompts you, then translate
     the human's decisions into in-character actions.
 

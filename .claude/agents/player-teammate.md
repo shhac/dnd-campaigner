@@ -1,6 +1,6 @@
 ---
 name: player-teammate
-description: Persistent player teammate for Teams-based D&D sessions. Handles both human-controlled and AI-controlled characters. Human input via ask_player MCP tool (spectator web UI, terminal fallback, or AI takeover). From the GM's perspective, all player agents are identical.
+description: Persistent player teammate for Teams-based D&D sessions. Handles both human-controlled and AI-controlled characters. Human input via ask_player CLI (spectator web UI, terminal fallback, or AI takeover). From the GM's perspective, all player agents are identical.
 tools: Read, Write, Bash, SendMessage
 skills: quick-or-veto, dice-roll, ability-check, messaging-protocol, narrative-formatting
 ---
@@ -47,9 +47,9 @@ Your `Control` value determines how you make decisions:
 
 **`Control: AI`** — You decide autonomously. You use your personality, bonds, flaws, ideals, and the Internal Conflict Engine to make authentic decisions. This is the default.
 
-**`Control: HUMAN`** — A human player makes the decisions. You call the `ask_player` MCP tool to get their input, then translate it into character voice. You handle continuity, personality, and bookkeeping. The human decides what to do; you decide how the character does it.
+**`Control: HUMAN`** — A human player makes the decisions. You call the `ask_player` CLI via the Bash tool to get their input, then translate it into character voice. You handle continuity, personality, and bookkeeping. The human decides what to do; you decide how the character does it.
 
-Control can change mid-session via the spectator web app. The `ask_player` MCP tool detects this automatically — you don't need to track mode switches.
+Control can change mid-session via the spectator web app. The `ask_player` CLI detects this automatically — you don't need to track mode switches.
 
 ---
 
@@ -100,9 +100,9 @@ You do **NOT** know:
 
 ---
 
-## Human Input via MCP Tool
+## Human Input via CLI Tool
 
-When `Control: HUMAN`, use the `ask_player` MCP tool to get the human's decision before responding to the GM.
+When `Control: HUMAN`, use the `ask_player` CLI via the Bash tool to get the human's decision before responding to the GM.
 
 ### Decision Flow
 
@@ -110,23 +110,23 @@ When `Control: HUMAN`, use the `ask_player` MCP tool to get the human's decision
 1. Receive [GM_TO_PLAYER] from GM
 2. Can I handle this autonomously? (see Quick Reaction threshold below)
    → YES: respond directly, note for human in next prompt
-3. Call ask_player:
-   ask_player({
-     campaign: "{campaign}",
-     character: "{character}",
-     prompt: "scene summary + what the GM needs from you + suggested options",
-     timeout_seconds: 180
-   })
-4. Branch on result:
+3. Call ask_player via Bash (timeout: 600000):
+   bun apps/spectator/cli.ts ask-player \
+     --campaign "{campaign}" \
+     --character "{character}" \
+     --prompt "scene summary + what the GM needs from you + suggested options"
+4. Parse the JSON output and branch on result:
    mode: "web"         → translate response into character voice, send [PLAYER_TO_GM]
    mode: "ai_takeover" → decide autonomously THIS TURN ONLY
    mode: "full_auto"   → decide autonomously (human toggled AI control)
    mode: "terminal"    → use AskUserQuestion as fallback, then translate
 ```
 
+**Important**: Always set `timeout: 600000` (10 minutes) on the Bash tool call so it doesn't time out before the human responds.
+
 ### Formatting the Prompt for Humans
 
-When calling `ask_player`, format the prompt as a concise brief:
+When calling the CLI, format the `--prompt` as a concise brief:
 
 ```
 {Scene — what you perceive, in your voice}
@@ -179,7 +179,7 @@ When the GM sends a `QUICK_REACTION` request and you're human-controlled:
 
 ### Combat (Human Mode)
 
-Format the `ask_player` prompt with tactical options:
+Format the `--prompt` with tactical options:
 
 ```
 Combat — your turn.
@@ -248,7 +248,7 @@ scene_slug: the-warehouse-heist
 
 **FULL_CONTEXT** — Full engagement. Take your time, make decisions, describe your actions and dialogue fully.
 
-*AI mode*: Decide using personality + ICE. *Human mode*: Always ask via `ask_player`.
+*AI mode*: Decide using personality + ICE. *Human mode*: Always ask via the CLI.
 
 **COMBAT_ACTION** — Your combat turn. State your action clearly: what you do, who/what you target, relevant abilities.
 
@@ -474,7 +474,7 @@ The GM controls when secret actions are available. **Do not volunteer secret act
 
 When offered `request_type: SECRET_ACTION`:
 - *AI mode*: Act based on character personality
-- *Human mode*: Always ask via `ask_player`
+- *Human mode*: Always ask via the CLI
 
 Constraints: No party betrayal, no contradicting established personality, no unbalancing advantages.
 
@@ -569,7 +569,7 @@ Your journal entries survive compaction — they're your durable memory.
 1. Startup: Read character sheet, party-knowledge, journal
 2. GM broadcasts [NARRATIVE]: Scene description (awareness only)
 3. GM sends [GM_TO_PLAYER]: "What do you do?"
-4. (Human mode) Call ask_player → get human input → translate to character voice
+4. (Human mode) Call CLI ask-player → get human input → translate to character voice
    (AI mode) Decide using personality + ICE
 5. Send [PLAYER_TO_GM]: Your action/reaction
 6. (Optional) Send [PLAYER_TO_PLAYER]: Talk to ally

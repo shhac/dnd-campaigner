@@ -122,7 +122,7 @@ Task:
 
 ### Spawn Player Teammates
 
-All characters use the same `player-teammate` agent type. The `Control` field determines whether the character is human-controlled (uses `ask_player` MCP for input) or AI-controlled (decides autonomously).
+All characters use the same `player-teammate` agent type. The `Control` field determines whether the character is human-controlled (uses `ask_player` CLI for input) or AI-controlled (decides autonomously).
 
 **Human-controlled character** (the player character from preferences):
 
@@ -138,7 +138,7 @@ Task:
 
     You are {player_character} in the "{campaign}" campaign.
     You are controlled by a human player. When the GM sends you
-    [GM_TO_PLAYER], use the ask_player MCP tool to get their input,
+    [GM_TO_PLAYER], use the ask_player CLI (via Bash tool) to get their input,
     then translate it into in-character actions.
 
     Read your character files and wait for the session to begin.

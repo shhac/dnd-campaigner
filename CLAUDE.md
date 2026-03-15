@@ -69,11 +69,11 @@ Set these up later when you reach the `/audiobook` command. See [QUICKSTART.md](
 
 apps/spectator/         # Spectator web app (session viewer + player input)
 ├── server.ts           # Bun HTTP + WebSocket server
-├── mcp.ts              # MCP server (ask_player, check_interrupt tools)
+├── cli.ts              # CLI tool (ask-player, check-interrupt commands)
 ├── lib/                # Server libraries (parser, watcher, discovery)
 ├── public/             # Browser frontend (vanilla HTML/CSS/JS)
 ├── docs/               # Architecture documentation
-└── test/               # MCP timeout test server
+└── test/               # CLI timeout test server
 
 templates/              # Markdown templates for campaign content
 campaigns/{campaign}/   # Individual campaign data
@@ -154,7 +154,7 @@ Creates PCs or NPCs with full sheets. **Time estimate:** 10-15 minutes per chara
 ```
 /play {campaign-name}
 ```
-Starts a session using Claude Code Teams. All participants are persistent teammates: GM, Narrator, and every player character. All player characters use the same unified agent -- human-controlled characters use the `ask_player` MCP tool for input, AI characters decide autonomously. Any character can be toggled between human and AI control mid-session, enabling multiplayer. The team lead is a lightweight delegate handling session lifecycle.
+Starts a session using Claude Code Teams. All participants are persistent teammates: GM, Narrator, and every player character. All player characters use the same unified agent -- human-controlled characters use the `ask_player` CLI (via Bash tool) for input, AI characters decide autonomously. Any character can be toggled between human and AI control mid-session, enabling multiplayer. The team lead is a lightweight delegate handling session lifecycle.
 
 **Time estimate:** 30-90 minutes per session (3-5 major scenes).
 
@@ -176,7 +176,7 @@ The spectator app is optional -- sessions work fine without it (input falls back
 
 ### What Happens During a Play Session
 
-A session follows a repeating loop. The GM broadcasts a narrative scene describing the environment, NPCs, and events. The GM then sends direct prompts to each player character asking what they want to do. AI party members respond autonomously based on their personality, bonds, and flaws. Human-controlled characters use the `ask_player` MCP tool, which routes input through the spectator web UI (if running) or the Claude Code terminal.
+A session follows a repeating loop. The GM broadcasts a narrative scene describing the environment, NPCs, and events. The GM then sends direct prompts to each player character asking what they want to do. AI party members respond autonomously based on their personality, bonds, and flaws. Human-controlled characters use the `ask_player` CLI (via Bash tool), which routes input through the spectator web UI (if running) or falls back to the Claude Code terminal.
 
 All responses flow back to the GM, who weaves them into the next narrative beat -- describing consequences, advancing the story, and introducing complications. Dice rolls happen when outcomes are uncertain: ability checks, saves, attack rolls. The GM requests specific rolls and the `toss` CLI executes them.
 

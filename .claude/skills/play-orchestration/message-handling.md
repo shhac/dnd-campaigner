@@ -33,7 +33,7 @@ When the GM broadcasts a `[NARRATIVE]` message:
 2. **Display the FULL narrative to the human** — show everything, summarize nothing
 3. Use proper formatting (see Formatting Guidelines below)
 
-**Note**: The team lead does NOT collect human input after narrative. The GM sends `[GM_TO_PLAYER]` directly to the human's player teammate, which handles getting human input via the `ask_player` MCP tool.
+**Note**: The team lead does NOT collect human input after narrative. The GM sends `[GM_TO_PLAYER]` directly to the human's player teammate, which handles getting human input via the `ask_player` CLI (Bash tool).
 
 ### Formatting Guidelines
 

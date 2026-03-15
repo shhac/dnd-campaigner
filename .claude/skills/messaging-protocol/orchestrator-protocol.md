@@ -1,6 +1,6 @@
 # Team Lead (Orchestrator) Protocol Reference
 
-Messages the team lead handles. The team lead manages session lifecycle, displays narrative to the human, and handles NPC spawning. It does NOT relay GM-player messages — they communicate directly. Human input for player characters is handled by the player agent via the `ask_player` MCP tool. For conventions and quick reference, see `SKILL.md`.
+Messages the team lead handles. The team lead manages session lifecycle, displays narrative to the human, and handles NPC spawning. It does NOT relay GM-player messages — they communicate directly. Human input for player characters is handled by the player agent via the `ask_player` CLI (Bash tool). For conventions and quick reference, see `SKILL.md`.
 
 ## Messages Received from GM
 

@@ -66,7 +66,7 @@ Canonical reference for all structured message types used in Teams-based D&D ses
 ```
 1. GM broadcasts [NARRATIVE]          → All teammates receive (awareness only)
 2. GM sends [GM_TO_PLAYER] to each    → Character-specific prompts
-3. Human's teammate uses ask_player   → Gets human input directly via MCP tool
+3. Human's teammate uses ask_player   → Gets human input directly via CLI (Bash tool)
 4. All players send [PLAYER_TO_GM]    → Direct to GM
 5. GM broadcasts [NARRATIVE]          → Outcome with woven player actions
 6. GM updates story-state.md and party-knowledge.md directly

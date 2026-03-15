@@ -38,7 +38,7 @@ Technical internals of the D&D Campaigner system. For getting started, see [QUIC
 
 **The loop:** GM broadcasts narrative -> GM prompts each player -> players respond -> GM weaves responses into next beat -> repeat.
 
-**Human I/O:** Human-controlled characters use the `ask_player` MCP tool directly. The MCP server routes input through the spectator web UI (if running) or falls back to terminal input. No relay through the team lead.
+**Human I/O:** Human-controlled characters use the `ask_player` CLI (via Bash tool) directly. It routes input through the spectator web UI (if running) or falls back to terminal input. No relay through the team lead.
 
 ## Teams Architecture
 
@@ -49,12 +49,12 @@ The `/play` command uses Claude Code Teams to run D&D sessions with persistent t
 A team named `dnd-{campaign}` is created with:
 - **GM teammate** (`gm` agent): Persistent for the entire session. Reads campaign files once, communicates via `SendMessage`. Broadcasts `[NARRATIVE]` to all teammates, sends `[GM_TO_PLAYER]` directly to each player teammate, sends `[SESSION_END]` to the team lead. Updates `story-state.md` and `party-knowledge.md` directly after each scene.
 - **Narrator teammate** (`narrator` agent): Observes GM broadcasts and peer DM activity. Writes scene files to `scenes/` in real-time. Output is secret-free.
-- **Player teammates** (`player-teammate` agent): Persistent for the entire session. All characters — AI and human-controlled — use the same agent type. AI players decide autonomously. Human-controlled characters use the `ask_player` MCP tool to get input via the spectator web UI (or terminal fallback). From the GM's perspective, all players are identical. Any character can be toggled between human and AI control mid-session, enabling multiplayer. All players communicate directly with the GM via `[PLAYER_TO_GM]` and message each other via `[PLAYER_TO_PLAYER]`. Each player self-journals at beat boundaries.
-- **Team lead** (main conversation): Lightweight delegate orchestrator. Creates the team, spawns all teammates, manages session lifecycle. Does NOT relay messages between GM and players — they communicate directly. Human input is handled by the player agent itself via MCP.
+- **Player teammates** (`player-teammate` agent): Persistent for the entire session. All characters — AI and human-controlled — use the same agent type. AI players decide autonomously. Human-controlled characters use the `ask_player` CLI (via Bash tool) to get input via the spectator web UI (or terminal fallback). From the GM's perspective, all players are identical. Any character can be toggled between human and AI control mid-session, enabling multiplayer. All players communicate directly with the GM via `[PLAYER_TO_GM]` and message each other via `[PLAYER_TO_PLAYER]`. Each player self-journals at beat boundaries.
+- **Team lead** (main conversation): Lightweight delegate orchestrator. Creates the team, spawns all teammates, manages session lifecycle. Does NOT relay messages between GM and players — they communicate directly. Human input is handled by the player agent itself via the CLI.
 
-### Human Control via MCP
+### Human Control via CLI
 
-Human-controlled characters are spawned with `Control: HUMAN` in their prompt. When they receive `[GM_TO_PLAYER]`, they call the `ask_player` MCP tool which auto-detects the best input channel:
+Human-controlled characters are spawned with `Control: HUMAN` in their prompt. When they receive `[GM_TO_PLAYER]`, they call the `ask_player` CLI (via Bash tool) which auto-detects the best input channel:
 - **Spectator web UI**: If the spectator app is running, the prompt appears in the browser with a countdown timer. The human responds there.
 - **Terminal fallback**: If no spectator, falls back to `AskUserQuestion` in the Claude Code terminal.
 - **AI takeover**: If the countdown expires, the character acts autonomously for that turn.
