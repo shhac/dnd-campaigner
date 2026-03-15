@@ -4,13 +4,23 @@
  */
 
 import { homedir } from "os";
-import { join, resolve } from "path";
-import { readdirSync, statSync } from "fs";
+import { join } from "path";
+import { readdirSync, statSync, readFileSync } from "fs";
 
 export interface SessionInfo {
   sessionId: string;
   jsonlPath: string;
   modifiedAt: Date;
+  sizeBytes: number;
+}
+
+export interface SessionSummary extends SessionInfo {
+  campaign?: string;
+  hasTeam: boolean;
+  isOrchestrator: boolean;
+  eventCount: number;
+  agents: string[];
+  firstTimestamp?: string;
 }
 
 /**
@@ -44,6 +54,7 @@ export function listSessions(cwd: string): SessionInfo[] {
           sessionId: f.replace(".jsonl", ""),
           jsonlPath: fullPath,
           modifiedAt: stat.mtime,
+          sizeBytes: stat.size,
         };
       })
       .sort((a, b) => b.modifiedAt.getTime() - a.modifiedAt.getTime());
@@ -53,15 +64,105 @@ export function listSessions(cwd: string): SessionInfo[] {
 }
 
 /**
- * Find the most recent session, optionally filtering by campaign name.
+ * Find a specific session by ID.
  */
-export function findActiveSession(
+export function findSession(
   cwd: string,
-  sessionId?: string
+  sessionId: string
 ): SessionInfo | null {
   const sessions = listSessions(cwd);
-  if (sessionId) {
-    return sessions.find((s) => s.sessionId === sessionId) ?? null;
+  return sessions.find((s) => s.sessionId === sessionId) ?? null;
+}
+
+/**
+ * Quick-scan a JSONL file for metadata: campaign name, team presence,
+ * agent names, orchestrator detection. Reads only the first ~200 lines.
+ *
+ * Orchestrator detection: The team lead's JSONL has teammate-messages
+ * from 3+ different agent IDs (GM, narrator, players). Subagent JSONLs
+ * only receive messages from "team-lead".
+ */
+export function scanSessionMeta(session: SessionInfo): SessionSummary {
+  const summary: SessionSummary = {
+    ...session,
+    hasTeam: false,
+    isOrchestrator: false,
+    eventCount: 0,
+    agents: [],
+  };
+
+  try {
+    const content = readFileSync(session.jsonlPath, "utf-8");
+    const lines = content.split("\n").filter((l) => l.trim());
+    summary.eventCount = lines.length;
+
+    const agentSet = new Set<string>();
+    let hasSendMessage = false;
+
+    for (let i = 0; i < Math.min(lines.length, 200); i++) {
+      try {
+        const record = JSON.parse(lines[i]);
+
+        if (!summary.firstTimestamp && record.timestamp) {
+          summary.firstTimestamp = record.timestamp;
+        }
+
+        const msgContent = record.message?.content;
+
+        // Check for SendMessage tool_use (outgoing messages — team lead does this)
+        if (record.type === "assistant" && Array.isArray(msgContent)) {
+          for (const block of msgContent) {
+            if (block.type === "tool_use" && block.name === "SendMessage") {
+              hasSendMessage = true;
+            }
+          }
+        }
+
+        if (typeof msgContent !== "string") continue;
+
+        // Detect team usage and extract agent IDs
+        if (msgContent.includes("<teammate-message")) {
+          summary.hasTeam = true;
+          const idMatches = msgContent.matchAll(/teammate_id="([^"]+)"/g);
+          for (const m of idMatches) {
+            if (m[1] !== "team-lead") agentSet.add(m[1]);
+          }
+        }
+
+        // Detect campaign name
+        if (!summary.campaign) {
+          const campMatch = msgContent.match(
+            /campaign:\s*([a-z][a-z0-9-]+)/i
+          );
+          if (campMatch) summary.campaign = campMatch[1];
+        }
+      } catch {
+        // Skip malformed lines
+      }
+    }
+
+    summary.agents = [...agentSet];
+
+    // Orchestrator = has team + receives messages from 3+ agents + sends messages
+    // Subagent = has team but only receives from team-lead
+    summary.isOrchestrator =
+      summary.hasTeam && summary.agents.length >= 3 && hasSendMessage;
+  } catch {
+    // File read error
   }
-  return sessions[0] ?? null;
+
+  return summary;
+}
+
+/**
+ * List all sessions with metadata summaries.
+ * Filters to show only orchestrator sessions for team sessions,
+ * and solo sessions. Subagent transcripts are hidden.
+ */
+export function listSessionSummaries(cwd: string): SessionSummary[] {
+  const sessions = listSessions(cwd);
+  const summaries = sessions.map(scanSessionMeta);
+
+  // Filter: show orchestrators + non-team sessions, hide subagent transcripts
+  return summaries.filter((s) => !s.hasTeam || s.isOrchestrator);
 }

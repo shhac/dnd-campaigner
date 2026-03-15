@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spectator Mode — Choose Session</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f14;
+      --bg-surface: #16161e;
+      --bg-card: #1c1c27;
+      --bg-hover: #22222e;
+      --border: #2a2a3a;
+      --text: #d4d4e0;
+      --text-dim: #8888a0;
+      --text-bright: #eeeef5;
+      --accent: #c4a04a;
+      --color-gm: #b388ff;
+      --color-green: #66bb6a;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Berkeley Mono', 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 13px;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+
+    h1 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-bright);
+      margin-bottom: 4px;
+    }
+    h1 .icon { color: var(--accent); margin-right: 8px; }
+
+    .subtitle {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-bottom: 32px;
+    }
+
+    .session-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .session-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 14px 18px;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    .session-card:hover {
+      border-color: var(--accent);
+      background: var(--bg-hover);
+    }
+
+    .session-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .session-campaign {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-bright);
+    }
+    .session-campaign .no-campaign {
+      color: var(--text-dim);
+      font-style: italic;
+      font-weight: 400;
+    }
+
+    .session-date {
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    .session-meta {
+      display: flex;
+      gap: 16px;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    .session-meta .badge {
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+    }
+    .badge.team { background: #1a2a1a; color: var(--color-green); }
+    .badge.solo { background: #2a2a30; color: #888; }
+
+    .session-agents {
+      margin-top: 6px;
+      font-size: 10px;
+      color: #555;
+    }
+    .session-agents span {
+      margin-right: 8px;
+    }
+
+    .session-id {
+      font-size: 9px;
+      color: #333;
+      margin-top: 4px;
+      font-family: inherit;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-dim);
+    }
+
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-dim);
+    }
+
+    .tip {
+      margin-top: 32px;
+      padding: 12px 16px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 11px;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+    .tip code {
+      background: var(--bg-card);
+      padding: 1px 5px;
+      border-radius: 2px;
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1><span class="icon">◆</span>Spectator Mode</h1>
+    <p class="subtitle">Choose a session to watch</p>
+
+    <div id="sessions" class="loading">Loading sessions...</div>
+
+    <div class="tip">
+      <strong>Tip:</strong> Start a D&D session with <code>/play campaign-name</code> in another terminal,
+      then come back here and click it to watch. Sessions with
+      <span class="badge team" style="display:inline">team</span> are multiplayer sessions — those are the interesting ones.
+      <br><br>
+      Or skip the picker: <code>bun apps/spectator/server.ts --session &lt;id&gt;</code>
+    </div>
+  </div>
+
+  <script>
+    async function loadSessions() {
+      const container = document.getElementById("sessions");
+      try {
+        const resp = await fetch("/api/sessions");
+        const sessions = await resp.json();
+
+        if (sessions.length === 0) {
+          container.innerHTML = '<div class="empty">No sessions found.<br>Run a D&D session first.</div>';
+          return;
+        }
+
+        container.className = "session-list";
+        container.innerHTML = sessions.map(s => {
+          const date = new Date(s.modifiedAt);
+          const dateStr = date.toLocaleDateString("en-US", {
+            month: "short", day: "numeric", year: "numeric"
+          });
+          const timeStr = date.toLocaleTimeString("en-US", {
+            hour: "2-digit", minute: "2-digit", hour12: false
+          });
+          const sizeKB = Math.round(s.sizeBytes / 1024);
+
+          const campaignLabel = s.campaign
+            ? s.campaign.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")
+            : '<span class="no-campaign">Unknown campaign</span>';
+
+          const teamBadge = s.hasTeam
+            ? '<span class="badge team">team</span>'
+            : '<span class="badge solo">solo</span>';
+
+          const agentNames = s.agents
+            .filter(a => a !== "gm" && a !== "narrator")
+            .map(a => a.split("-")[0])
+            .map(a => a.charAt(0).toUpperCase() + a.slice(1));
+
+          const agentsHtml = s.agents.length > 0
+            ? '<div class="session-agents">' + s.agents.map(a =>
+                '<span>' + a + '</span>'
+              ).join("") + '</div>'
+            : '';
+
+          return '<a class="session-card" href="/?session=' + s.sessionId + '">' +
+            '<div class="session-header">' +
+              '<span class="session-campaign">' + campaignLabel + '</span>' +
+              '<span class="session-date">' + dateStr + ' ' + timeStr + '</span>' +
+            '</div>' +
+            '<div class="session-meta">' +
+              teamBadge +
+              '<span>' + s.eventCount + ' lines</span>' +
+              '<span>' + sizeKB + ' KB</span>' +
+            '</div>' +
+            agentsHtml +
+            '<div class="session-id">' + s.sessionId + '</div>' +
+          '</a>';
+        }).join("");
+
+      } catch (err) {
+        container.innerHTML = '<div class="empty">Error loading sessions: ' + err.message + '</div>';
+      }
+    }
+
+    loadSessions();
+  </script>
+</body>
+</html>
