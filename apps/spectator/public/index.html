@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spectator Mode</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header id="header">
+    <div class="header-left">
+      <span class="header-icon">◆</span>
+      <h1 id="campaign-title">Spectator Mode</h1>
+    </div>
+    <div class="header-center" id="filter-toggles"></div>
+    <div class="header-right">
+      <span id="session-status" class="status-badge starting">Starting</span>
+      <span id="event-count" class="event-count">0 events</span>
+      <button id="scroll-lock" class="btn-icon" title="Auto-scroll">⬇</button>
+    </div>
+  </header>
+
+  <main>
+    <aside id="party-panel">
+      <h2>Party</h2>
+      <div id="agent-cards"></div>
+    </aside>
+
+    <section id="play-script">
+      <div id="events-container"></div>
+    </section>
+
+    <aside id="flow-panel">
+      <h2>Message Flow</h2>
+      <div id="flow-log"></div>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

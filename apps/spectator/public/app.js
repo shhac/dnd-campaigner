@@ -1,0 +1,615 @@
+/**
+ * Spectator Mode — frontend client
+ * Connects via WebSocket, renders play-script view of D&D session.
+ */
+
+// State
+let state = {
+  sessionId: null,
+  campaign: null,
+  agents: {},
+  events: [],
+  status: "starting",
+};
+
+let autoScroll = true;
+let eventCount = 0;
+
+// Filter state — which event types are visible
+const filters = {
+  narrative: true,
+  gm_to_player: true,
+  player_to_gm: true,
+  player_to_player: true,
+  activity: false,
+  idle: false,
+  session: true,
+};
+
+// Agent color mapping
+const AGENT_COLORS = {
+  gm: "var(--color-gm)",
+  narrator: "var(--color-narrator)",
+  "team-lead": "var(--color-lead)",
+};
+
+function getAgentColor(id, color) {
+  if (AGENT_COLORS[id]) return AGENT_COLORS[id];
+  if (color) return `var(--color-${color})`;
+  const colors = ["yellow", "purple", "orange", "pink", "blue", "green", "cyan", "red"];
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) | 0;
+  return `var(--color-${colors[Math.abs(hash) % colors.length]})`;
+}
+
+function getAgentShortName(id) {
+  if (id === "gm") return "GM";
+  if (id === "narrator") return "Narrator";
+  if (id === "team-lead") return "Lead";
+  if (id === "*") return "All";
+  const parts = id.split("-");
+  return parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+}
+
+function getAgentFullName(id) {
+  const agent = state.agents[id];
+  if (agent?.character?.name) return agent.character.name;
+  if (agent?.name) return agent.name;
+  if (id === "gm") return "Game Master";
+  if (id === "*") return "All";
+  return id.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+}
+
+function formatTimestamp(ts) {
+  try {
+    return new Date(ts).toLocaleTimeString("en-US", {
+      hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
+    });
+  } catch { return ""; }
+}
+
+// === GM Prompt Extraction ===
+
+/**
+ * Extract the interesting parts of a GM→Player message:
+ * - ## Request (what the GM is asking the character to do)
+ * - ## Dice (what rolls are needed)
+ * Skips ## Scene and ## Just Happened (redundant with narrative).
+ */
+function extractGmPromptSummary(content) {
+  const sections = {};
+  let currentSection = null;
+  let currentLines = [];
+
+  for (const line of content.split("\n")) {
+    const heading = line.match(/^##\s+(.+)/);
+    if (heading) {
+      if (currentSection) sections[currentSection] = currentLines.join("\n").trim();
+      currentSection = heading[1].trim();
+      currentLines = [];
+    } else {
+      currentLines.push(line);
+    }
+  }
+  if (currentSection) sections[currentSection] = currentLines.join("\n").trim();
+
+  // The interesting bits — request + dice
+  const request = sections["Request"] || sections["Question"] || null;
+  const dice = sections["Dice"] || null;
+
+  // Scene is redundant with narrative — only show in expanded view
+  const hasScene = "Scene" in sections || "Just Happened" in sections;
+
+  return { request, dice, hasScene, sections };
+}
+
+// === Rendering ===
+
+function renderAgentCards() {
+  const container = document.getElementById("agent-cards");
+  const agents = Object.values(state.agents);
+
+  const order = { gm: 0, narrator: 1, lead: 2 };
+  agents.sort(
+    (a, b) => (order[a.role] ?? 3) - (order[b.role] ?? 3) || a.id.localeCompare(b.id)
+  );
+
+  container.innerHTML = agents
+    .filter((a) => a.role !== "lead")
+    .map((agent) => {
+      const color = getAgentColor(agent.id, agent.color);
+      const char = agent.character;
+      return `
+      <div class="agent-card" style="border-left: 3px solid ${color}">
+        <div class="agent-name" style="color: ${color}">${getAgentFullName(agent.id)}</div>
+        ${char
+          ? `<div class="agent-info">${char.race} ${char.class_} ${char.level}</div>
+             <div class="hp-bar-container">
+               <div class="hp-bar" style="width: ${(char.hp.current / char.hp.max) * 100}%"></div>
+             </div>
+             <div class="agent-info">${char.hp.current}/${char.hp.max} HP · AC ${char.ac}</div>`
+          : agent.role === "gm"
+            ? `<div class="agent-info">Game Master</div>`
+            : agent.role === "narrator"
+              ? `<div class="agent-info">Narrator</div>`
+              : ""
+        }
+        <div class="agent-status">
+          <span class="status-dot ${agent.status}"></span>
+          <span>${agent.status}</span>
+        </div>
+        ${agent.lastActivity ? `<div class="agent-activity" title="${escapeHtml(agent.lastActivity)}">${escapeHtml(agent.lastActivity)}</div>` : ""}
+      </div>`;
+    })
+    .join("");
+}
+
+function shouldShow(event) {
+  switch (event.type) {
+    case "narrative": return filters.narrative;
+    case "gm_to_player": return filters.gm_to_player;
+    case "player_to_gm": return filters.player_to_gm;
+    case "player_to_player":
+    case "player_to_party": return filters.player_to_player;
+    case "activity": return filters.activity;
+    case "idle": return filters.idle && !!event.summary;
+    case "session_command":
+    case "session_end": return filters.session;
+    case "system":
+    case "command_ack":
+    case "terminated": return false;
+    case "ask_player":
+    case "narrator_note": return filters.gm_to_player;
+    default: return false;
+  }
+}
+
+function renderEvent(event) {
+  if (!shouldShow(event)) return null;
+  // Skip team-lead internal chatter
+  if (event.from === "team-lead" && !["narrative", "session_command", "gm_to_player"].includes(event.type)) return null;
+
+  const el = document.createElement("div");
+  el.className = `event ${event.type}`;
+  el.dataset.eventId = event.id;
+
+  const color = getAgentColor(event.from, event.color);
+
+  switch (event.type) {
+    case "narrative":
+      el.innerHTML = renderNarrative(event);
+      break;
+    case "gm_to_player":
+      el.innerHTML = renderGmPrompt(event);
+      break;
+    case "player_to_gm":
+      el.innerHTML = renderPlayerAction(event, color);
+      break;
+    case "player_to_player":
+    case "player_to_party":
+      el.innerHTML = renderPlayerAction(event, color);
+      break;
+    case "activity":
+      el.innerHTML = renderActivity(event, color);
+      break;
+    case "session_command":
+      el.innerHTML = renderSessionCommand(event);
+      break;
+    case "session_end":
+      el.innerHTML = renderSessionEnd(event);
+      break;
+    case "idle":
+      el.innerHTML = `<span style="color: #555">⟳ ${getAgentShortName(event.from)}: ${escapeHtml(event.summary)}</span>`;
+      break;
+    default:
+      return null;
+  }
+
+  return el;
+}
+
+// --- Narrative (always full) ---
+
+function renderNarrative(event) {
+  const content = stripTag(event.content);
+  const activityIdx = content.indexOf("## Party Activity");
+  const narrative = activityIdx > -1 ? content.substring(0, activityIdx) : content;
+  const activity = activityIdx > -1 ? content.substring(activityIdx) : null;
+
+  return `
+    <div class="event-header">
+      <span class="event-from" style="color: var(--color-gm)">⬥ NARRATIVE</span>
+      ${event.parsed.sceneSlug ? `<span class="event-tag">${event.parsed.sceneSlug}</span>` : ""}
+      <span class="event-meta">${formatTimestamp(event.timestamp)}</span>
+    </div>
+    <div class="event-content">${formatNarrativeText(narrative.trim())}</div>
+    ${activity ? `<div class="party-activity">${formatMarkdown(activity)}</div>` : ""}
+  `;
+}
+
+// --- GM → Player (collapsed, shows request + dice only) ---
+
+function renderGmPrompt(event) {
+  const content = stripTag(event.content);
+  const toName = getAgentShortName(event.to);
+  const toColor = getAgentColor(event.to);
+  const reqType = event.parsed.requestType;
+  const { request, dice, hasScene } = extractGmPromptSummary(content);
+
+  // Build the collapsed summary
+  let summaryHtml = "";
+
+  if (request) {
+    summaryHtml += `<div class="gm-prompt-request">${formatInlineMarkdown(request)}</div>`;
+  }
+
+  if (dice) {
+    summaryHtml += `<div class="gm-prompt-dice">${formatInlineMarkdown(dice)}</div>`;
+  }
+
+  // If no request/dice extracted, show a brief excerpt
+  if (!summaryHtml) {
+    const excerpt = content.split("\n").filter(l => l.trim() && !l.startsWith("request_type") && !l.startsWith("scene_number") && !l.startsWith("scene_slug")).slice(0, 3).join("\n");
+    summaryHtml = `<div class="gm-prompt-request">${formatInlineMarkdown(excerpt)}</div>`;
+  }
+
+  const expandId = `expand-${event.id}`;
+
+  return `
+    <div class="event-header">
+      <span class="event-from" style="color: var(--color-gm)">GM</span>
+      <span class="event-arrow">→</span>
+      <span class="event-to" style="color: ${toColor}">${toName}</span>
+      ${reqType ? `<span class="event-tag">${reqType}</span>` : ""}
+      ${hasScene ? `<button class="expand-btn" onclick="toggleExpand('${expandId}')" title="Show full scene briefing">▸ scene</button>` : ""}
+      <span class="event-meta">${formatTimestamp(event.timestamp)}</span>
+    </div>
+    ${summaryHtml}
+    ${hasScene ? `<div id="${expandId}" class="expandable collapsed"><div class="expandable-content">${formatInlineMarkdown(content)}</div></div>` : ""}
+  `;
+}
+
+// --- Player → GM / Player → Player (full content, formatted) ---
+
+function renderPlayerAction(event, fromColor) {
+  const content = stripTag(event.content);
+  const fromName = getAgentShortName(event.from);
+  const toName = event.to === "*" ? "All" : getAgentShortName(event.to);
+  const toColor = event.to === "gm" ? "var(--color-gm)" : getAgentColor(event.to);
+
+  // Strip metadata fields from top (type:, character:, etc)
+  const lines = content.split("\n");
+  let bodyStart = 0;
+  for (let i = 0; i < lines.length && i < 5; i++) {
+    if (/^(type|character|scene_number|scene_slug|request_type)\s*:/.test(lines[i])) {
+      bodyStart = i + 1;
+    } else if (lines[i].trim() === "") {
+      if (bodyStart > 0) { bodyStart = i + 1; break; }
+    } else {
+      break;
+    }
+  }
+  const body = lines.slice(bodyStart).join("\n").trim();
+
+  // Format the body with inline markdown
+  let rendered = formatInlineMarkdown(body);
+
+  // Action type badge
+  const actionType = event.parsed.actionType;
+  const badge = actionType && actionType !== "ACTION"
+    ? `<span class="event-tag">${actionType}</span>`
+    : "";
+
+  return `
+    <div class="event-header">
+      <span class="event-from" style="color: ${fromColor}">${fromName}</span>
+      <span class="event-arrow">→</span>
+      <span class="event-to" style="color: ${toColor}">${toName}</span>
+      ${badge}
+      <span class="event-meta">${formatTimestamp(event.timestamp)}</span>
+    </div>
+    <div class="event-content">${rendered}</div>
+  `;
+}
+
+// --- Activity (compact inline) ---
+
+function renderActivity(event, color) {
+  const doingMatch = event.content.match(/doing:\s*(.+)/);
+  const charMatch = event.content.match(/character:\s*(.+)/);
+  const doing = doingMatch ? doingMatch[1].trim() : stripTag(event.content);
+  const name = charMatch
+    ? getAgentShortName(charMatch[1].trim())
+    : getAgentShortName(event.from);
+
+  return `<span style="color: ${color}">⟐ ${name}</span> <span>${escapeHtml(doing)}</span>`;
+}
+
+// --- Session events ---
+
+function renderSessionCommand(event) {
+  const content = stripTag(event.content);
+  // Show a clean one-liner
+  const cmdMatch = content.match(/command:\s*(\w+)/);
+  const cmd = cmdMatch ? cmdMatch[1] : "unknown";
+  return `<span class="session-marker">▶ SESSION ${cmd.toUpperCase()}</span>`;
+}
+
+function renderSessionEnd(event) {
+  const content = stripTag(event.content);
+  const expandId = `expand-${event.id}`;
+  // Show summary line, expandable for full metrics
+  return `
+    <div class="event-header">
+      <span class="event-from" style="color: var(--color-gm)">◼ SESSION END</span>
+      <button class="expand-btn" onclick="toggleExpand('${expandId}')">▸ metrics</button>
+      <span class="event-meta">${formatTimestamp(event.timestamp)}</span>
+    </div>
+    <div id="${expandId}" class="expandable collapsed">
+      <div class="expandable-content">${formatInlineMarkdown(content)}</div>
+    </div>
+  `;
+}
+
+// === Expand/collapse ===
+
+function toggleExpand(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.toggle("collapsed");
+  // Update button text
+  const btn = el.previousElementSibling?.querySelector?.(".expand-btn")
+    || el.parentElement.querySelector(".expand-btn");
+  if (btn) {
+    const isCollapsed = el.classList.contains("collapsed");
+    btn.textContent = btn.textContent.replace(/^[▸▾]/, isCollapsed ? "▸" : "▾");
+  }
+}
+// Make toggleExpand globally accessible
+window.toggleExpand = toggleExpand;
+
+// === Flow panel ===
+
+function addFlowEntry(event) {
+  if (event.type === "idle" || event.type === "system" || event.type === "command_ack" || event.type === "activity") return;
+
+  const container = document.getElementById("flow-log");
+  const entry = document.createElement("div");
+  entry.className = "flow-entry";
+
+  const fromColor = getAgentColor(event.from, event.color);
+  const toColor = event.to === "*" ? "var(--text-dim)" : getAgentColor(event.to);
+
+  const typeLabel = event.type === "narrative" ? "NARR"
+    : event.type === "gm_to_player" ? (event.parsed.requestType || "GM").substring(0, 6)
+    : event.type === "player_to_gm" ? (event.parsed.actionType || "ACT").substring(0, 6)
+    : event.type === "player_to_player" ? "TALK"
+    : event.type === "session_end" ? "END"
+    : (event.parsed.tag || event.type).substring(0, 8);
+
+  entry.innerHTML = `
+    <span class="flow-from" style="color: ${fromColor}">${getAgentShortName(event.from)}</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-to" style="color: ${toColor}">${event.to === "*" ? "ALL" : getAgentShortName(event.to)}</span>
+    <span class="flow-type">${typeLabel}</span>
+  `;
+
+  container.appendChild(entry);
+  while (container.children.length > 100) container.removeChild(container.firstChild);
+  container.scrollTop = container.scrollHeight;
+}
+
+// === Filter toggles ===
+
+function initFilters() {
+  const container = document.getElementById("filter-toggles");
+  const filterDefs = [
+    { key: "narrative", label: "Narrative", icon: "⬥" },
+    { key: "gm_to_player", label: "GM Prompts", icon: "⬦" },
+    { key: "player_to_gm", label: "Actions", icon: "◆" },
+    { key: "player_to_player", label: "Crosstalk", icon: "◇" },
+    { key: "activity", label: "Activity", icon: "⟐" },
+    { key: "idle", label: "Idle", icon: "⟳" },
+    { key: "session", label: "Session", icon: "▶" },
+  ];
+
+  container.innerHTML = filterDefs.map(({ key, label, icon }) => `
+    <button class="filter-btn ${filters[key] ? "active" : ""}" data-filter="${key}" title="Toggle ${label}">
+      ${icon} ${label}
+    </button>
+  `).join("");
+
+  container.addEventListener("click", (e) => {
+    const btn = e.target.closest(".filter-btn");
+    if (!btn) return;
+    const key = btn.dataset.filter;
+    filters[key] = !filters[key];
+    btn.classList.toggle("active", filters[key]);
+    rerenderEvents();
+  });
+}
+
+function rerenderEvents() {
+  const container = document.getElementById("events-container");
+  container.innerHTML = "";
+  const flowLog = document.getElementById("flow-log");
+  flowLog.innerHTML = "";
+
+  for (const event of state.events) {
+    const el = renderEvent(event);
+    if (el) container.appendChild(el);
+    addFlowEntry(event);
+  }
+
+  if (autoScroll) {
+    const script = document.getElementById("play-script");
+    script.scrollTop = script.scrollHeight;
+  }
+}
+
+// === Utilities ===
+
+function escapeHtml(text) {
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function stripTag(content) {
+  return content.replace(/^\[[A-Z_]+\]\n?/, "");
+}
+
+function formatNarrativeText(text) {
+  return text
+    .split(/\n\n+/)
+    .map((para) => {
+      let html = escapeHtml(para.trim());
+      html = html.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+      html = html.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+      html = html.replace(
+        /(\d+d\d+(?:[+-]\d+)?\s*=\s*\[\d+\][^\n]*)/g,
+        '<span class="dice-roll">🎲 $1</span>'
+      );
+      return `<p>${html}</p>`;
+    })
+    .join("");
+}
+
+function formatInlineMarkdown(text) {
+  let html = escapeHtml(text);
+  // Bold
+  html = html.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  // Italic / actions
+  html = html.replace(/\*([^*]+)\*/g, '<em style="color: var(--text-dim)">$1</em>');
+  // Headings
+  html = html.replace(/^##\s+(.+)$/gm, '<div class="inline-heading">$1</div>');
+  // Dice rolls
+  html = html.replace(
+    /(\d+d\d+(?:[+-]\d+)?\s*=\s*\[\d+\][^\n]*)/g,
+    '<span class="dice-roll">🎲 $1</span>'
+  );
+  html = html.replace(
+    /Roll\s*Required:\s*([^\n]+)/g,
+    '<span class="dice-roll">🎲 Roll Required: $1</span>'
+  );
+  // Bullet lists
+  html = html.replace(/^- (.+)$/gm, '<div class="md-bullet">· $1</div>');
+  // Quoted dialogue
+  html = html.replace(/&quot;([^&]*?)&quot;/g, '"<span class="dialogue">$1</span>"');
+  // Paragraphs
+  html = html.replace(/\n\n+/g, '<div class="para-break"></div>');
+  return html;
+}
+
+function formatMarkdown(text) {
+  let html = escapeHtml(text);
+  html = html.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  html = html.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+  html = html.replace(/^##\s+(.+)$/gm, "<strong>$1</strong>");
+  html = html.replace(/^- (.+)$/gm, "  · $1");
+  return html;
+}
+
+// === WebSocket ===
+
+function connect() {
+  const protocol = location.protocol === "https:" ? "wss:" : "ws:";
+  const ws = new WebSocket(`${protocol}//${location.host}`);
+
+  ws.onopen = () => console.log("Connected to spectator server");
+
+  ws.onmessage = (msg) => {
+    const { type, data } = JSON.parse(msg.data);
+    switch (type) {
+      case "init": handleInit(data); break;
+      case "event": handleEvent(data); break;
+      case "agents":
+        state.agents = data;
+        renderAgentCards();
+        break;
+    }
+  };
+
+  ws.onclose = () => {
+    console.log("Disconnected. Reconnecting in 2s...");
+    setTimeout(connect, 2000);
+  };
+  ws.onerror = () => ws.close();
+}
+
+function handleInit(data) {
+  state = {
+    sessionId: data.sessionId,
+    campaign: data.campaign,
+    agents: data.agents || {},
+    events: data.events || [],
+    status: data.status,
+  };
+
+  if (data.campaign?.title) {
+    document.getElementById("campaign-title").textContent = `${data.campaign.title} — Spectator`;
+    document.title = `${data.campaign.title} — Spectator`;
+  }
+
+  updateSessionStatus(data.status);
+  renderAgentCards();
+  rerenderEvents();
+
+  eventCount = state.events.length;
+  document.getElementById("event-count").textContent = `${eventCount} events`;
+}
+
+function handleEvent(event) {
+  state.events.push(event);
+  eventCount++;
+  document.getElementById("event-count").textContent = `${eventCount} events`;
+
+  if (event.type === "session_command" && event.content.includes("command: end")) {
+    updateSessionStatus("ending");
+  }
+  if (event.type === "session_end") updateSessionStatus("ended");
+
+  const container = document.getElementById("events-container");
+  const el = renderEvent(event);
+  if (el) {
+    container.appendChild(el);
+    if (autoScroll) {
+      document.getElementById("play-script").scrollTop =
+        document.getElementById("play-script").scrollHeight;
+    }
+  }
+  addFlowEntry(event);
+}
+
+function updateSessionStatus(status) {
+  const badge = document.getElementById("session-status");
+  badge.textContent = status;
+  badge.className = `status-badge ${status}`;
+}
+
+// === Scroll lock ===
+
+const scrollBtn = document.getElementById("scroll-lock");
+scrollBtn.classList.add("active");
+
+scrollBtn.addEventListener("click", () => {
+  autoScroll = !autoScroll;
+  scrollBtn.classList.toggle("active", autoScroll);
+  if (autoScroll) {
+    document.getElementById("play-script").scrollTop =
+      document.getElementById("play-script").scrollHeight;
+  }
+});
+
+document.getElementById("play-script").addEventListener("scroll", (e) => {
+  const el = e.target;
+  const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 50;
+  if (!atBottom && autoScroll) {
+    autoScroll = false;
+    scrollBtn.classList.remove("active");
+  }
+});
+
+// === Start ===
+initFilters();
+connect();
