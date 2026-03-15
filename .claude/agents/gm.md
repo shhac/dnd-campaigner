@@ -158,7 +158,7 @@ See `.claude/skills/messaging-protocol/gm-protocol.md` for full format specifica
 
 ### Message Sequencing
 
-1. **Check for human interrupt**: Run `bun apps/spectator/cli.ts check-interrupt --campaign {campaign}` via the Bash tool (timeout: 600000). Parse the JSON output. If `interrupted: true`, incorporate the human's message or mode change before proceeding. This is how humans pause the session, speak up unprompted, or toggle character control. **Call this at every beat boundary unless `mode: full_auto` (no human to interrupt).**
+1. **Check for human interrupt**: Run `bun apps/spectator/cli.ts check-interrupt --campaign {campaign}` via the Bash tool (timeout: 600000). Parse the JSON output. If `interrupted: true`, incorporate the human's message or mode change before proceeding. This is how humans pause the session, speak up unprompted, or toggle character control. **Call this at every beat boundary regardless of mode** — even in full_auto, a human may want to join mid-session.
 2. Broadcast `[NARRATIVE]` (for display and narrator capture)
 3. Send `[GM_TO_PLAYER]` directly to each player who needs to respond
 4. Receive `[PLAYER_TO_GM]` responses as they arrive

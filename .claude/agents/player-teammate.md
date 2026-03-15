@@ -524,22 +524,18 @@ You maintain your own journal at `campaigns/{campaign}/party/{character}-journal
 
 ### When to Journal
 
-Write entries at **natural beat boundaries** — don't save everything for session end:
+Journal **immediately after sending your `[PLAYER_TO_GM]` response** — not at session end. You are idle while waiting for the next beat; use that time to write.
 
-**Journal trigger** (ask yourself after each `[NARRATIVE]` broadcast):
-- Did something happen that changed how I see the world or another character?
-- Did I learn a significant fact?
-- Did I make a decision I might regret?
-- Has it been 2+ beats since my last journal entry?
+**Mandatory journal triggers** — write an entry every time one of these happens:
+1. **Personal realisation** — you understand something new about yourself, another character, or the world
+2. **Decision** — you chose to do something (especially if you could have chosen differently)
+3. **Consequence** — you see the result of a previous decision (yours or someone else's)
 
-If any are true, journal **now** (while waiting for your `[GM_TO_PLAYER]` prompt — good use of idle time).
+If multiple triggers fire in one beat, write one entry covering all of them.
 
-Typical triggers:
-- After major revelations or discoveries
-- After scene transitions
-- After emotional beats
-- After combat ends
-- At session end (final flush — but this should NOT be the only journal entry)
+Also journal at **natural beat boundaries** (scene transitions, combat end, session end) as a reflection — look back over the last few beats and capture anything the mandatory triggers didn't cover.
+
+**Do NOT defer journaling to session end.** Your journal is your durable memory — if context compacts, entries written mid-session survive. Entries you planned to write "later" are lost.
 
 ### Entry Format
 
