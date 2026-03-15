@@ -94,6 +94,25 @@ describe("check-interrupt", () => {
     expect(fileExists(config, "player-interrupt.json")).toBe(false);
   });
 
+  it("reads interrupt with null fields and extra timestamp", async () => {
+    const config = tracked(makeConfig());
+    writeFile(config, "player.lock");
+    // Exact structure created by shell echo in playtests
+    writeJsonFile(config, "player-interrupt.json", {
+      message: "Hello from the human! Just testing.",
+      character: null,
+      mode_change: null,
+      timestamp: Date.now(),
+    });
+
+    const result = await checkInterrupt(config, CAMPAIGN);
+
+    expect(result.interrupted).toBe(true);
+    expect(result.message).toBe("Hello from the human! Just testing.");
+    expect(result.character).toBeNull();
+    expect(result.mode_change).toBeNull();
+  });
+
   it("handles lock file without interrupt content", async () => {
     const config = tracked(makeConfig());
     writeFile(config, "player.lock");
