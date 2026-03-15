@@ -102,28 +102,52 @@ Output: { interrupted: false }
       | { interrupted: true, message, mode_change?, character? }
 ```
 
-Called at every beat boundary regardless of mode. Global (not per-character) since interrupts affect the whole session.
+Called by the GM at every beat boundary (skipped in `full_auto` mode). Global (not per-character) since interrupts affect the whole session.
+
+#### Current Design: Beat-Boundary Polling
+
+The GM calls `check-interrupt` as the first step of each beat. This is simple and has no lifecycle management, but depends on the GM remembering to make the call.
+
+#### Alternative Design: Background Watcher (Not Yet Implemented)
+
+If the GM proves unreliable at calling `check-interrupt` (e.g., the way it forgot dice rolls for 3 consecutive playtests), we could switch to a persistent background watcher:
+
+```bash
+# GM starts this at session begin via Bash with run_in_background: true, timeout: 600000
+bun apps/spectator/cli.ts watch-interrupt --campaign the-dimming
+# Blocks until player.lock appears, then returns the interrupt JSON
+# GM gets notified automatically when the background Bash completes
+```
+
+**Trade-offs:**
+- Pro: GM doesn't need to remember to check — interrupts arrive automatically
+- Pro: Slightly lower latency (interrupt delivered as soon as GM's current turn ends, vs waiting for next beat boundary)
+- Con: Background task lifecycle management (restart after each interrupt, handle errors)
+- Con: Teammate agents are single-threaded, so the GM still can't act on the interrupt until its current turn ends — effective latency is similar
+- Con: Edge cases with multiple rapid interrupts while watcher is being restarted
+
+**When to switch:** If playtesting shows the GM consistently skips `check-interrupt` calls (similar to the dice compliance problem), implement `watch-interrupt` as a long-lived background Bash call started at session begin.
 
 ### Lock File Protocol
 
 #### Prompted Response
 ```
-1. Player agent calls ask_player({ campaign, character: "eamon-lightward", prompt: "..." })
-2. MCP writes tmp/eamon-lightward-prompt.json
+1. Player agent calls: bun apps/spectator/cli.ts ask-player --campaign the-dimming --character eamon-lightward --prompt "..."
+2. CLI writes tmp/eamon-lightward-prompt.json (with deadline timestamp)
 3. Spectator detects, pushes to browser
-4. Browser shows prompt under Eamon's tab with countdown
+4. Browser shows prompt under Eamon's tab with countdown (15s less than actual deadline)
 5. Human responds → POST /api/respond { character: "eamon-lightward", message: "..." }
 6. Spectator writes tmp/eamon-lightward-response.json
-7. MCP reads response, deletes both files, returns to player agent
-8. Player agent sends response to GM as [PLAYER_TO_GM]
+7. CLI reads response, deletes both files, outputs JSON to stdout
+8. Player agent parses JSON, sends response to GM as [PLAYER_TO_GM]
 ```
 
 #### Interrupt (unprompted)
 ```
 1. Human clicks Interrupt → POST /api/interrupt { message, character? }
 2. Spectator writes tmp/player.lock + tmp/player-interrupt.json
-3. GM calls check_interrupt() at next beat boundary
-4. MCP reads + deletes, returns content
+3. GM calls check-interrupt CLI at next beat boundary
+4. CLI reads + deletes, outputs JSON to stdout
 ```
 
 #### Per-Character Mode Toggle
@@ -184,13 +208,14 @@ POST /api/mode                      → { character, mode: "human"|"full_auto" }
 
 ### Implementation Status
 
-- [x] MCP timeout validated (300s clean)
-- [x] MCP server with `ask_player` and `check_interrupt` (`apps/spectator/mcp.ts`)
+- [x] CLI tool with `ask-player` and `check-interrupt` (`apps/spectator/cli.ts`)
 - [x] API endpoints on spectator server (`apps/spectator/server.ts`)
 - [x] Browser UI with prompt bar, interrupt, pause, mode toggle
-- [x] Registered in `.mcp.json` (project scope)
-- [ ] Per-character prompt/response files (Phase 2)
-- [ ] Character tabs in browser UI (Phase 2)
-- [ ] Player agent integration (`ask_player` call in player-teammate.md)
-- [ ] GM agent integration (`check_interrupt` call at beat boundaries)
+- [x] Player agent integration (`ask_player` CLI call in player-teammate.md)
+- [x] GM agent integration (`check_interrupt` CLI call at beat boundaries)
+- [x] Deadline-based timestamps (CLI passes deadline, UI shows 15s less)
 - [ ] End-to-end test with live session
+
+### Historical Note
+
+The original design used an MCP server (`mcp.ts` registered in `.mcp.json`). This was replaced with a CLI tool because MCP tools cannot be called by teammate agents in Claude Code Teams — see `mcp-teammate-limitation.md` for the full investigation.
