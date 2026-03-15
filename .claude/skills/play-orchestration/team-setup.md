@@ -66,7 +66,7 @@ Verbosity can also be passed as a `/play` argument: `/play {campaign} --verbose`
 
 | Level | Team Lead Displays | Notes |
 |-------|-------------------|-------|
-| `quiet` | `[NARRATIVE]` text and `[RELAY_TO_HUMAN]` prompts only | No system messages, no health check logs, no agent spawn confirmations |
+| `quiet` | `[NARRATIVE]` text and player prompts only | No system messages, no health check logs, no agent spawn confirmations |
 | `normal` | Narrative + prompts + agent lifecycle messages (spawn, shutdown) | Default behavior — current standard |
 | `verbose` | Everything in `normal` + health check events, message routing notes, file access audit logs | Debug mode for diagnosing session issues |
 
@@ -120,29 +120,31 @@ Task:
     and continue numbering from the highest existing number + 1.
 ```
 
-### Spawn Human-Relay Player Teammate
+### Spawn Player Teammates
+
+All characters use the same `player-teammate` agent type. The `Control` field determines whether the character is human-controlled (uses `ask_player` MCP for input) or AI-controlled (decides autonomously).
+
+**Human-controlled character** (the player character from preferences):
 
 ```
 Task:
-  subagent_type: human-relay-player
+  subagent_type: player-teammate
   team_name: dnd-{campaign}
   name: {player_character}
   prompt: |
     Campaign: {campaign}
     Character: {player_character}
-    Mode: HUMAN_RELAY
+    Control: HUMAN
 
     You are {player_character} in the "{campaign}" campaign.
-    The human player controls you. Relay GM prompts to the team lead
-    for human input, then translate the human's decisions into
-    in-character actions.
+    You are controlled by a human player. When the GM sends you
+    [GM_TO_PLAYER], use the ask_player MCP tool to get their input,
+    then translate it into in-character actions.
 
     Read your character files and wait for the session to begin.
 ```
 
-### Spawn AI Player Teammates
-
-For each AI-controlled character:
+**AI-controlled characters** (all others):
 
 ```
 Task:
@@ -152,12 +154,13 @@ Task:
   prompt: |
     Campaign: {campaign}
     Character: {character}
+    Control: AI
 
     You are {character} in the "{campaign}" campaign.
     Read your character files and wait for the session to begin.
 ```
 
-**Spawn all player teammates in a single message with multiple Task calls** (parallel).
+**Spawn all player teammates in a single message with multiple Task calls** (parallel). The human's character is spawned alongside AI characters — there is no separate agent type.
 
 ### File Access Audit (Information Isolation Verification)
 
@@ -170,7 +173,6 @@ After spawning player teammates, the team lead should verify information isolati
 | GM | All campaign files | (none — GM sees everything) |
 | Narrator | `preferences.md`, `scenes/`, peer DM activity | `story-state.md`, `npcs/`, character sheets |
 | Player teammate | Own character sheet, own journal, `party-knowledge.md`, `world-primer.md` | `story-state.md`, other character sheets, `npcs/`, `beats/` |
-| Human-relay player | Own character sheet, own journal, `party-knowledge.md`, `world-primer.md` | `story-state.md`, other character sheets, `npcs/`, `beats/` |
 
 **Audit behavior**:
 - At `verbose` verbosity: Log each agent's file reads as they are observed (e.g., from teammate idle summaries or tool call reports)

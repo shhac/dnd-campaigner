@@ -8,7 +8,6 @@ The team lead monitors critical teammates for liveness during the session. This 
 
 **Tracked agents** (critical):
 - GM
-- Human-relay player (if present)
 
 **Health check rules**:
 - Track the timestamp of the last message received from each critical teammate
@@ -21,7 +20,7 @@ The team lead monitors critical teammates for liveness during the session. This 
 **When to check**: After processing each incoming message, note the current time. If more than 120 seconds have elapsed since the last message from a critical teammate AND the session is mid-scene (not during expected idle periods like human input), trigger the health check.
 
 **Expected idle periods** (do NOT trigger health checks during these):
-- While waiting for human input via `[RELAY_TO_HUMAN]` / AskUserQuestion
+- While waiting for human input via AskUserQuestion
 - During session startup (teammates loading campaign files)
 - After sending `[SESSION_COMMAND] end` (GM is wrapping up)
 

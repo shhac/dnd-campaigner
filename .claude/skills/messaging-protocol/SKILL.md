@@ -6,10 +6,10 @@ description: >
   Role-specific details are in separate files:
   gm-protocol.md, player-protocol.md, narrator-protocol.md, orchestrator-protocol.md.
   Message tags: [NARRATIVE], [GM_TO_PLAYER], [PLAYER_TO_GM], [PLAYER_TO_PLAYER],
-  [PLAYER_TO_PARTY], [RELAY_TO_HUMAN], [SESSION_END], [SESSION_COMMAND], [COMMAND_ACK],
+  [PLAYER_TO_PARTY], [SESSION_END], [SESSION_COMMAND], [COMMAND_ACK],
   [ASK_PLAYER], [NARRATOR_NOTE], [NARRATOR_REQUEST], [NPC_SPAWN_REQUEST], [NPC_SPAWNED],
   [NPC_DESPAWN_REQUEST], [NPC_DESPAWNED], [PROTOCOL_WARNING], [DICE_RESULT],
-  [PLAYER_ANSWER], [CONTEXT_REFRESH], [HUMAN_DECISION], [MODE_SWITCH], [ACTIVITY].
+  [PLAYER_ANSWER], [CONTEXT_REFRESH], [ACTIVITY].
 ---
 
 # Messaging Protocol — Overview
@@ -41,12 +41,9 @@ Canonical reference for all structured message types used in Teams-based D&D ses
 | `[PLAYER_ANSWER]` | Team lead | GM | message |
 | `[SESSION_COMMAND]` | Team lead | GM | message |
 | `[CONTEXT_REFRESH]` | Team lead | Any teammate | message |
-| `[HUMAN_DECISION]` | Team lead | Human's player teammate | message |
-| `[MODE_SWITCH]` | Team lead | Human's player teammate | message |
 | `[PLAYER_TO_GM]` | Player teammate | GM | message |
 | `[PLAYER_TO_PLAYER]` | Player teammate | Player teammate | message |
 | `[PLAYER_TO_PARTY]` | Player teammate | All (broadcast) | broadcast |
-| `[RELAY_TO_HUMAN]` | Human's player teammate | Team lead | message |
 | `[NARRATOR_REQUEST]` | Narrator | GM | message |
 | `[NPC_SPAWN_REQUEST]` | GM | Team lead | message |
 | `[NPC_SPAWNED]` | Team lead | GM | message |
@@ -60,7 +57,7 @@ Canonical reference for all structured message types used in Teams-based D&D ses
 | File | Who reads it | Contains |
 |------|-------------|----------|
 | `gm-protocol.md` | GM agent | Messages GM sends and receives, dice roll formatting, GM-specific rules |
-| `player-protocol.md` | Player teammates (AI and human-relay) | Messages players send and receive, dice result formatting, veto/ICE rules |
+| `player-protocol.md` | Player teammates (AI and human-controlled) | Messages players send and receive, dice result formatting, veto/ICE rules |
 | `narrator-protocol.md` | Narrator agent | Messages narrator observes, what to ignore, scene file conventions |
 | `orchestrator-protocol.md` | Team lead | Messages team lead routes, session commands, NPC lifecycle, health checks |
 
@@ -69,11 +66,10 @@ Canonical reference for all structured message types used in Teams-based D&D ses
 ```
 1. GM broadcasts [NARRATIVE]          → All teammates receive (awareness only)
 2. GM sends [GM_TO_PLAYER] to each    → Character-specific prompts
-3. Human's teammate sends [RELAY_TO_HUMAN] → Team lead shows to human
-4. Team lead sends [HUMAN_DECISION]   → Back to human's teammate
-5. All players send [PLAYER_TO_GM]    → Direct to GM
-6. GM broadcasts [NARRATIVE]          → Outcome with woven player actions
-7. GM updates story-state.md and party-knowledge.md directly
+3. Human's teammate uses ask_player   → Gets human input directly via MCP tool
+4. All players send [PLAYER_TO_GM]    → Direct to GM
+5. GM broadcasts [NARRATIVE]          → Outcome with woven player actions
+6. GM updates story-state.md and party-knowledge.md directly
 ```
 
 Players journal autonomously at natural beat boundaries — no external signal needed.
@@ -89,4 +85,4 @@ Dice roll formatting (Roll Required blocks, roll results, NPC rolls) is document
 When the GM sends multiple messages in sequence:
 
 1. **Display first**: Always display `[NARRATIVE]` to the human immediately
-2. **Then act**: Process `[ASK_PLAYER]`, `[RELAY_TO_HUMAN]`
+2. **Then act**: Process `[ASK_PLAYER]` and other actionable messages

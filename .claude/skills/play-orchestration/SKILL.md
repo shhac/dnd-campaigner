@@ -1,17 +1,17 @@
 ---
 name: play-orchestration
-description: Core orchestration loop for Teams-based D&D play sessions. Use when orchestrating D&D play sessions via Claude Code Teams, when the GM sends messages to process, when handling human relay I/O, when asking the player questions via AskUserQuestion, or when context may have been compacted during a long session. This skill survives context compaction.
+description: Core orchestration loop for Teams-based D&D play sessions. Use when orchestrating D&D play sessions via Claude Code Teams, when the GM sends messages to process, when asking the player questions via AskUserQuestion, or when context may have been compacted during a long session. This skill survives context compaction.
 ---
 
 # Play Orchestration Skill
 
-Core orchestration logic for running D&D sessions using Claude Code Teams. The team lead is a **lightweight delegate** — it creates the team, spawns all teammates (GM, Narrator, and player characters), handles human I/O via the human-relay player, and manages session lifecycle. The GM and players communicate directly; the team lead does NOT relay messages between them.
+Core orchestration logic for running D&D sessions using Claude Code Teams. The team lead is a **lightweight delegate** — it creates the team, spawns all teammates (GM, Narrator, and player characters), displays narrative to the human, and manages session lifecycle. Human input for player characters is handled by the player agent via the `ask_player` MCP tool. The GM and players communicate directly; the team lead does NOT relay messages between them.
 
 ## When This Skill Activates
 
 Use this skill when:
 - Starting a new D&D play session via `/play`
-- A teammate sends a message to the team lead (human relay requests, session end)
+- A teammate sends a message to the team lead (session end, activity pings)
 - Context has been compacted during a long session (re-invoke to restore orchestration patterns)
 
 ## Quick Reference: The Orchestration Loop
@@ -34,7 +34,6 @@ Send session-start to GM
     v
 Core Message Loop:
   [NARRATIVE]      -> Display to human
-  [RELAY_TO_HUMAN] -> Show to human, collect input, send back
   [ASK_PLAYER]     -> Convert to AskUserQuestion, send answer
   [SESSION_END]    -> Shutdown sequence
   [ACTIVITY]       -> Update activity display
@@ -48,8 +47,8 @@ Loop until [SESSION_END]
 **CRITICAL**: When the GM sends multiple messages in sequence, process them in this order:
 
 1. **Display first**: Always display `[NARRATIVE]` to the human immediately upon receipt
-2. **Then act**: Process `[ASK_PLAYER]` or `[RELAY_TO_HUMAN]` messages
-3. **No relay needed for player I/O**: The GM and players communicate directly
+2. **Then act**: Process `[ASK_PLAYER]` and other actionable messages
+3. **No relay needed for player I/O**: The GM and players communicate directly. Human input is handled by the player agent via `ask_player`.
 
 ## Detailed Procedures
 

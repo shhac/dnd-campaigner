@@ -18,12 +18,11 @@ Detailed procedures for starting, saving, ending, and recovering D&D sessions us
 4. Determine AI-controlled characters
 5. Spawn GM teammate
 6. Spawn Narrator teammate
-7. Spawn human-relay player teammate
-8. Spawn AI player teammates (parallel)
-9. File access audit (verify information isolation)
-10. Send session-start to GM (includes verbosity)
-11. Wait for opening [NARRATIVE]
-12. Display to human, begin core loop + health checks
+7. Spawn all player teammates (parallel) — human's character uses Control: HUMAN, AI characters use Control: AI
+8. File access audit (verify information isolation)
+9. Send session-start to GM (includes verbosity)
+10. Wait for opening [NARRATIVE]
+11. Display to human, begin core loop + health checks
 ```
 
 ### Step-by-Step
@@ -110,29 +109,29 @@ Task:
     and continue numbering from the highest existing number + 1.
 ```
 
-#### 7. Spawn Human-Relay Player Teammate
+#### 7. Spawn All Player Teammates
+
+Spawn all player teammates in parallel. The human's character and AI characters both use the `player-teammate` agent type. The human's character is distinguished by `Control: HUMAN` (it uses the `ask_player` MCP tool to get human input).
 
 ```
 Task:
-  subagent_type: human-relay-player
+  subagent_type: player-teammate
   team_name: dnd-{campaign}
   name: {player_character}
   prompt: |
     Campaign: {campaign}
     Character: {player_character}
-    Mode: HUMAN_RELAY
+    Control: HUMAN
 
     You are {player_character} in the "{campaign}" campaign.
-    The human player controls you. Relay GM prompts to the team lead
-    for human input, then translate the human's decisions into
-    in-character actions.
+    The human player controls you. Use the ask_player MCP tool
+    to get human input when the GM prompts you, then translate
+    the human's decisions into in-character actions.
 
     Read your character files and wait for the session to begin.
 ```
 
-#### 8. Spawn AI Player Teammates
-
-For each AI-controlled character, spawn in parallel:
+For each AI-controlled character:
 
 ```
 Task:
@@ -142,14 +141,15 @@ Task:
   prompt: |
     Campaign: {campaign}
     Character: {character}
+    Control: AI
 
     You are {character} in the "{campaign}" campaign.
     Read your character files and wait for the session to begin.
 ```
 
-**Spawn all AI player teammates in a single message with multiple Task calls** (parallel).
+**Spawn all player teammates in a single message with multiple Task calls** (parallel).
 
-#### 9. Send Session-Start
+#### 8. Send Session-Start
 
 ```
 SendMessage → gm:
@@ -164,7 +164,7 @@ SendMessage → gm:
     - {char2}
 ```
 
-#### 10-11. Wait and Display
+#### 9-10. Wait and Display
 
 Wait for the GM's opening `[NARRATIVE]` broadcast. Display it to the human. Begin the core loop.
 
@@ -334,8 +334,6 @@ Campaign files (`campaigns/{campaign}/`) are NOT deleted — they persist betwee
 | "/play {campaign} --verbose" | Startup with verbose verbosity (debug output) |
 | "Let's save" | Send `[SESSION_COMMAND] save` to GM |
 | "I want to stop" | Send `[SESSION_COMMAND] end` to GM |
-| "I need to step away" | Send `[MODE_SWITCH] AUTONOMOUS` to human's player |
-| "I'm back" | Send `[MODE_SWITCH] HUMAN_RELAY` to human's player |
 | (context compacted) | Re-read files, send `[CONTEXT_REFRESH]` to GM and players |
 | (GM unresponsive) | Try `[CONTEXT_REFRESH]`, then respawn if needed |
 
@@ -344,7 +342,6 @@ Campaign files (`campaigns/{campaign}/`) are NOT deleted — they persist betwee
 | Condition | Timeout | Action |
 |-----------|---------|--------|
 | GM silent (mid-scene) | 120s | Send `[CONTEXT_REFRESH]`, wait 30s, then respawn |
-| Human-relay silent (mid-scene) | 120s | Send `[CONTEXT_REFRESH]`, wait 30s, then respawn |
 | Player no response to GM prompt | 90s | Nudge with `[CONTEXT_REFRESH]` |
 | Player still no response | 180s | Respawn agent, notify GM via `[SYSTEM_NOTE]` |
 | File isolation violation detected | immediate | Warn human, consider respawn |

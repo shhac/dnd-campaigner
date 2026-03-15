@@ -1,6 +1,6 @@
 # Team Lead (Orchestrator) Protocol Reference
 
-Messages the team lead handles. The team lead routes human I/O, manages session lifecycle, and handles NPC spawning. It does NOT relay GM-player messages — they communicate directly. For conventions and quick reference, see `SKILL.md`.
+Messages the team lead handles. The team lead manages session lifecycle, displays narrative to the human, and handles NPC spawning. It does NOT relay GM-player messages — they communicate directly. Human input for player characters is handled by the player agent via the `ask_player` MCP tool. For conventions and quick reference, see `SKILL.md`.
 
 ## Messages Received from GM
 
@@ -42,12 +42,6 @@ Fields: `npc`, `reason` (optional).
 
 ## Messages Received from Players
 
-### `[RELAY_TO_HUMAN]`
-
-Human's character requests human input. Fields: `character`. Followed by Scene, Decision Needed, Suggested Options sections.
-
-**Action:** Show to human via `AskUserQuestion` or display. Send response as `[HUMAN_DECISION]` to character teammate.
-
 ### `[ACTIVITY]` — from player teammates
 
 Lightweight status ping. Fields: `character`, `doing`.
@@ -67,14 +61,6 @@ reason: "Player wants to stop for the night"
 ```
 
 Start command additional fields: `campaign`, `player_character`, `narrative_style`, `ai_characters`.
-
-### `[HUMAN_DECISION]` — to human's player teammate
-
-Fields: `character`. Free-form human input follows.
-
-### `[MODE_SWITCH]` — to human's player teammate
-
-Fields: `mode` (AUTONOMOUS/HUMAN_RELAY), `reason` (optional).
 
 ### `[PLAYER_ANSWER]` — to GM
 
@@ -117,8 +103,6 @@ The protocol uses **lightweight confirmation for critical-path messages only**. 
 - `[GM_TO_PLAYER]` prompts -- tracked indirectly via player response timeout
 - `[PLAYER_TO_GM]` responses -- GM processes or ignores, no ACK
 - `[PLAYER_TO_PLAYER]` crosstalk -- no delivery guarantee needed
-- `[HUMAN_DECISION]` -- the player teammate acts on it or doesn't; team lead observes the outcome
-
 ### Timeout Behavior
 
 **Session commands** (`[SESSION_COMMAND]`):
@@ -149,4 +133,4 @@ For non-critical messages, the system relies on the natural flow of gameplay -- 
 ## Processing Order
 
 1. **Display first**: Always show `[NARRATIVE]` to human immediately
-2. **Then act**: Process `[ASK_PLAYER]`, `[RELAY_TO_HUMAN]`
+2. **Then act**: Process `[ASK_PLAYER]` and other actionable messages

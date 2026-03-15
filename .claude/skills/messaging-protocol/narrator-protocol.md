@@ -86,7 +86,6 @@ The narrator should **not** incorporate content from these message types into sc
 - **`[GM_TO_PLAYER]`** — Character-specific prompts contain GM instructions, request types, and mechanical details not suited for prose. The *results* of these prompts appear in `[PLAYER_TO_GM]` responses and subsequent `[NARRATIVE]` broadcasts.
 - **`[PLAYER_TO_GM]`** — Player action declarations to the GM. The GM weaves these into `[NARRATIVE]` broadcasts. Capturing raw `[PLAYER_TO_GM]` would duplicate content.
 - **`[SESSION_COMMAND]`**, **`[COMMAND_ACK]`**, **`[SESSION_END]`** — Session control messages, not narrative content.
-- **`[RELAY_TO_HUMAN]`**, **`[HUMAN_DECISION]`** — Human I/O routing, not narrative content.
 - **`[NPC_SPAWN_REQUEST]`**, **`[NPC_SPAWNED]`**, **`[NPC_DESPAWN_REQUEST]`**, **`[NPC_DESPAWNED]`** — Infrastructure messages.
 - **`[PROTOCOL_WARNING]`** — Error correction, not narrative content.
 - **`[DICE_RESULT]`**, **`[PLAYER_ANSWER]`** — Mechanical results; dice outcomes appear in `[NARRATIVE]` when the GM narrates them.

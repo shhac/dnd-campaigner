@@ -9,7 +9,6 @@ Reference: **messaging-protocol** skill for full message protocol (all tag forma
 | Tag | Source | Action |
 |-----|--------|--------|
 | `[NARRATIVE]` | GM (broadcast or direct) | Display to human |
-| `[RELAY_TO_HUMAN]` | Human's player teammate | Show to human, collect input, send `[HUMAN_DECISION]` back |
 | `[ASK_PLAYER]` | GM (direct) | Convert to AskUserQuestion, send `[PLAYER_ANSWER]` to GM |
 | `[SESSION_END]` | GM (direct) | Display summary, shutdown team |
 | `[ACTIVITY]` | Player teammate | Update activity display |
@@ -34,7 +33,7 @@ When the GM broadcasts a `[NARRATIVE]` message:
 2. **Display the FULL narrative to the human** — show everything, summarize nothing
 3. Use proper formatting (see Formatting Guidelines below)
 
-**Note**: The team lead does NOT collect human input after narrative. The GM sends `[GM_TO_PLAYER]` directly to the human's player teammate, which handles relaying to the human via `[RELAY_TO_HUMAN]`.
+**Note**: The team lead does NOT collect human input after narrative. The GM sends `[GM_TO_PLAYER]` directly to the human's player teammate, which handles getting human input via the `ask_player` MCP tool.
 
 ### Formatting Guidelines
 
@@ -45,65 +44,6 @@ When the GM broadcasts a `[NARRATIVE]` message:
 | **Character actions** | Italics | *Mira reaches for her blade.* |
 | **Dice results** | Code formatting | `Perception check: 14 + 3 = 17` |
 | **GM notes/mechanics** | Parenthetical | (DC 15 - Success) |
-
-## Handling [RELAY_TO_HUMAN]
-
-When the human's player teammate sends `[RELAY_TO_HUMAN]`, it needs the human's input.
-
-### Parse the Message
-
-Parse the `[RELAY_TO_HUMAN]` payload (see **messaging-protocol** skill for format). Extract the Scene, Decision Needed, and Suggested Options sections.
-
-### Show to Human
-
-Use AskUserQuestion to present the decision:
-
-```
-AskUserQuestion:
-  question: "{Decision Needed text}"
-  header: "Action"
-  options:
-    - label: "{Option A label}"
-      description: "{Option A description}"
-    - label: "{Option B label}"
-      description: "{Option B description}"
-```
-
-The player can always type a custom response via "Other".
-
-### Send Human's Response Back
-
-```
-SendMessage:
-  type: message
-  recipient: {player_character}
-  content: |
-    [HUMAN_DECISION]
-    character: {player_character}
-
-    {human's selection or typed response}
-  summary: "{player_character} decides"
-```
-
-The human's player teammate translates the response into in-character action and sends `[PLAYER_TO_GM]` directly to the GM.
-
-### Dice Rolling for Human
-
-When the human's player teammate or the GM needs dice rolled for the human's character, the team lead performs the roll using the `toss` CLI (via the dice-roll skill) and sends the result:
-
-```
-SendMessage:
-  type: message
-  recipient: gm
-  content: |
-    [DICE_RESULT]
-    character: {player_character}
-    check: Stealth
-    roll: "1d20+5 = [8]+5 = 13"
-    dc: 12
-    result: success
-  summary: "{player_character} rolls {check}"
-```
 
 ## Handling [ASK_PLAYER]
 
@@ -219,40 +159,6 @@ SendMessage:
     npc: {npc-name}
   summary: "NPC {npc-name} despawned"
 ```
-
-## Handling [MODE_SWITCH] (Human Player Away/Back)
-
-When the human player steps away or returns, send a mode switch to their character teammate:
-
-### Player Steps Away
-
-```
-SendMessage:
-  type: message
-  recipient: {player_character}
-  content: |
-    [MODE_SWITCH]
-    mode: AUTONOMOUS
-    reason: "Player stepped away"
-  summary: "Switching to autonomous mode"
-```
-
-The human's character teammate will begin making its own decisions.
-
-### Player Returns
-
-```
-SendMessage:
-  type: message
-  recipient: {player_character}
-  content: |
-    [MODE_SWITCH]
-    mode: HUMAN_RELAY
-    reason: "Player returned"
-  summary: "Switching back to human relay"
-```
-
-The character teammate will send a `[RELAY_TO_HUMAN]` with a "While you were away" summary. Display this to the human.
 
 ## Human-Initiated Session Commands
 

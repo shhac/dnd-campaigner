@@ -1,6 +1,8 @@
 # Player Protocol Reference
 
-Messages player teammates send and receive. Applies to AI players and the human-relay player. For conventions and quick reference, see `SKILL.md`.
+Messages player teammates send and receive. Applies to all player teammates (AI-controlled and human-controlled). For conventions and quick reference, see `SKILL.md`.
+
+**Human input**: Human-controlled characters use the `ask_player` MCP tool to get human input. This is handled internally by the player agent — no protocol messages are needed for human relay.
 
 ## Messages Players Send
 
@@ -56,12 +58,6 @@ from: korimeth-talyss
 
 **In-character ONLY.** Use for speeches, warnings, proposals to the group. For private 1:1, use `[PLAYER_TO_PLAYER]`.
 
-### `[RELAY_TO_HUMAN]` — message to team lead (human-relay only)
-
-Request human input. Fields: `character`. Followed by Scene, Decision Needed, and Suggested Options sections.
-
-Send when in HUMAN_RELAY mode and human input is needed. Team lead responds with `[HUMAN_DECISION]`.
-
 ### `[ACTIVITY]` — message to team lead
 
 Lightweight status ping. Fire-and-forget — no confirmation needed.
@@ -103,14 +99,6 @@ Character-specific prompt. Key fields:
 - `scene_number`, `scene_slug`: For journaling reference
 
 Respond with `[PLAYER_TO_GM]` sent directly to GM.
-
-### `[HUMAN_DECISION]` (human-relay only, from team lead)
-
-Human's response. Fields: `character`. Free-form human input follows. Translate into in-character action, send `[PLAYER_TO_GM]` to GM.
-
-### `[MODE_SWITCH]` (human-relay only, from team lead)
-
-Fields: `mode` (AUTONOMOUS/HUMAN_RELAY), `reason`. In AUTONOMOUS, make own decisions. Provide "while you were away" summary when switching back.
 
 ### `[CONTEXT_REFRESH]` (from team lead)
 

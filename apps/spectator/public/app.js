@@ -139,6 +139,13 @@ function renderAgentCards() {
           <span>${agent.status}</span>
         </div>
         ${agent.lastActivity ? `<div class="agent-activity" title="${escapeHtml(agent.lastActivity)}">${escapeHtml(agent.lastActivity)}</div>` : ""}
+        ${char ? (() => {
+          const mode = characterModes[agent.id] || "human";
+          const hasPrompt = activePrompts[agent.id];
+          return `<button class="mode-toggle ${mode === "human" ? "human" : "auto"}" data-character="${agent.id}" title="Click to toggle">
+            ${mode === "human" ? "Human" : "Auto"}${hasPrompt ? " ●" : ""}
+          </button>`;
+        })() : ""}
       </div>`;
     })
     .join("");
@@ -811,6 +818,8 @@ function updateModeControls() {
     btn.textContent = `${humanChars.length} Human`;
     btn.classList.remove("active");
   }
+  // Re-render sidebar cards to update mode indicators
+  renderAgentCards();
 }
 
 function updatePauseButton() {
@@ -854,6 +863,14 @@ function initPlayerControls() {
   });
   document.getElementById("interrupt-cancel").addEventListener("click", () => {
     document.getElementById("interrupt-container").classList.add("hidden");
+  });
+
+  // Per-character mode toggles in sidebar
+  document.getElementById("agent-cards").addEventListener("click", (e) => {
+    const btn = e.target.closest(".mode-toggle");
+    if (btn && btn.dataset.character) {
+      toggleCharacterMode(btn.dataset.character);
+    }
   });
 
   // Prompt tab clicks (switch between characters)

@@ -56,8 +56,7 @@ If no destination is provided, you'll be asked where to put it.
 ├── agents/
 │   ├── gm.md                      # Persistent GM teammate
 │   ├── narrator.md                 # Persistent Narrator teammate
-│   ├── player-teammate.md          # AI player teammate
-│   ├── human-relay-player.md       # Human player teammate
+│   ├── player-teammate.md          # Player teammate (AI + human-controlled)
 │   ├── decision-log.md             # Records character decisions
 │   ├── character-creator.md        # For adding new characters
 │   └── dnd-enthusiast.md           # For rules/design feedback
@@ -168,7 +167,6 @@ Copy these agents (no modification needed):
 - `.claude/agents/gm.md`
 - `.claude/agents/narrator.md`
 - `.claude/agents/player-teammate.md`
-- `.claude/agents/human-relay-player.md`
 - `.claude/agents/decision-log.md`
 - `.claude/agents/character-creator.md`
 - `.claude/agents/dnd-enthusiast.md`

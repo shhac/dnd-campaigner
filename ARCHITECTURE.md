@@ -31,11 +31,6 @@ Technical internals of the D&D Campaigner system. For getting started, see [QUIC
         │         [PLAYER_TO_PLAYER]         │
         │            ┌──────────────────────>│  (between players)
         │            │                       │
-        │  [RELAY_TO_HUMAN]                  │
-        │            │              ┌────────┤
-        │            │              │ Human  │
-        │            │              │ Relay  ├──> Team Lead ──> Human
-        │            │              └────────┤
         │  [SESSION_END]                     │
         ├──────────────────────────> Team Lead (shuts down team)
         │
@@ -43,7 +38,7 @@ Technical internals of the D&D Campaigner system. For getting started, see [QUIC
 
 **The loop:** GM broadcasts narrative -> GM prompts each player -> players respond -> GM weaves responses into next beat -> repeat.
 
-**Human I/O:** The human's relay teammate sends `[RELAY_TO_HUMAN]` to the team lead, which displays it and collects the human's response via `[HUMAN_DECISION]`.
+**Human I/O:** Human-controlled characters use the `ask_player` MCP tool directly. The MCP server routes input through the spectator web UI (if running) or falls back to terminal input. No relay through the team lead.
 
 ## Teams Architecture
 
@@ -54,14 +49,16 @@ The `/play` command uses Claude Code Teams to run D&D sessions with persistent t
 A team named `dnd-{campaign}` is created with:
 - **GM teammate** (`gm` agent): Persistent for the entire session. Reads campaign files once, communicates via `SendMessage`. Broadcasts `[NARRATIVE]` to all teammates, sends `[GM_TO_PLAYER]` directly to each player teammate, sends `[SESSION_END]` to the team lead. Updates `story-state.md` and `party-knowledge.md` directly after each scene.
 - **Narrator teammate** (`narrator` agent): Observes GM broadcasts and peer DM activity. Writes scene files to `scenes/` in real-time. Output is secret-free.
-- **Player teammates** (`player-teammate` / `human-relay-player` agents): Persistent for the entire session. Each character (AI and human-controlled) is a teammate. AI players decide and act autonomously. The human's character relays GM prompts to the human and translates their decisions into in-character actions. All players communicate directly with the GM via `[PLAYER_TO_GM]` and can message each other in-character via `[PLAYER_TO_PLAYER]`. Each player self-journals at beat boundaries.
-- **Team lead** (main conversation): Lightweight delegate orchestrator. Creates the team, spawns all teammates, handles human I/O when the human-relay player requests it (via `[RELAY_TO_HUMAN]`), and manages session lifecycle. Does NOT relay messages between GM and players -- they communicate directly.
+- **Player teammates** (`player-teammate` agent): Persistent for the entire session. All characters — AI and human-controlled — use the same agent type. AI players decide autonomously. Human-controlled characters use the `ask_player` MCP tool to get input via the spectator web UI (or terminal fallback). From the GM's perspective, all players are identical. Any character can be toggled between human and AI control mid-session, enabling multiplayer. All players communicate directly with the GM via `[PLAYER_TO_GM]` and message each other via `[PLAYER_TO_PLAYER]`. Each player self-journals at beat boundaries.
+- **Team lead** (main conversation): Lightweight delegate orchestrator. Creates the team, spawns all teammates, manages session lifecycle. Does NOT relay messages between GM and players — they communicate directly. Human input is handled by the player agent itself via MCP.
 
-### Human-Relay and Autonomous Modes
+### Human Control via MCP
 
-The human's character teammate operates in one of two modes:
-- **HUMAN_RELAY** (default): Relays GM prompts to the human, translates human decisions into in-character actions. The human makes the choices; the teammate adds character voice, continuity, and personality.
-- **AUTONOMOUS**: When the human steps away, the character makes its own decisions based on personality, bonds, and flaws. Provides a "while you were away" summary when switching back.
+Human-controlled characters are spawned with `Control: HUMAN` in their prompt. When they receive `[GM_TO_PLAYER]`, they call the `ask_player` MCP tool which auto-detects the best input channel:
+- **Spectator web UI**: If the spectator app is running, the prompt appears in the browser with a countdown timer. The human responds there.
+- **Terminal fallback**: If no spectator, falls back to `AskUserQuestion` in the Claude Code terminal.
+- **AI takeover**: If the countdown expires, the character acts autonomously for that turn.
+- **Full auto**: If the human toggles a character to AI control via the spectator UI, it acts autonomously until toggled back.
 
 ## Message Protocol
 
@@ -73,11 +70,8 @@ All teammate communication uses structured YAML-like tags in `SendMessage` conte
 | `[GM_TO_PLAYER]` | GM -> player | Character-specific prompts sent directly to player teammates |
 | `[PLAYER_TO_GM]` | player -> GM | Actions, reactions, vetoes sent directly to GM |
 | `[PLAYER_TO_PLAYER]` | player -> player | In-character dialogue between player teammates (GM-visible via peer DM) |
-| `[RELAY_TO_HUMAN]` | human relay -> team lead | Human's player teammate requests human input |
-| `[HUMAN_DECISION]` | team lead -> human relay | Team lead sends human's response back to their player teammate |
 | `[ACTIVITY]` | player -> team lead | Player activity status for visibility (displayed in Party Activity footer) |
 | `[SESSION_END]` | GM -> team lead | GM signals session complete (team lead shuts down team) |
-| `[MODE_SWITCH]` | team lead -> human relay | Switches human's player between HUMAN_RELAY and AUTONOMOUS modes |
 
 ### Request Types
 
@@ -153,8 +147,7 @@ This replaces the previous model where `story-state.md` contained all secrets fo
 - **character-creator**: Builds PCs/NPCs with proper D&D 5e stats
 - **gm**: Persistent GM teammate (~350 lines). RULE ZERO at line 1 enforces session-end compliance. Communicates via SendMessage, reads campaign files once (including only UNLOCKED act files from `story-arcs/`), retains context for the entire session. Messages player teammates directly with `[GM_TO_PLAYER]`. Requires a `## Dice` section in FULL_CONTEXT/COMBAT_ACTION messages. Core loop includes conflict injection prompts. Does not write scene files (narrator handles this).
 - **narrator**: Persistent Narrator teammate that observes all gameplay (GM broadcasts + peer DM visibility) and writes scene files in real-time. Output is secret-free -- only externally observable behavior. Feeds the novelization and audiobook pipelines.
-- **player-teammate**: Persistent AI player teammate. Receives GM prompts directly, responds with actions/dialogue, can message other players in-character. Sends `[ACTIVITY]` messages to team lead for visibility. "Think Before You Speak" internal monologue before group decisions. ICE thresholds shifted (agreeableness 1-8 objection, major commitment 1-10 reservations). Provides feedback when GM omits `## Dice` section. Self-journals at beat boundaries. Maintains character personality across the entire session.
-- **human-relay-player**: Persistent human player teammate. Relays GM prompts to the human, translates human decisions into in-character actions. Supports HUMAN_RELAY and AUTONOMOUS modes. Indistinguishable from AI player teammates from the GM's perspective.
+- **player-teammate**: Unified player agent for both AI and human-controlled characters. Receives GM prompts directly, responds with actions/dialogue, can message other players in-character. Human-controlled characters use `ask_player` MCP tool for input (spectator web UI or terminal fallback). AI characters use ICE (Internal Conflict Engine) for authentic decisions. "Think Before You Speak" internal monologue before group decisions. Self-journals at beat boundaries. Any character can toggle between human and AI control mid-session.
 - **dnd-enthusiast**: Experienced D&D player/DM offering feedback on campaign design, rules, and player experience
 - **decision-log**: Records character decisions and actions after significant events to help with context reconstruction
 

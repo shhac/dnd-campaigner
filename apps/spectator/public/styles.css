@@ -190,6 +190,27 @@ main {
 .hp-bar-container { margin-top: 4px; background: #2a1a1a; height: 4px; border-radius: 2px; overflow: hidden; }
 .hp-bar { height: 100%; background: #66bb6a; transition: width 0.3s; }
 
+.mode-toggle {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 2px 0;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg);
+  color: var(--text-dim);
+  font-family: inherit;
+  font-size: 9px;
+  text-align: center;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.15s;
+}
+.mode-toggle:hover { border-color: var(--text-dim); }
+.mode-toggle.human { border-color: #66bb6a; color: #66bb6a; background: #0a1a0a; }
+.mode-toggle.auto { border-color: var(--accent-dim); color: var(--accent); background: #1a1508; }
+
 /* === Play Script (Center) === */
 #play-script {
   overflow-y: auto;
