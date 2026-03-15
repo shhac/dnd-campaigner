@@ -47,13 +47,20 @@ const config: PlayerInputConfig = {
   spectatorCheck: spectatorIsUp,
 };
 
+const BOOLEAN_FLAGS = new Set(["clear"]);
+
 function parseArgs(argv: string[]): { command: string; args: Record<string, string> } {
   const command = argv[0];
   const args: Record<string, string> = {};
   for (let i = 1; i < argv.length; i++) {
     const arg = argv[i];
-    if (arg.startsWith("--") && i + 1 < argv.length) {
-      args[arg.slice(2)] = argv[++i];
+    if (arg.startsWith("--")) {
+      const key = arg.slice(2);
+      if (BOOLEAN_FLAGS.has(key)) {
+        args[key] = "true";
+      } else if (i + 1 < argv.length) {
+        args[key] = argv[++i];
+      }
     }
   }
   return { command, args };
@@ -85,32 +92,33 @@ switch (command) {
 
   case "check-interrupt": {
     if (!args.campaign) {
-      log("Usage: cli.ts check-interrupt --campaign <name>");
+      log("Usage: cli.ts check-interrupt --campaign <name> [--id <hash> --clear]");
       process.exit(1);
     }
-    const result = await checkInterrupt(config, args.campaign);
-    if (result.interrupted) {
-      log(`Interrupt: ${result.message || "(mode change)"}${result.character ? ` [${result.character}]` : ""}${result.mode_change ? ` mode→${result.mode_change}` : ""}`);
+    if (args.clear !== undefined) {
+      // Clear mode: --id and --clear must both be present
+      if (!args.id) {
+        log("--clear requires --id");
+        process.exit(1);
+      }
+      const result = await clearInterrupt(config, args.campaign, args.id);
+      if (!result.cleared) {
+        log(`Clear failed: ${result.reason}`);
+      }
+      process.stdout.write(JSON.stringify(result) + "\n");
+    } else {
+      // Check mode: read interrupt without deleting
+      const result = await checkInterrupt(config, args.campaign);
+      if (result.interrupted) {
+        log(`Interrupt: ${result.message || "(mode change)"}${result.character ? ` [${result.character}]` : ""}${result.mode_change ? ` mode→${result.mode_change}` : ""}`);
+      }
+      process.stdout.write(JSON.stringify(result) + "\n");
     }
-    process.stdout.write(JSON.stringify(result) + "\n");
-    break;
-  }
-
-  case "clear-interrupt": {
-    if (!args.campaign || !args.id) {
-      log("Usage: cli.ts clear-interrupt --campaign <name> --id <hash>");
-      process.exit(1);
-    }
-    const result = await clearInterrupt(config, args.campaign, args.id);
-    if (!result.cleared) {
-      log(`Clear failed: ${result.reason}`);
-    }
-    process.stdout.write(JSON.stringify(result) + "\n");
     break;
   }
 
   default:
     log(`Unknown command: ${command}`);
-    log("Commands: ask-player, check-interrupt, clear-interrupt");
+    log("Commands: ask-player, check-interrupt");
     process.exit(1);
 }
