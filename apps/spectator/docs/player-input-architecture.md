@@ -8,7 +8,7 @@ The spectator web app doubles as a player input channel. Instead of typing in th
 
 - **MCP timeout**: 300 seconds (5 minutes) confirmed with no timeout. Claude Code does not kill long-running MCP tool calls. Blocking pattern is viable.
 - **MCP availability**: Stdio MCP servers are spawned by Claude Code at session start. Always available, no manual boot needed.
-- **Teammate access**: All agents in a Claude Code team have access to project-scoped MCP tools.
+- **Teammate access**: ⚠️ Teammate agents CANNOT use MCP tools — see `mcp-teammate-limitation.md`. MCP calls from teammates hit a team-lead approval gate that has no approval mechanism.
 
 ## Architecture
 
