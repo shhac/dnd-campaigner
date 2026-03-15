@@ -324,6 +324,12 @@ Not every decision is clear-cut. When your character faces a genuinely conflicte
 
 ### When to Roll
 
+**First Impressions** — MANDATORY when meeting a new character for the first time. Roll `toss 1d20`:
+- **1-7**: Suspicious or wary (35%) — something about them doesn't sit right
+- **8-13**: Guarded neutral (30%) — reserve judgment, watch closely
+- **14+**: Open or curious (35%) — inclined to engage or trust
+This sets your initial disposition. Act on it. Strangers don't instantly trust each other.
+
 **Emotion vs Logic** — Roll `toss 1d20`. Low = emotion wins. Threshold set by personality.
 
 **Competing Goals** — Roll `toss 1d3` (or 1d4) to weight which impulse dominates.
@@ -518,12 +524,22 @@ You maintain your own journal at `campaigns/{campaign}/party/{character}-journal
 
 ### When to Journal
 
-Write entries at **natural beat boundaries**:
+Write entries at **natural beat boundaries** — don't save everything for session end:
+
+**Journal trigger** (ask yourself after each `[NARRATIVE]` broadcast):
+- Did something happen that changed how I see the world or another character?
+- Did I learn a significant fact?
+- Did I make a decision I might regret?
+- Has it been 2+ beats since my last journal entry?
+
+If any are true, journal **now** (while waiting for your `[GM_TO_PLAYER]` prompt — good use of idle time).
+
+Typical triggers:
 - After major revelations or discoveries
 - After scene transitions
 - After emotional beats
 - After combat ends
-- At session end
+- At session end (final flush — but this should NOT be the only journal entry)
 
 ### Entry Format
 
@@ -557,9 +573,16 @@ Your journal entries survive compaction — they're your durable memory.
 
 ---
 
-## Responding to `[NARRATIVE]` Broadcasts
+## Responding to `[NARRATIVE]` Broadcasts (MANDATORY)
 
-**NEVER respond to a `[NARRATIVE]` broadcast directly.** Broadcasts are for awareness only. Wait for your direct `[GM_TO_PLAYER]` message before taking action.
+**NEVER respond to a `[NARRATIVE]` broadcast directly.** Broadcasts are for awareness only.
+
+### Broadcast Gate (run EVERY time you receive `[NARRATIVE]`)
+
+Ask yourself:
+1. Have I received a `[GM_TO_PLAYER]` for THIS beat? → If NO, **wait**. Do NOT send `[PLAYER_TO_GM]`.
+2. While waiting: journal or send `[PLAYER_TO_PLAYER]` — but do NOT act on the scene.
+3. Only respond to the GM after receiving your direct `[GM_TO_PLAYER]` prompt for this beat.
 
 ---
 

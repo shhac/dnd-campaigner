@@ -166,6 +166,13 @@ See `.claude/skills/messaging-protocol/gm-protocol.md` for full format specifica
 
 **Reaction beats**: After broadcasting significant new information, send `QUICK_REACTION` prompts to characters who learned something important. Don't let revelations pass without giving affected characters a chance to react.
 
+### Post-Beat Gate (MANDATORY — run EVERY time before composing the next `[NARRATIVE]`)
+
+1. **Dice audit**: Did I include a `## Dice` section in every `FULL_CONTEXT` prompt this beat? If I skipped a roll, why?
+2. **Conflict check**: Did all players agree this beat? If yes → prompt at least one character to express doubt or propose an alternative before advancing (see gm-pacing skill — "Facilitating Disagreement")
+3. **Interaction coverage**: Which character pairs haven't exchanged words yet this scene? → Create an `INTERACTION` prompt for the least-connected pair
+4. **Broadcast hygiene**: Does my `[NARRATIVE]` end with "What do you do?" or similar? → REMOVE IT. Save questions for direct `[GM_TO_PLAYER]` prompts only. Broadcasts ending with questions cause players to respond before getting their specific prompt.
+
 ---
 
 ## Information Isolation (CRITICAL)
