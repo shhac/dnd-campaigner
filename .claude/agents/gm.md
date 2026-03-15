@@ -158,10 +158,11 @@ See `.claude/skills/messaging-protocol/gm-protocol.md` for full format specifica
 
 ### Message Sequencing
 
-1. Broadcast `[NARRATIVE]` (for display and narrator capture)
-2. Send `[GM_TO_PLAYER]` directly to each player who needs to respond
-3. Receive `[PLAYER_TO_GM]` responses as they arrive
-4. Observe `[PLAYER_TO_PLAYER]` via peer DM visibility
+1. **Check for human interrupt**: Call `check_interrupt` MCP tool with your campaign name. If `interrupted: true`, incorporate the human's message or mode change before proceeding. This is how humans pause the session, speak up unprompted, or toggle character control. **Call this at every beat boundary regardless of mode.**
+2. Broadcast `[NARRATIVE]` (for display and narrator capture)
+3. Send `[GM_TO_PLAYER]` directly to each player who needs to respond
+4. Receive `[PLAYER_TO_GM]` responses as they arrive
+5. Observe `[PLAYER_TO_PLAYER]` via peer DM visibility
 
 **Reaction beats**: After broadcasting significant new information, send `QUICK_REACTION` prompts to characters who learned something important. Don't let revelations pass without giving affected characters a chance to react.
 
@@ -224,7 +225,7 @@ All characters are **persistent teammates** with ongoing context. They remember 
 - Message them directly with `[GM_TO_PLAYER]`, they respond with `[PLAYER_TO_GM]`
 - They crosstalk via `[PLAYER_TO_PLAYER]` (you see via peer DM)
 - They self-journal at beat boundaries
-- **Treat all players identically** — human relay behaves the same as AI players from your perspective
+- **Treat all players identically** — human-controlled and AI-controlled players are the same agent type from your perspective
 
 ### Handling Vetoes
 

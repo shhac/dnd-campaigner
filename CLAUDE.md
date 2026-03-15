@@ -67,6 +67,14 @@ Set these up later when you reach the `/audiobook` command. See [QUICKSTART.md](
 ├── agents/             # AI agent definitions
 └── skills/             # Reusable skills
 
+apps/spectator/         # Spectator web app (session viewer + player input)
+├── server.ts           # Bun HTTP + WebSocket server
+├── mcp.ts              # MCP server (ask_player, check_interrupt tools)
+├── lib/                # Server libraries (parser, watcher, discovery)
+├── public/             # Browser frontend (vanilla HTML/CSS/JS)
+├── docs/               # Architecture documentation
+└── test/               # MCP timeout test server
+
 templates/              # Markdown templates for campaign content
 campaigns/{campaign}/   # Individual campaign data
 ├── overview.md         # World setting, themes, factions
@@ -146,17 +154,33 @@ Creates PCs or NPCs with full sheets. **Time estimate:** 10-15 minutes per chara
 ```
 /play {campaign-name}
 ```
-Starts a session using Claude Code Teams. All participants are persistent teammates: GM, Narrator, and every player character (AI and human). The GM messages players directly; players respond directly. The human's character operates in HUMAN_RELAY mode (relays decisions to/from the human) or AUTONOMOUS mode (acts independently when the human steps away). Players self-journal at beat boundaries. The team lead is a lightweight delegate handling human I/O and session lifecycle.
+Starts a session using Claude Code Teams. All participants are persistent teammates: GM, Narrator, and every player character. All player characters use the same unified agent -- human-controlled characters use the `ask_player` MCP tool for input, AI characters decide autonomously. Any character can be toggled between human and AI control mid-session, enabling multiplayer. The team lead is a lightweight delegate handling session lifecycle.
 
 **Time estimate:** 30-90 minutes per session (3-5 major scenes).
 
+### Spectator Mode (Optional)
+
+Run the spectator web app in a separate terminal to watch the session unfold in a browser:
+
+```bash
+bun apps/spectator/server.ts
+```
+
+Opens at `http://localhost:3333`. Features:
+- **Play-script view** of all agent communication in real-time
+- **Player input** via browser instead of terminal (respond to GM prompts, interrupt, pause)
+- **Per-character control** toggles (human/AI) for each character
+- **Countdown timer** when a prompt is waiting (AI takes over if you don't respond)
+
+The spectator app is optional -- sessions work fine without it (input falls back to the terminal). See `apps/spectator/docs/player-input-architecture.md` for the full design.
+
 ### What Happens During a Play Session
 
-A session follows a repeating loop. The GM broadcasts a narrative scene describing the environment, NPCs, and events. This appears in the terminal for the human to read. The GM then sends direct prompts to each player character asking what they want to do. AI party members respond autonomously based on their personality, bonds, and flaws. The human's relay presents the prompt and waits for the human's decision, then translates it into an in-character action.
+A session follows a repeating loop. The GM broadcasts a narrative scene describing the environment, NPCs, and events. The GM then sends direct prompts to each player character asking what they want to do. AI party members respond autonomously based on their personality, bonds, and flaws. Human-controlled characters use the `ask_player` MCP tool, which routes input through the spectator web UI (if running) or the Claude Code terminal.
 
 All responses flow back to the GM, who weaves them into the next narrative beat -- describing consequences, advancing the story, and introducing complications. Dice rolls happen when outcomes are uncertain: ability checks, saves, attack rolls. The GM requests specific rolls and the `toss` CLI executes them.
 
-This cycle (narrative -> prompts -> responses -> narrative) repeats until a natural stopping point. The GM targets 3-5 major beats per session and actively looks for good stopping points after the third beat. The human can also end the session at any time by saying "end session."
+This cycle (narrative -> prompts -> responses -> narrative) repeats until a natural stopping point. The GM targets 3-5 major beats per session and actively looks for good stopping points after the third beat. The human can also end the session at any time by saying "end session" (or clicking Pause in the spectator UI).
 
 Between beats, AI players may talk to each other in character, journal significant moments, and the narrator writes scene files to `scenes/` for the permanent record. All campaign state is saved automatically -- `story-state.md`, `party-knowledge.md`, and character journals are updated so the next session picks up seamlessly.
 

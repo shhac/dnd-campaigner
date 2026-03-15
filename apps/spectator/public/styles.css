@@ -191,10 +191,13 @@ main {
 .hp-bar { height: 100%; background: #66bb6a; transition: width 0.3s; }
 
 .mode-toggle {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   width: 100%;
   margin-top: 6px;
-  padding: 2px 0;
+  padding: 3px 0;
   border: 1px solid var(--border);
   border-radius: 3px;
   background: var(--bg);
@@ -210,6 +213,7 @@ main {
 .mode-toggle:hover { border-color: var(--text-dim); }
 .mode-toggle.human { border-color: #66bb6a; color: #66bb6a; background: #0a1a0a; }
 .mode-toggle.auto { border-color: var(--accent-dim); color: var(--accent); background: #1a1508; }
+.mode-toggle .prompt-dot { color: var(--color-gm); animation: pulse 1s infinite; }
 
 /* === Play Script (Center) === */
 #play-script {
