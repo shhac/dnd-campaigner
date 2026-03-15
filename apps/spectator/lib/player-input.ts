@@ -13,6 +13,7 @@ import {
   unlinkSync,
 } from "fs";
 import { resolve } from "path";
+import { createHash } from "crypto";
 
 export interface PlayerInputConfig {
   repoRoot: string;
@@ -35,6 +36,7 @@ export type AskPlayerResult =
 
 export interface CheckInterruptResult {
   interrupted: boolean;
+  id?: string | null;
   message?: string | null;
   character?: string | null;
   mode_change?: string | null;
@@ -168,24 +170,70 @@ export async function checkInterrupt(
 ): Promise<CheckInterruptResult> {
   const lockPath = fp(config, campaign, "player.lock");
   const interruptPath = fp(config, campaign, "player-interrupt.json");
-  const pausePath = fp(config, campaign, "player.pause");
 
   // Fast path — no interrupt
   if (!existsSync(lockPath)) {
     return { interrupted: false };
   }
 
-  // Read interrupt
+  // Read interrupt — do NOT delete files (that's clearInterrupt's job)
+  let raw = "";
   let data: Record<string, unknown> = {};
   try {
-    data = readJson(interruptPath) as Record<string, unknown>;
+    raw = readFileSync(interruptPath, "utf-8");
+    data = JSON.parse(raw) as Record<string, unknown>;
   } catch {
     // Lock exists but no content — treat as empty interrupt
   }
 
-  // Clean up
-  deleteIfExists(lockPath);
-  deleteIfExists(interruptPath);
+  // ID is SHA-1 of the raw file content — used by clearInterrupt to avoid clearing a newer interrupt
+  const id = raw ? createHash("sha1").update(raw).digest("hex").slice(0, 12) : null;
+
+  return {
+    interrupted: true,
+    id,
+    message: (data.message as string) || null,
+    character: (data.character as string) || null,
+    mode_change: (data.mode_change as string) || null,
+  };
+}
+
+export interface ClearInterruptResult {
+  cleared: boolean;
+  reason?: string;
+}
+
+export async function clearInterrupt(
+  config: PlayerInputConfig,
+  campaign: string,
+  id: string
+): Promise<ClearInterruptResult> {
+  const lockPath = fp(config, campaign, "player.lock");
+  const interruptPath = fp(config, campaign, "player-interrupt.json");
+  const pausePath = fp(config, campaign, "player.pause");
+
+  // Verify the interrupt hasn't changed since check
+  let raw = "";
+  try {
+    raw = readFileSync(interruptPath, "utf-8");
+  } catch {
+    // File already gone
+    deleteIfExists(lockPath);
+    return { cleared: true, reason: "files_already_gone" };
+  }
+
+  const currentId = createHash("sha1").update(raw).digest("hex").slice(0, 12);
+  if (currentId !== id) {
+    return { cleared: false, reason: "id_mismatch_newer_interrupt" };
+  }
+
+  // Parse for mode change processing
+  let data: Record<string, unknown> = {};
+  try {
+    data = JSON.parse(raw) as Record<string, unknown>;
+  } catch {
+    // Malformed — clear anyway since ID matched
+  }
 
   // Handle mode changes (per-character or global)
   const modeChange = data.mode_change as string | undefined;
@@ -199,10 +247,8 @@ export async function checkInterrupt(
     writeFileSync(pausePath, "");
   }
 
-  return {
-    interrupted: true,
-    message: (data.message as string) || null,
-    character: character || null,
-    mode_change: modeChange || null,
-  };
+  // Now delete the interrupt files
+  deleteIfExists(lockPath);
+  deleteIfExists(interruptPath);
+  return { cleared: true };
 }

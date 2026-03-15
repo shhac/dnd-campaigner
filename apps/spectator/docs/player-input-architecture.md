@@ -146,8 +146,9 @@ bun apps/spectator/cli.ts watch-interrupt --campaign the-dimming
 ```
 1. Human clicks Interrupt → POST /api/interrupt { message, character? }
 2. Spectator writes tmp/player.lock + tmp/player-interrupt.json
-3. GM calls check-interrupt CLI at next beat boundary
-4. CLI reads + deletes, outputs JSON to stdout
+3. GM calls check-interrupt CLI at next beat boundary → gets { interrupted: true, id, message, ... }
+4. GM processes the interrupt, then calls clear-interrupt --id {id} → deletes files, applies mode changes
+5. If a newer interrupt arrived between check and clear, clear-interrupt returns { cleared: false } — GM re-checks
 ```
 
 #### Per-Character Mode Toggle

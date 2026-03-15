@@ -17,7 +17,7 @@
  */
 
 import { resolve } from "path";
-import { askPlayer, checkInterrupt, type PlayerInputConfig } from "./lib/player-input";
+import { askPlayer, checkInterrupt, clearInterrupt, type PlayerInputConfig } from "./lib/player-input";
 
 const REPO_ROOT = resolve(import.meta.dir, "../..");
 const DEFAULT_TIMEOUT = 180;
@@ -96,8 +96,21 @@ switch (command) {
     break;
   }
 
+  case "clear-interrupt": {
+    if (!args.campaign || !args.id) {
+      log("Usage: cli.ts clear-interrupt --campaign <name> --id <hash>");
+      process.exit(1);
+    }
+    const result = await clearInterrupt(config, args.campaign, args.id);
+    if (!result.cleared) {
+      log(`Clear failed: ${result.reason}`);
+    }
+    process.stdout.write(JSON.stringify(result) + "\n");
+    break;
+  }
+
   default:
     log(`Unknown command: ${command}`);
-    log("Commands: ask-player, check-interrupt");
+    log("Commands: ask-player, check-interrupt, clear-interrupt");
     process.exit(1);
 }

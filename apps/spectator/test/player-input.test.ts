@@ -13,6 +13,7 @@ import { tmpdir } from "os";
 import {
   askPlayer,
   checkInterrupt,
+  clearInterrupt,
   type PlayerInputConfig,
   type AskPlayerResult,
 } from "../lib/player-input";
@@ -74,7 +75,7 @@ describe("check-interrupt", () => {
     expect(result).toEqual({ interrupted: false });
   });
 
-  it("reads interrupt content and cleans up files", async () => {
+  it("reads interrupt content without deleting files", async () => {
     const config = tracked(makeConfig());
     writeFile(config, "player.lock");
     writeJsonFile(config, "player-interrupt.json", {
@@ -88,16 +89,17 @@ describe("check-interrupt", () => {
     expect(result.message).toBe("I want to ask the NPC about the artifact");
     expect(result.character).toBe("eamon-lightward");
     expect(result.mode_change).toBeNull();
+    expect(result.id).toBeTypeOf("string");
+    expect(result.id!.length).toBe(12);
 
-    // Files should be cleaned up
-    expect(fileExists(config, "player.lock")).toBe(false);
-    expect(fileExists(config, "player-interrupt.json")).toBe(false);
+    // Files should still exist — clearInterrupt deletes them
+    expect(fileExists(config, "player.lock")).toBe(true);
+    expect(fileExists(config, "player-interrupt.json")).toBe(true);
   });
 
   it("reads interrupt with null fields and extra timestamp", async () => {
     const config = tracked(makeConfig());
     writeFile(config, "player.lock");
-    // Exact structure created by shell echo in playtests
     writeJsonFile(config, "player-interrupt.json", {
       message: "Hello from the human! Just testing.",
       character: null,
@@ -111,6 +113,7 @@ describe("check-interrupt", () => {
     expect(result.message).toBe("Hello from the human! Just testing.");
     expect(result.character).toBeNull();
     expect(result.mode_change).toBeNull();
+    expect(result.id).toBeTypeOf("string");
   });
 
   it("handles lock file without interrupt content", async () => {
@@ -121,7 +124,68 @@ describe("check-interrupt", () => {
 
     expect(result.interrupted).toBe(true);
     expect(result.message).toBeNull();
+    expect(result.id).toBeNull();
+    // Lock still exists
+    expect(fileExists(config, "player.lock")).toBe(true);
+  });
+
+  it("returns consistent id for same content", async () => {
+    const config = tracked(makeConfig());
+    writeFile(config, "player.lock");
+    writeJsonFile(config, "player-interrupt.json", { message: "test" });
+
+    const r1 = await checkInterrupt(config, CAMPAIGN);
+    const r2 = await checkInterrupt(config, CAMPAIGN);
+
+    expect(r1.id).toBe(r2.id);
+  });
+});
+
+// ============================================================
+// clear-interrupt
+// ============================================================
+
+describe("clear-interrupt", () => {
+  it("clears files when id matches", async () => {
+    const config = tracked(makeConfig());
+    writeFile(config, "player.lock");
+    writeJsonFile(config, "player-interrupt.json", {
+      message: "Please pause",
+    });
+
+    const check = await checkInterrupt(config, CAMPAIGN);
+    const result = await clearInterrupt(config, CAMPAIGN, check.id!);
+
+    expect(result.cleared).toBe(true);
     expect(fileExists(config, "player.lock")).toBe(false);
+    expect(fileExists(config, "player-interrupt.json")).toBe(false);
+  });
+
+  it("refuses to clear when id mismatches (newer interrupt)", async () => {
+    const config = tracked(makeConfig());
+    writeFile(config, "player.lock");
+    writeJsonFile(config, "player-interrupt.json", { message: "first" });
+
+    const check = await checkInterrupt(config, CAMPAIGN);
+
+    // A new interrupt arrives before clear
+    writeJsonFile(config, "player-interrupt.json", { message: "second" });
+
+    const result = await clearInterrupt(config, CAMPAIGN, check.id!);
+
+    expect(result.cleared).toBe(false);
+    expect(result.reason).toBe("id_mismatch_newer_interrupt");
+    // Files should still exist
+    expect(fileExists(config, "player.lock")).toBe(true);
+    expect(fileExists(config, "player-interrupt.json")).toBe(true);
+  });
+
+  it("handles already-deleted files gracefully", async () => {
+    const config = tracked(makeConfig());
+    const result = await clearInterrupt(config, CAMPAIGN, "doesntmatter");
+
+    expect(result.cleared).toBe(true);
+    expect(result.reason).toBe("files_already_gone");
   });
 
   it("creates .auto file on full_auto mode change", async () => {
@@ -132,7 +196,8 @@ describe("check-interrupt", () => {
       mode_change: "full_auto",
     });
 
-    await checkInterrupt(config, CAMPAIGN);
+    const check = await checkInterrupt(config, CAMPAIGN);
+    await clearInterrupt(config, CAMPAIGN, check.id!);
 
     expect(fileExists(config, "eamon-lightward.auto")).toBe(true);
   });
@@ -146,7 +211,8 @@ describe("check-interrupt", () => {
       mode_change: "human",
     });
 
-    await checkInterrupt(config, CAMPAIGN);
+    const check = await checkInterrupt(config, CAMPAIGN);
+    await clearInterrupt(config, CAMPAIGN, check.id!);
 
     expect(fileExists(config, "eamon-lightward.auto")).toBe(false);
   });
@@ -158,7 +224,8 @@ describe("check-interrupt", () => {
       mode_change: "pause",
     });
 
-    await checkInterrupt(config, CAMPAIGN);
+    const check = await checkInterrupt(config, CAMPAIGN);
+    await clearInterrupt(config, CAMPAIGN, check.id!);
 
     expect(fileExists(config, "player.pause")).toBe(true);
   });
