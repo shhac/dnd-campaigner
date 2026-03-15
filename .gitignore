@@ -33,6 +33,9 @@ __pycache__/
 # Chatterbox TTS
 .chatterbox-venv/
 
+# Playwright MCP
+.playwright-mcp/
+
 # Intermediate Files
 campaigns/*/novel/**/*.m4a
 campaigns/*/novel/**/*.mp3
