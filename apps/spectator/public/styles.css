@@ -484,6 +484,16 @@ main {
 #prompt-countdown.warning { color: #ffa726; }
 #prompt-countdown.critical { color: #ef5350; animation: pulse 0.5s infinite; }
 
+.prompt-tab {
+  cursor: pointer;
+  padding: 1px 6px;
+  border-radius: 3px;
+  margin-right: 4px;
+  transition: all 0.15s;
+}
+.prompt-tab:hover { background: var(--bg-hover); }
+.prompt-tab.active { background: #2a2a3a; color: var(--text-bright); }
+
 #prompt-text {
   font-size: 12px;
   line-height: 1.5;

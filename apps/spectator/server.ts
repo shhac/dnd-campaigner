@@ -129,13 +129,25 @@ function handlePlayerApi(req: Request, url: URL): Response | null {
   // Health check — always available
   if (url.pathname === "/api/health") {
     const dir = campaignTmpDir();
+    // Scan for per-character auto flags and pending prompts
+    const characters: Record<string, { mode: string; hasPrompt: boolean }> = {};
+    if (dir) {
+      const campaign = manager?.state.campaign;
+      if (campaign) {
+        for (const char of campaign.characters) {
+          characters[char.id] = {
+            mode: existsSync(join(dir, `${char.id}.auto`)) ? "full_auto" : "human",
+            hasPrompt: existsSync(join(dir, `${char.id}-prompt.json`)),
+          };
+        }
+      }
+    }
     return Response.json({
       ok: true,
       session: activeSession?.sessionId ?? null,
       campaign: manager?.state.campaign?.name ?? null,
-      hasPrompt: dir ? existsSync(join(dir, "player-prompt.json")) : false,
+      characters,
       isPaused: dir ? existsSync(join(dir, "player.pause")) : false,
-      mode: dir && existsSync(join(dir, "full-auto.flag")) ? "full_auto" : "human",
     });
   }
 
@@ -145,18 +157,35 @@ function handlePlayerApi(req: Request, url: URL): Response | null {
     return Response.json({ error: "No active campaign" }, { status: 503 });
   }
 
-  // GET /api/prompt — browser polls for pending prompt
+  // GET /api/prompt — browser polls for pending prompts (per-character)
   if (url.pathname === "/api/prompt" && req.method === "GET") {
-    const promptPath = join(dir, "player-prompt.json");
-    if (existsSync(promptPath)) {
-      try {
-        const data = JSON.parse(readFileSync(promptPath, "utf-8"));
-        return Response.json(data);
-      } catch {
-        return Response.json({ prompt: null });
+    const character = url.searchParams.get("character");
+    // If character specified, return that character's prompt
+    if (character) {
+      const promptPath = join(dir, `${character}-prompt.json`);
+      if (existsSync(promptPath)) {
+        try {
+          return Response.json(JSON.parse(readFileSync(promptPath, "utf-8")));
+        } catch {
+          return Response.json({ prompt: null });
+        }
+      }
+      return Response.json({ prompt: null });
+    }
+    // No character specified — return all pending prompts
+    const prompts: Record<string, unknown> = {};
+    const campaign = manager?.state.campaign;
+    if (campaign) {
+      for (const char of campaign.characters) {
+        const path = join(dir, `${char.id}-prompt.json`);
+        if (existsSync(path)) {
+          try {
+            prompts[char.id] = JSON.parse(readFileSync(path, "utf-8"));
+          } catch {}
+        }
       }
     }
-    return Response.json({ prompt: null });
+    return Response.json({ prompts });
   }
 
   // POST /api/respond, /api/interrupt, /api/mode — handled async (need body parsing)
@@ -186,46 +215,56 @@ async function handlePlayerApiAsync(req: Request, url: URL): Promise<Response | 
 
   if (url.pathname === "/api/respond" && req.method === "POST") {
     const body = await req.json() as Record<string, unknown>;
+    const character = body.character as string;
+    if (!character) return Response.json({ error: "character required" }, { status: 400 });
     writeFileSync(
-      join(dir, "player-response.json"),
+      join(dir, `${character}-response.json`),
       JSON.stringify({ message: body.message, skip: body.skip ?? false, timestamp: Date.now() })
     );
-    return Response.json({ ok: true });
+    return Response.json({ ok: true, character });
   }
 
   if (url.pathname === "/api/interrupt" && req.method === "POST") {
     const body = await req.json() as Record<string, unknown>;
+    const character = body.character as string | undefined;
     writeFileSync(join(dir, "player.lock"), "");
     writeFileSync(
       join(dir, "player-interrupt.json"),
-      JSON.stringify({ message: body.message, mode_change: body.mode_change ?? null, timestamp: Date.now() })
+      JSON.stringify({
+        message: body.message,
+        character: character ?? null,
+        mode_change: body.mode_change ?? null,
+        timestamp: Date.now(),
+      })
     );
-    // Handle mode changes immediately
-    if (body.mode_change === "full_auto") {
-      writeFileSync(join(dir, "full-auto.flag"), "");
-    } else if (body.mode_change === "human") {
-      try { unlinkSync(join(dir, "full-auto.flag")); } catch {}
+    // Handle per-character mode changes immediately
+    if (body.mode_change === "full_auto" && character) {
+      writeFileSync(join(dir, `${character}.auto`), "");
+    } else if (body.mode_change === "human" && character) {
+      try { unlinkSync(join(dir, `${character}.auto`)); } catch {}
     }
-    broadcast("interrupt", { message: body.message, mode_change: body.mode_change });
+    broadcast("interrupt", { message: body.message, character, mode_change: body.mode_change });
     return Response.json({ ok: true });
   }
 
   if (url.pathname === "/api/mode" && req.method === "POST") {
     const body = await req.json() as Record<string, unknown>;
+    const character = body.character as string;
     const mode = body.mode as string;
+    if (!character) return Response.json({ error: "character required" }, { status: 400 });
     if (mode === "full_auto") {
-      writeFileSync(join(dir, "full-auto.flag"), "");
+      writeFileSync(join(dir, `${character}.auto`), "");
     } else {
-      try { unlinkSync(join(dir, "full-auto.flag")); } catch {}
+      try { unlinkSync(join(dir, `${character}.auto`)); } catch {}
     }
-    // Also create interrupt so GM picks up the mode change
+    // Create interrupt so GM picks up the mode change
     writeFileSync(join(dir, "player.lock"), "");
     writeFileSync(
       join(dir, "player-interrupt.json"),
-      JSON.stringify({ message: null, mode_change: mode, timestamp: Date.now() })
+      JSON.stringify({ message: null, character, mode_change: mode, timestamp: Date.now() })
     );
-    broadcast("mode", { mode });
-    return Response.json({ ok: true, mode });
+    broadcast("mode", { character, mode });
+    return Response.json({ ok: true, character, mode });
   }
 
   return null;

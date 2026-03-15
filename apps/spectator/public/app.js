@@ -612,9 +612,10 @@ document.getElementById("play-script").addEventListener("scroll", (e) => {
 
 // === Player Input System ===
 
-let playerMode = "human"; // "human" | "full_auto"
+let characterModes = {}; // { "eamon-lightward": "human", ... }
 let isPaused = false;
-let currentPrompt = null;
+let activePrompts = {}; // { "eamon-lightward": { prompt, character, ... }, ... }
+let activePromptChar = null; // which character's prompt is currently shown
 let countdownInterval = null;
 
 function startPromptPolling() {
@@ -622,20 +623,36 @@ function startPromptPolling() {
     try {
       const resp = await fetch("/api/prompt");
       const data = await resp.json();
-      if (data.prompt && !currentPrompt) {
-        showPromptBar(data);
-      } else if (!data.prompt && currentPrompt) {
-        hidePromptBar();
+      const newPrompts = data.prompts || {};
+
+      // Detect new prompts
+      for (const [char, prompt] of Object.entries(newPrompts)) {
+        if (!activePrompts[char]) {
+          activePrompts[char] = prompt;
+          // Auto-show the first prompt that appears
+          if (!activePromptChar) showPromptBar(char, prompt);
+        }
       }
+      // Detect removed prompts (response was consumed)
+      for (const char of Object.keys(activePrompts)) {
+        if (!newPrompts[char]) {
+          delete activePrompts[char];
+          if (activePromptChar === char) hidePromptBar();
+        }
+      }
+      updatePromptTabs();
     } catch {}
 
-    // Also poll health for mode/pause state
+    // Poll health for mode/pause state
     try {
       const resp = await fetch("/api/health");
       const health = await resp.json();
-      if (health.mode !== playerMode) {
-        playerMode = health.mode;
-        updateModeButton();
+      if (health.characters) {
+        characterModes = {};
+        for (const [id, info] of Object.entries(health.characters)) {
+          characterModes[id] = info.mode;
+        }
+        updateModeControls();
       }
       if (health.isPaused !== isPaused) {
         isPaused = health.isPaused;
@@ -645,22 +662,22 @@ function startPromptPolling() {
   }, 1000);
 }
 
-function showPromptBar(data) {
-  currentPrompt = data;
+function showPromptBar(character, data) {
+  activePromptChar = character;
   const container = document.getElementById("prompt-container");
   const text = document.getElementById("prompt-text");
   const input = document.getElementById("prompt-input");
   const countdown = document.getElementById("prompt-countdown");
+  const label = document.getElementById("prompt-label");
 
+  label.textContent = `${getAgentShortName(character)}:`;
   text.textContent = data.prompt;
   input.value = "";
   container.classList.remove("hidden");
   input.focus();
 
-  // Update layout
   document.documentElement.style.setProperty("--player-bar-height", "140px");
 
-  // Start countdown
   const deadline = data.timestamp + (data.timeout_seconds || 180) * 1000;
   updateCountdown(deadline, countdown);
   if (countdownInterval) clearInterval(countdownInterval);
@@ -668,12 +685,32 @@ function showPromptBar(data) {
 }
 
 function hidePromptBar() {
-  currentPrompt = null;
+  activePromptChar = null;
   document.getElementById("prompt-container").classList.add("hidden");
   document.documentElement.style.setProperty("--player-bar-height", "48px");
   if (countdownInterval) {
     clearInterval(countdownInterval);
     countdownInterval = null;
+  }
+  // Show next pending prompt if any
+  const next = Object.keys(activePrompts)[0];
+  if (next) showPromptBar(next, activePrompts[next]);
+}
+
+function updatePromptTabs() {
+  // Show character tabs when multiple prompts are pending
+  const chars = Object.keys(activePrompts);
+  const label = document.getElementById("prompt-label");
+  if (chars.length <= 1 && activePromptChar) {
+    label.textContent = `${getAgentShortName(activePromptChar)}:`;
+    return;
+  }
+  if (chars.length > 1 && activePromptChar) {
+    label.innerHTML = chars.map(c =>
+      `<span class="prompt-tab ${c === activePromptChar ? 'active' : ''}" data-char="${c}">` +
+      `${getAgentShortName(c)} ${activePrompts[c] ? '●' : ''}` +
+      `</span>`
+    ).join(" ");
   }
 }
 
@@ -683,34 +720,36 @@ function updateCountdown(deadline, el) {
   const secs = remaining % 60;
   el.textContent = `${mins}:${secs.toString().padStart(2, "0")}`;
   el.className = remaining <= 10 ? "critical" : remaining <= 30 ? "warning" : "";
-  if (remaining <= 0) {
-    hidePromptBar();
-  }
+  if (remaining <= 0) hidePromptBar();
 }
 
 async function sendResponse(message) {
+  if (!activePromptChar) return;
   try {
     await fetch("/api/respond", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message }),
+      body: JSON.stringify({ character: activePromptChar, message }),
     });
   } catch (e) {
     console.error("Failed to send response:", e);
   }
+  delete activePrompts[activePromptChar];
   hidePromptBar();
 }
 
 async function skipTurn() {
+  if (!activePromptChar) return;
   try {
     await fetch("/api/respond", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: null, skip: true }),
+      body: JSON.stringify({ character: activePromptChar, message: null, skip: true }),
     });
   } catch (e) {
     console.error("Failed to skip:", e);
   }
+  delete activePrompts[activePromptChar];
   hidePromptBar();
 }
 
@@ -742,25 +781,36 @@ async function togglePause() {
   }
 }
 
-async function toggleMode() {
-  const newMode = playerMode === "human" ? "full_auto" : "human";
+async function toggleCharacterMode(character) {
+  const current = characterModes[character] || "human";
+  const newMode = current === "human" ? "full_auto" : "human";
   try {
     await fetch("/api/mode", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ mode: newMode }),
+      body: JSON.stringify({ character, mode: newMode }),
     });
-    playerMode = newMode;
-    updateModeButton();
+    characterModes[character] = newMode;
+    updateModeControls();
   } catch (e) {
     console.error("Failed to toggle mode:", e);
   }
 }
 
-function updateModeButton() {
+function updateModeControls() {
   const btn = document.getElementById("btn-mode");
-  btn.textContent = playerMode === "full_auto" ? "Full Auto" : "Human";
-  btn.classList.toggle("active", playerMode === "full_auto");
+  const humanChars = Object.entries(characterModes).filter(([, m]) => m === "human");
+  const autoChars = Object.entries(characterModes).filter(([, m]) => m === "full_auto");
+  if (humanChars.length === 0 && autoChars.length > 0) {
+    btn.textContent = "All Auto";
+    btn.classList.add("active");
+  } else if (autoChars.length === 0) {
+    btn.textContent = "All Human";
+    btn.classList.remove("active");
+  } else {
+    btn.textContent = `${humanChars.length} Human`;
+    btn.classList.remove("active");
+  }
 }
 
 function updatePauseButton() {
@@ -806,9 +856,33 @@ function initPlayerControls() {
     document.getElementById("interrupt-container").classList.add("hidden");
   });
 
-  // Pause & Mode
+  // Prompt tab clicks (switch between characters)
+  document.getElementById("prompt-label").addEventListener("click", (e) => {
+    const tab = e.target.closest(".prompt-tab");
+    if (tab && tab.dataset.char && activePrompts[tab.dataset.char]) {
+      showPromptBar(tab.dataset.char, activePrompts[tab.dataset.char]);
+      updatePromptTabs();
+    }
+  });
+
+  // Pause
   document.getElementById("btn-pause").addEventListener("click", togglePause);
-  document.getElementById("btn-mode").addEventListener("click", toggleMode);
+
+  // Mode — cycle through characters or toggle all
+  document.getElementById("btn-mode").addEventListener("click", () => {
+    const chars = Object.keys(characterModes);
+    if (chars.length === 0) return;
+    // If all same mode, toggle all
+    const allHuman = chars.every(c => characterModes[c] === "human");
+    const allAuto = chars.every(c => characterModes[c] === "full_auto");
+    if (allHuman || allAuto) {
+      const newMode = allHuman ? "full_auto" : "human";
+      chars.forEach(c => toggleCharacterMode(c));
+    } else {
+      // Mixed — set all to human
+      chars.filter(c => characterModes[c] !== "human").forEach(c => toggleCharacterMode(c));
+    }
+  });
 
   // Set initial layout
   document.documentElement.style.setProperty("--player-bar-height", "48px");
