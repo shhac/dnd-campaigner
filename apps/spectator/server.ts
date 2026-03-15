@@ -12,6 +12,7 @@
  */
 
 import { resolve, join } from "path";
+import { existsSync, writeFileSync, readFileSync, unlinkSync, mkdirSync } from "fs";
 import {
   findSession,
   listSessionSummaries,
@@ -109,6 +110,127 @@ if (cliSessionId) {
   }
 }
 
+// --- Player input helpers ---
+
+function campaignTmpDir(): string | null {
+  const name = manager?.state.campaign?.name;
+  if (!name) return null;
+  const dir = join(repoRoot, "campaigns", name, "tmp");
+  mkdirSync(dir, { recursive: true });
+  return dir;
+}
+
+function tmpFile(name: string): string | null {
+  const dir = campaignTmpDir();
+  return dir ? join(dir, name) : null;
+}
+
+function handlePlayerApi(req: Request, url: URL): Response | null {
+  // Health check — always available
+  if (url.pathname === "/api/health") {
+    const dir = campaignTmpDir();
+    return Response.json({
+      ok: true,
+      session: activeSession?.sessionId ?? null,
+      campaign: manager?.state.campaign?.name ?? null,
+      hasPrompt: dir ? existsSync(join(dir, "player-prompt.json")) : false,
+      isPaused: dir ? existsSync(join(dir, "player.pause")) : false,
+      mode: dir && existsSync(join(dir, "full-auto.flag")) ? "full_auto" : "human",
+    });
+  }
+
+  // All other player APIs need an active campaign
+  const dir = campaignTmpDir();
+  if (!dir) {
+    return Response.json({ error: "No active campaign" }, { status: 503 });
+  }
+
+  // GET /api/prompt — browser polls for pending prompt
+  if (url.pathname === "/api/prompt" && req.method === "GET") {
+    const promptPath = join(dir, "player-prompt.json");
+    if (existsSync(promptPath)) {
+      try {
+        const data = JSON.parse(readFileSync(promptPath, "utf-8"));
+        return Response.json(data);
+      } catch {
+        return Response.json({ prompt: null });
+      }
+    }
+    return Response.json({ prompt: null });
+  }
+
+  // POST /api/respond, /api/interrupt, /api/mode — handled async (need body parsing)
+  // These are routed in the fetch handler below, not here.
+
+  // POST /api/pause — pause session
+  if (url.pathname === "/api/pause" && req.method === "POST") {
+    writeFileSync(join(dir, "player.pause"), "");
+    broadcast("pause", { paused: true });
+    return Response.json({ ok: true, paused: true });
+  }
+
+  // DELETE /api/pause — resume session
+  if (url.pathname === "/api/pause" && req.method === "DELETE") {
+    try { unlinkSync(join(dir, "player.pause")); } catch {}
+    broadcast("pause", { paused: false });
+    return Response.json({ ok: true, paused: false });
+  }
+
+  return null; // Not a player API route (or needs async body parsing)
+}
+
+// Async body handlers (need await for req.json())
+async function handlePlayerApiAsync(req: Request, url: URL): Promise<Response | null> {
+  const dir = campaignTmpDir();
+  if (!dir) return null;
+
+  if (url.pathname === "/api/respond" && req.method === "POST") {
+    const body = await req.json() as Record<string, unknown>;
+    writeFileSync(
+      join(dir, "player-response.json"),
+      JSON.stringify({ message: body.message, skip: body.skip ?? false, timestamp: Date.now() })
+    );
+    return Response.json({ ok: true });
+  }
+
+  if (url.pathname === "/api/interrupt" && req.method === "POST") {
+    const body = await req.json() as Record<string, unknown>;
+    writeFileSync(join(dir, "player.lock"), "");
+    writeFileSync(
+      join(dir, "player-interrupt.json"),
+      JSON.stringify({ message: body.message, mode_change: body.mode_change ?? null, timestamp: Date.now() })
+    );
+    // Handle mode changes immediately
+    if (body.mode_change === "full_auto") {
+      writeFileSync(join(dir, "full-auto.flag"), "");
+    } else if (body.mode_change === "human") {
+      try { unlinkSync(join(dir, "full-auto.flag")); } catch {}
+    }
+    broadcast("interrupt", { message: body.message, mode_change: body.mode_change });
+    return Response.json({ ok: true });
+  }
+
+  if (url.pathname === "/api/mode" && req.method === "POST") {
+    const body = await req.json() as Record<string, unknown>;
+    const mode = body.mode as string;
+    if (mode === "full_auto") {
+      writeFileSync(join(dir, "full-auto.flag"), "");
+    } else {
+      try { unlinkSync(join(dir, "full-auto.flag")); } catch {}
+    }
+    // Also create interrupt so GM picks up the mode change
+    writeFileSync(join(dir, "player.lock"), "");
+    writeFileSync(
+      join(dir, "player-interrupt.json"),
+      JSON.stringify({ message: null, mode_change: mode, timestamp: Date.now() })
+    );
+    broadcast("mode", { mode });
+    return Response.json({ ok: true, mode });
+  }
+
+  return null;
+}
+
 // --- HTTP + WebSocket server ---
 
 const server = Bun.serve({
@@ -122,6 +244,22 @@ const server = Bun.serve({
       return success
         ? undefined
         : new Response("WebSocket upgrade failed", { status: 400 });
+    }
+
+    // Player input API (sync handlers)
+    const syncResult = handlePlayerApi(req, url);
+    if (syncResult) return syncResult;
+
+    // Player input API (async handlers — need body parsing)
+    if (
+      (url.pathname === "/api/respond" ||
+        url.pathname === "/api/interrupt" ||
+        url.pathname === "/api/mode") &&
+      req.method === "POST"
+    ) {
+      return handlePlayerApiAsync(req, url).then(
+        (r) => r || new Response("Not Found", { status: 404 })
+      );
     }
 
     // API: list sessions for picker

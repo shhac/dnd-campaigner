@@ -610,6 +610,212 @@ document.getElementById("play-script").addEventListener("scroll", (e) => {
   }
 });
 
+// === Player Input System ===
+
+let playerMode = "human"; // "human" | "full_auto"
+let isPaused = false;
+let currentPrompt = null;
+let countdownInterval = null;
+
+function startPromptPolling() {
+  setInterval(async () => {
+    try {
+      const resp = await fetch("/api/prompt");
+      const data = await resp.json();
+      if (data.prompt && !currentPrompt) {
+        showPromptBar(data);
+      } else if (!data.prompt && currentPrompt) {
+        hidePromptBar();
+      }
+    } catch {}
+
+    // Also poll health for mode/pause state
+    try {
+      const resp = await fetch("/api/health");
+      const health = await resp.json();
+      if (health.mode !== playerMode) {
+        playerMode = health.mode;
+        updateModeButton();
+      }
+      if (health.isPaused !== isPaused) {
+        isPaused = health.isPaused;
+        updatePauseButton();
+      }
+    } catch {}
+  }, 1000);
+}
+
+function showPromptBar(data) {
+  currentPrompt = data;
+  const container = document.getElementById("prompt-container");
+  const text = document.getElementById("prompt-text");
+  const input = document.getElementById("prompt-input");
+  const countdown = document.getElementById("prompt-countdown");
+
+  text.textContent = data.prompt;
+  input.value = "";
+  container.classList.remove("hidden");
+  input.focus();
+
+  // Update layout
+  document.documentElement.style.setProperty("--player-bar-height", "140px");
+
+  // Start countdown
+  const deadline = data.timestamp + (data.timeout_seconds || 180) * 1000;
+  updateCountdown(deadline, countdown);
+  if (countdownInterval) clearInterval(countdownInterval);
+  countdownInterval = setInterval(() => updateCountdown(deadline, countdown), 1000);
+}
+
+function hidePromptBar() {
+  currentPrompt = null;
+  document.getElementById("prompt-container").classList.add("hidden");
+  document.documentElement.style.setProperty("--player-bar-height", "48px");
+  if (countdownInterval) {
+    clearInterval(countdownInterval);
+    countdownInterval = null;
+  }
+}
+
+function updateCountdown(deadline, el) {
+  const remaining = Math.max(0, Math.floor((deadline - Date.now()) / 1000));
+  const mins = Math.floor(remaining / 60);
+  const secs = remaining % 60;
+  el.textContent = `${mins}:${secs.toString().padStart(2, "0")}`;
+  el.className = remaining <= 10 ? "critical" : remaining <= 30 ? "warning" : "";
+  if (remaining <= 0) {
+    hidePromptBar();
+  }
+}
+
+async function sendResponse(message) {
+  try {
+    await fetch("/api/respond", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message }),
+    });
+  } catch (e) {
+    console.error("Failed to send response:", e);
+  }
+  hidePromptBar();
+}
+
+async function skipTurn() {
+  try {
+    await fetch("/api/respond", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: null, skip: true }),
+    });
+  } catch (e) {
+    console.error("Failed to skip:", e);
+  }
+  hidePromptBar();
+}
+
+async function sendInterrupt(message, modeChange) {
+  try {
+    await fetch("/api/interrupt", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message, mode_change: modeChange || null }),
+    });
+  } catch (e) {
+    console.error("Failed to interrupt:", e);
+  }
+  document.getElementById("interrupt-container").classList.add("hidden");
+  document.getElementById("interrupt-input").value = "";
+}
+
+async function togglePause() {
+  try {
+    if (isPaused) {
+      await fetch("/api/pause", { method: "DELETE" });
+    } else {
+      await fetch("/api/pause", { method: "POST" });
+    }
+    isPaused = !isPaused;
+    updatePauseButton();
+  } catch (e) {
+    console.error("Failed to toggle pause:", e);
+  }
+}
+
+async function toggleMode() {
+  const newMode = playerMode === "human" ? "full_auto" : "human";
+  try {
+    await fetch("/api/mode", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mode: newMode }),
+    });
+    playerMode = newMode;
+    updateModeButton();
+  } catch (e) {
+    console.error("Failed to toggle mode:", e);
+  }
+}
+
+function updateModeButton() {
+  const btn = document.getElementById("btn-mode");
+  btn.textContent = playerMode === "full_auto" ? "Full Auto" : "Human";
+  btn.classList.toggle("active", playerMode === "full_auto");
+}
+
+function updatePauseButton() {
+  const btn = document.getElementById("btn-pause");
+  btn.textContent = isPaused ? "Resume" : "Pause";
+  btn.classList.toggle("danger", isPaused);
+}
+
+function initPlayerControls() {
+  // Prompt response
+  document.getElementById("prompt-send").addEventListener("click", () => {
+    const input = document.getElementById("prompt-input");
+    if (input.value.trim()) sendResponse(input.value.trim());
+  });
+  document.getElementById("prompt-input").addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && e.target.value.trim()) {
+      sendResponse(e.target.value.trim());
+    }
+  });
+  document.getElementById("prompt-skip").addEventListener("click", skipTurn);
+
+  // Interrupt
+  document.getElementById("btn-interrupt").addEventListener("click", () => {
+    const container = document.getElementById("interrupt-container");
+    container.classList.toggle("hidden");
+    if (!container.classList.contains("hidden")) {
+      document.getElementById("interrupt-input").focus();
+    }
+  });
+  document.getElementById("interrupt-send").addEventListener("click", () => {
+    const input = document.getElementById("interrupt-input");
+    if (input.value.trim()) sendInterrupt(input.value.trim(), null);
+  });
+  document.getElementById("interrupt-input").addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && e.target.value.trim()) {
+      sendInterrupt(e.target.value.trim(), null);
+    }
+    if (e.key === "Escape") {
+      document.getElementById("interrupt-container").classList.add("hidden");
+    }
+  });
+  document.getElementById("interrupt-cancel").addEventListener("click", () => {
+    document.getElementById("interrupt-container").classList.add("hidden");
+  });
+
+  // Pause & Mode
+  document.getElementById("btn-pause").addEventListener("click", togglePause);
+  document.getElementById("btn-mode").addEventListener("click", toggleMode);
+
+  // Set initial layout
+  document.documentElement.style.setProperty("--player-bar-height", "48px");
+}
+
 // === Start ===
 initFilters();
+initPlayerControls();
+startPromptPolling();
 connect();

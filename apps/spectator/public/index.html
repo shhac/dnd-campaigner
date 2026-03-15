@@ -36,6 +36,33 @@
     </aside>
   </main>
 
+  <footer id="player-bar">
+    <div id="prompt-container" class="hidden">
+      <div id="prompt-header">
+        <span id="prompt-label">GM asks:</span>
+        <span id="prompt-countdown"></span>
+      </div>
+      <div id="prompt-text"></div>
+      <div id="prompt-input-row">
+        <input type="text" id="prompt-input" placeholder="Type your response..." autocomplete="off" />
+        <button id="prompt-send" class="player-btn primary">Send</button>
+        <button id="prompt-skip" class="player-btn">Skip</button>
+      </div>
+    </div>
+    <div id="interrupt-container" class="hidden">
+      <div id="interrupt-input-row">
+        <input type="text" id="interrupt-input" placeholder="What do you want to say?" autocomplete="off" />
+        <button id="interrupt-send" class="player-btn primary">Send</button>
+        <button id="interrupt-cancel" class="player-btn">Cancel</button>
+      </div>
+    </div>
+    <div id="player-controls">
+      <button id="btn-interrupt" class="player-btn" title="Speak up">Interrupt</button>
+      <button id="btn-pause" class="player-btn" title="Pause session">Pause</button>
+      <button id="btn-mode" class="player-btn" title="Toggle AI control">Human</button>
+    </div>
+  </footer>
+
   <script src="app.js"></script>
 </body>
 </html>
