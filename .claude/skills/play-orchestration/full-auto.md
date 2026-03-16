@@ -14,6 +14,7 @@ When running a session with no human player (all characters are AI-controlled).
 [SESSION_COMMAND]
 command: start
 campaign: {campaign}
+playthrough: {playthrough}
 mode: full_auto
 narrative_style: {style}
 ai_characters:

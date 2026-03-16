@@ -1,23 +1,23 @@
 ---
 description: Generate voices.yaml for novel TTS reading
-argument-hint: <campaign-name>
+argument-hint: <campaign-name> <game-name>
 ---
 
 # /setup-voices
 
-Generate a `voices.yaml` file for a campaign's novel, mapping POV characters to Piper TTS voices with per-voice settings.
+Generate a `voices.yaml` file for a playthrough's novel, mapping POV characters to Piper TTS voices with per-voice settings.
 
 ## Usage
 
 ```
-/setup-voices {campaign-name}
+/setup-voices {campaign-name} {game-name}
 ```
 
 ## What This Does
 
 1. Scans the campaign's novel chapters to identify POV characters
 2. Looks up each character's gender from their character sheet
-3. Creates `campaigns/{campaign}/novel/voices.yaml` with voice mappings and optimal settings
+3. Creates `{playthrough}/novel/voices.yaml` with voice mappings and optimal settings
 
 ## Prerequisites
 
@@ -33,7 +33,7 @@ Generate a `voices.yaml` file for a campaign's novel, mapping POV characters to 
 Check that the campaign exists and has a novel:
 
 ```
-campaigns/{campaign}/novel/
+{playthrough}/novel/
 ```
 
 If no novel directory exists, inform the user they should run `/novelize {campaign}` first.
@@ -43,7 +43,7 @@ If no novel directory exists, inform the user they should run `/novelize {campai
 Scan all chapter files to extract unique POV characters:
 
 ```
-campaigns/{campaign}/novel/chapter-*.md
+{playthrough}/novel/chapter-*.md
 ```
 
 Skip any files ending in `-draft.md`.
@@ -84,7 +84,7 @@ For each POV character:
 
 ### Step 4: Generate voices.yaml
 
-Create `campaigns/{campaign}/novel/voices.yaml` with this format:
+Create `{playthrough}/novel/voices.yaml` with this format:
 
 ```yaml
 # Voice mapping for novel reading
@@ -138,7 +138,7 @@ Display what was created:
 | {name} | {gender} | {voice} | {length_scale} | {sentence_silence}s |
 ...
 
-File: campaigns/{campaign}/novel/voices.yaml
+File: {playthrough}/novel/voices.yaml
 
 To use: source scripts/piper-env.sh && read-novel {campaign}
 ```

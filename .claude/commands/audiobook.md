@@ -1,6 +1,6 @@
 ---
 description: Generate MP3 audiobook from novel chapters using Chatterbox TTS
-argument-hint: <campaign> [--chapter N] [--chapters N-M] [--resume] [--force] [--dry-run] [--test-voices] [--clean] [--parallel N] [--segment-only] [--generate-only] [--assemble-only] [--no-assemble]
+argument-hint: <campaign> <game-name> [--chapter N] [--chapters N-M] [--resume] [--force] [--dry-run] [--test-voices] [--clean] [--parallel N] [--segment-only] [--generate-only] [--assemble-only] [--no-assemble]
 ---
 
 # /audiobook
@@ -82,9 +82,9 @@ clean_mode: --clean flag present
 ### Validation
 
 1. **Campaign exists**: Check `campaigns/{campaign}/` directory exists
-2. **Novel exists**: Check `campaigns/{campaign}/novel/` directory exists (unless --clean)
-3. **Chapters exist**: Check at least one `chapter-*.md` file exists (unless --clean)
-4. **Voices configured**: Check `campaigns/{campaign}/novel/voices.yaml` exists (unless --clean)
+2. **Novel exists**: Check `{playthrough}/novel/` directory exists (unless --clean)
+3. **Chapters exist**: Check at least one `chapter-*.md` file exists in `{playthrough}/novel/` (unless --clean)
+4. **Voices configured**: Check `{playthrough}/novel/voices.yaml` exists (unless --clean)
 5. **Resume mode**: If `--resume`, verify `audiobook/audiobook-state.yaml` exists
 
 If validation fails:
