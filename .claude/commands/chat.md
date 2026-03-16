@@ -1,6 +1,6 @@
 ---
 description: Have a fireside conversation with a D&D character
-argument-hint: <campaign> <character>
+argument-hint: <campaign> <character> [--playthrough <game-name>]
 ---
 
 # /chat
@@ -11,6 +11,7 @@ Have a meta-conversation with a character outside of gameplay. Perfect for explo
 
 - `campaign` (required): The campaign name (e.g., `the-rot-beneath`)
 - `character` (required): The character's full hyphenated name (e.g., `gideon-harrowmoor`)
+- `--playthrough <game-name>` (optional): A playthrough name (e.g., `session-1`). When provided, the character reads their evolved sheet, journal, and relationships from `playthroughs/{campaign}/{game-name}/`. Without this, the character is "fresh" — base sheet only, no session history.
 
 ## What This Does
 
@@ -26,7 +27,7 @@ The character will:
 
 ```
 /chat the-rot-beneath gideon-harrowmoor
-/chat curse-of-strahd seraphine-dawnwhisper
+/chat the-dimming tilda-brannock --playthrough fireside-test
 ```
 
 ## What This Is NOT
@@ -84,15 +85,21 @@ You are the **orchestrator** for a character chat session. Your job is to valida
 1. **Parse arguments**:
    - First argument: `campaign` (required)
    - Second argument: `character` (required)
-   - If either is missing, explain the usage and ask for both
+   - Optional: `--playthrough <game-name>` flag
+   - If campaign or character is missing, explain the usage and ask for both
 
 2. **Verify campaign exists**:
    - Check `campaigns/{campaign}/` directory exists
    - If not, list available campaigns and ask user to choose
 
 3. **Verify character exists**:
-   - Check `campaigns/{campaign}/party/{character}.md` exists
-   - If not, list available characters in that campaign's party and ask user to choose
+   - If `--playthrough` provided: check `playthroughs/{campaign}/{game-name}/party/{character}.md` exists
+   - Otherwise: check `campaigns/{campaign}/party/{character}.md` exists
+   - If not found, list available characters in the relevant party directory and ask user to choose
+
+4. **Verify playthrough exists** (if `--playthrough` provided):
+   - Check `playthroughs/{campaign}/{game-name}/` directory exists
+   - If not, list available playthroughs for that campaign and ask user to choose
 
 ### Spawning the Agent
 
@@ -101,6 +108,7 @@ Once validated, spawn the `character-chat` agent with this prompt structure:
 ```
 Campaign: {campaign}
 Character: {character}
+Playthrough: {game-name}  ← include this line ONLY if --playthrough was provided
 
 The user wants to have a fireside conversation with this character. This is a meta-conversation outside the game - no campaign state changes will occur.
 
