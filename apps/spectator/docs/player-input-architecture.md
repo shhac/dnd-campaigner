@@ -45,26 +45,25 @@ One tool, one code path. The calling agent branches on the response mode.
 │  Per-char    │                    └──────┬───────┘
 │  prompt tabs │     POST /api/*           │ writes/reads
 │  Interrupt   │ ──────────────────►       │ lock files
-│  Pause/Mode  │                    ┌──────▼───────┐
-└──────────────┘                    │  tmp/        │
-                                    │  {char}-prompt.json│
-                                    │  {char}-response.json│
-                                    │  player.lock │
-                                    │  player.pause│
-                                    │  {char}.auto │
-                                    └──────▲───────┘
+│  Pause/Mode  │                    ┌──────▼────────────────┐
+└──────────────┘                    │  /tmp/dnd-campaigner/ │
+                                    │  {campaign}-{session}/│
+                                    │    {char}-prompt.json │
+                                    │    {char}-response.json│
+                                    │    player.lock        │
+                                    │    player.pause       │
+                                    │    {char}.auto        │
+                                    └──────▲────────────────┘
                                            │
                                     ┌──────┴───────┐
-                                    │  MCP Server  │
-                                    │  (stdio,     │
-                                    │   spawned by │
-                                    │   Claude)    │
+                                    │  CLI Tool    │
+                                    │  (cli.ts,    │
+                                    │   via Bash)  │
                                     └──────▲───────┘
-                                           │ tool call
+                                           │ Bash tool call
                                     ┌──────┴───────┐
-                                    │  Player      │
+                                    │  Player/GM   │
                                     │  Agent       │
-                                    │  (any)       │
                                     └──────────────┘
 ```
 
@@ -114,7 +113,7 @@ If the GM proves unreliable at calling `check-interrupt` (e.g., the way it forgo
 
 ```bash
 # GM starts this at session begin via Bash with run_in_background: true, timeout: 600000
-bun apps/spectator/cli.ts watch-interrupt --campaign the-dimming
+bun apps/spectator/cli.ts watch-interrupt --session the-dimming-abc123
 # Blocks until player.lock appears, then returns the interrupt JSON
 # GM gets notified automatically when the background Bash completes
 ```
@@ -132,7 +131,7 @@ bun apps/spectator/cli.ts watch-interrupt --campaign the-dimming
 
 #### Prompted Response
 ```
-1. Player agent calls: bun apps/spectator/cli.ts ask-player --campaign the-dimming --character eamon-lightward --prompt "..."
+1. Player agent calls: bun apps/spectator/cli.ts ask-player --session the-dimming-abc123 --character eamon-lightward --prompt "..."
 2. CLI writes tmp/eamon-lightward-prompt.json (with deadline timestamp)
 3. Spectator detects, pushes to browser
 4. Browser shows prompt under Eamon's tab with countdown (15s less than actual deadline)

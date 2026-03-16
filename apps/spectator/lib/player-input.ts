@@ -3,6 +3,10 @@
  *
  * Extracted from cli.ts for testability. All I/O goes through injected config
  * so tests can use temp dirs, mock the spectator check, and control timing.
+ *
+ * Session state lives in /tmp/dnd-campaigner/{campaign}-{session-id}/ — fully
+ * outside the repo. OS cleans up on reboot. Multiple simultaneous sessions
+ * don't collide.
  */
 
 import {
@@ -12,17 +16,19 @@ import {
   writeFileSync,
   unlinkSync,
 } from "fs";
-import { resolve } from "path";
+import { join } from "path";
 import { createHash } from "crypto";
+import { tmpdir } from "os";
+
+export const SESSION_DIR_ROOT = join(tmpdir(), "dnd-campaigner");
 
 export interface PlayerInputConfig {
-  repoRoot: string;
+  sessionDir: string;
   pollIntervalMs: number;
   spectatorCheck: () => Promise<boolean>;
 }
 
 export interface AskPlayerArgs {
-  campaign: string;
   character: string;
   prompt: string;
   deadlineMs: number;
@@ -42,20 +48,22 @@ export interface CheckInterruptResult {
   mode_change?: string | null;
 }
 
+export interface ClearInterruptResult {
+  cleared: boolean;
+  reason?: string;
+  /** On id_mismatch, includes the newer interrupt so the caller doesn't need another round trip */
+  new_interrupt?: CheckInterruptResult;
+}
+
 // --- Helpers ---
 
-function tmpDir(config: PlayerInputConfig, campaign: string): string {
-  const dir = resolve(config.repoRoot, "campaigns", campaign, "tmp");
-  mkdirSync(dir, { recursive: true });
-  return dir;
+function ensureDir(config: PlayerInputConfig): string {
+  mkdirSync(config.sessionDir, { recursive: true });
+  return config.sessionDir;
 }
 
-function fp(config: PlayerInputConfig, campaign: string, name: string): string {
-  return resolve(tmpDir(config, campaign), name);
-}
-
-function readJson(path: string): unknown {
-  return JSON.parse(readFileSync(path, "utf-8"));
+function fp(config: PlayerInputConfig, name: string): string {
+  return join(ensureDir(config), name);
 }
 
 function writeJson(path: string, data: unknown): void {
@@ -82,7 +90,7 @@ async function waitForFile(
   while (Date.now() < deadlineMs) {
     if (existsSync(path)) {
       try {
-        return readJson(path);
+        return JSON.parse(readFileSync(path, "utf-8"));
       } catch {
         // Partial write — retry
       }
@@ -104,18 +112,22 @@ async function waitWhileExists(
   return true;
 }
 
+function hashContent(raw: string): string {
+  return createHash("sha1").update(raw).digest("hex").slice(0, 12);
+}
+
 // --- Commands ---
 
 export async function askPlayer(
   config: PlayerInputConfig,
   args: AskPlayerArgs
 ): Promise<AskPlayerResult> {
-  const { campaign, character, prompt, deadlineMs } = args;
+  const { character, prompt, deadlineMs } = args;
 
-  const pausePath = fp(config, campaign, "player.pause");
-  const promptPath = fp(config, campaign, `${character}-prompt.json`);
-  const responsePath = fp(config, campaign, `${character}-response.json`);
-  const autoFlagPath = fp(config, campaign, `${character}.auto`);
+  const pausePath = fp(config, "player.pause");
+  const promptPath = fp(config, `${character}-prompt.json`);
+  const responsePath = fp(config, `${character}-response.json`);
+  const autoFlagPath = fp(config, `${character}.auto`);
 
   // 1. Check per-character auto mode first (fast path)
   if (existsSync(autoFlagPath)) {
@@ -165,11 +177,10 @@ export async function askPlayer(
 }
 
 export async function checkInterrupt(
-  config: PlayerInputConfig,
-  campaign: string
+  config: PlayerInputConfig
 ): Promise<CheckInterruptResult> {
-  const lockPath = fp(config, campaign, "player.lock");
-  const interruptPath = fp(config, campaign, "player-interrupt.json");
+  const lockPath = fp(config, "player.lock");
+  const interruptPath = fp(config, "player-interrupt.json");
 
   // Fast path — no interrupt
   if (!existsSync(lockPath)) {
@@ -186,8 +197,7 @@ export async function checkInterrupt(
     // Lock exists but no content — treat as empty interrupt
   }
 
-  // ID is SHA-1 of the raw file content — used by clearInterrupt to avoid clearing a newer interrupt
-  const id = raw ? createHash("sha1").update(raw).digest("hex").slice(0, 12) : null;
+  const id = raw ? hashContent(raw) : null;
 
   return {
     interrupted: true,
@@ -198,21 +208,13 @@ export async function checkInterrupt(
   };
 }
 
-export interface ClearInterruptResult {
-  cleared: boolean;
-  reason?: string;
-  /** On id_mismatch, includes the newer interrupt so the caller doesn't need another round trip */
-  new_interrupt?: CheckInterruptResult;
-}
-
 export async function clearInterrupt(
   config: PlayerInputConfig,
-  campaign: string,
   id: string
 ): Promise<ClearInterruptResult> {
-  const lockPath = fp(config, campaign, "player.lock");
-  const interruptPath = fp(config, campaign, "player-interrupt.json");
-  const pausePath = fp(config, campaign, "player.pause");
+  const lockPath = fp(config, "player.lock");
+  const interruptPath = fp(config, "player-interrupt.json");
+  const pausePath = fp(config, "player.pause");
 
   // Verify the interrupt hasn't changed since check
   let raw = "";
@@ -224,7 +226,7 @@ export async function clearInterrupt(
     return { cleared: true, reason: "files_already_gone" };
   }
 
-  const currentId = createHash("sha1").update(raw).digest("hex").slice(0, 12);
+  const currentId = hashContent(raw);
   if (currentId !== id) {
     let newData: Record<string, unknown> = {};
     try { newData = JSON.parse(raw) as Record<string, unknown>; } catch {}
@@ -254,9 +256,9 @@ export async function clearInterrupt(
   const character = data.character as string | undefined;
 
   if (modeChange === "full_auto" && character) {
-    writeFileSync(fp(config, campaign, `${character}.auto`), "");
+    writeFileSync(fp(config, `${character}.auto`), "");
   } else if (modeChange === "human" && character) {
-    deleteIfExists(fp(config, campaign, `${character}.auto`));
+    deleteIfExists(fp(config, `${character}.auto`));
   } else if (modeChange === "pause") {
     writeFileSync(pausePath, "");
   }
@@ -265,4 +267,9 @@ export async function clearInterrupt(
   deleteIfExists(lockPath);
   deleteIfExists(interruptPath);
   return { cleared: true };
+}
+
+/** Build a session directory path from a session identifier */
+export function sessionDirFor(session: string): string {
+  return join(SESSION_DIR_ROOT, session);
 }

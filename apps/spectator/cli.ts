@@ -5,21 +5,23 @@
  * Thin wrapper around lib/player-input.ts. Called by teammate agents via the
  * Bash tool. Outputs JSON to stdout, logs to stderr.
  *
+ * Session state lives in /tmp/dnd-campaigner/{session}/ where session is
+ * typically "{campaign}-{session-id}".
+ *
  * Usage:
  *   bun apps/spectator/cli.ts ask-player \
- *     --campaign the-dimming \
+ *     --session the-dimming-abc123 \
  *     --character eamon-lightward \
  *     --prompt "What do you do?" \
  *     --timeout 180 \
  *     --deadline 1710500000000
  *
- *   bun apps/spectator/cli.ts check-interrupt --campaign the-dimming
+ *   bun apps/spectator/cli.ts check-interrupt --session the-dimming-abc123
+ *   bun apps/spectator/cli.ts check-interrupt --session the-dimming-abc123 --id def456 --clear
  */
 
-import { resolve } from "path";
-import { askPlayer, checkInterrupt, clearInterrupt, type PlayerInputConfig } from "./lib/player-input";
+import { askPlayer, checkInterrupt, clearInterrupt, sessionDirFor, type PlayerInputConfig } from "./lib/player-input";
 
-const REPO_ROOT = resolve(import.meta.dir, "../..");
 const DEFAULT_TIMEOUT = 180;
 const HEALTH_TIMEOUT = 1000;
 
@@ -40,12 +42,6 @@ async function spectatorIsUp(): Promise<boolean> {
     return false;
   }
 }
-
-const config: PlayerInputConfig = {
-  repoRoot: REPO_ROOT,
-  pollIntervalMs: 500,
-  spectatorCheck: spectatorIsUp,
-};
 
 const BOOLEAN_FLAGS = new Set(["clear"]);
 
@@ -68,10 +64,21 @@ function parseArgs(argv: string[]): { command: string; args: Record<string, stri
 
 const { command, args } = parseArgs(process.argv.slice(2));
 
+if (!args.session) {
+  log(`Missing --session. Usage: cli.ts <command> --session <campaign-sessionid> ...`);
+  process.exit(1);
+}
+
+const config: PlayerInputConfig = {
+  sessionDir: sessionDirFor(args.session),
+  pollIntervalMs: 500,
+  spectatorCheck: spectatorIsUp,
+};
+
 switch (command) {
   case "ask-player": {
-    if (!args.campaign || !args.character || !args.prompt) {
-      log("Usage: cli.ts ask-player --campaign <name> --character <id> --prompt <text> [--timeout <seconds>] [--deadline <epoch-ms>]");
+    if (!args.character || !args.prompt) {
+      log("Usage: cli.ts ask-player --session <id> --character <id> --prompt <text> [--timeout <seconds>] [--deadline <epoch-ms>]");
       process.exit(1);
     }
     const timeoutSeconds = parseInt(args.timeout || String(DEFAULT_TIMEOUT), 10);
@@ -80,7 +87,6 @@ switch (command) {
       : Date.now() + timeoutSeconds * 1000;
 
     const result = await askPlayer(config, {
-      campaign: args.campaign,
       character: args.character,
       prompt: args.prompt,
       deadlineMs,
@@ -91,24 +97,18 @@ switch (command) {
   }
 
   case "check-interrupt": {
-    if (!args.campaign) {
-      log("Usage: cli.ts check-interrupt --campaign <name> [--id <hash> --clear]");
-      process.exit(1);
-    }
     if (args.clear !== undefined) {
-      // Clear mode: --id and --clear must both be present
       if (!args.id) {
         log("--clear requires --id");
         process.exit(1);
       }
-      const result = await clearInterrupt(config, args.campaign, args.id);
+      const result = await clearInterrupt(config, args.id);
       if (!result.cleared) {
         log(`Clear failed: ${result.reason}`);
       }
       process.stdout.write(JSON.stringify(result) + "\n");
     } else {
-      // Check mode: read interrupt without deleting
-      const result = await checkInterrupt(config, args.campaign);
+      const result = await checkInterrupt(config);
       if (result.interrupted) {
         log(`Interrupt: ${result.message || "(mode change)"}${result.character ? ` [${result.character}]` : ""}${result.mode_change ? ` mode→${result.mode_change}` : ""}`);
       }

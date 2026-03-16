@@ -6,48 +6,41 @@
  * All tests complete in <5 seconds.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
-import { mkdtempSync, writeFileSync, existsSync, readFileSync, mkdirSync, rmSync } from "fs";
+import { describe, it, expect, afterEach } from "bun:test";
+import { mkdtempSync, writeFileSync, existsSync, rmSync } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
 import {
   askPlayer,
   checkInterrupt,
   clearInterrupt,
+  sessionDirFor,
   type PlayerInputConfig,
-  type AskPlayerResult,
 } from "../lib/player-input";
 
-const CAMPAIGN = "test-campaign";
-
 function makeConfig(opts: { spectatorUp?: boolean } = {}): PlayerInputConfig {
-  const root = mkdtempSync(join(tmpdir(), "spectator-test-"));
-  mkdirSync(join(root, "campaigns", CAMPAIGN, "tmp"), { recursive: true });
+  const sessionDir = mkdtempSync(join(tmpdir(), "spectator-test-"));
   return {
-    repoRoot: root,
+    sessionDir,
     pollIntervalMs: 10,
     spectatorCheck: async () => opts.spectatorUp ?? false,
   };
 }
 
-function tmpPath(config: PlayerInputConfig, file: string): string {
-  return join(config.repoRoot, "campaigns", CAMPAIGN, "tmp", file);
+function fp(config: PlayerInputConfig, file: string): string {
+  return join(config.sessionDir, file);
 }
 
 function writeFile(config: PlayerInputConfig, file: string, content: string = ""): void {
-  writeFileSync(tmpPath(config, file), content);
+  writeFileSync(fp(config, file), content);
 }
 
 function writeJsonFile(config: PlayerInputConfig, file: string, data: unknown): void {
-  writeFileSync(tmpPath(config, file), JSON.stringify(data));
+  writeFileSync(fp(config, file), JSON.stringify(data));
 }
 
 function fileExists(config: PlayerInputConfig, file: string): boolean {
-  return existsSync(tmpPath(config, file));
-}
-
-function readJsonFile(config: PlayerInputConfig, file: string): unknown {
-  return JSON.parse(readFileSync(tmpPath(config, file), "utf-8"));
+  return existsSync(fp(config, file));
 }
 
 let configs: PlayerInputConfig[] = [];
@@ -59,9 +52,21 @@ function tracked(config: PlayerInputConfig): PlayerInputConfig {
 
 afterEach(() => {
   for (const c of configs) {
-    try { rmSync(c.repoRoot, { recursive: true, force: true }); } catch {}
+    try { rmSync(c.sessionDir, { recursive: true, force: true }); } catch {}
   }
   configs = [];
+});
+
+// ============================================================
+// sessionDirFor
+// ============================================================
+
+describe("sessionDirFor", () => {
+  it("builds path under /tmp/dnd-campaigner/", () => {
+    const dir = sessionDirFor("the-dimming-abc123");
+    expect(dir).toContain("dnd-campaigner");
+    expect(dir).toContain("the-dimming-abc123");
+  });
 });
 
 // ============================================================
@@ -71,7 +76,7 @@ afterEach(() => {
 describe("check-interrupt", () => {
   it("returns interrupted: false when no lock file", async () => {
     const config = tracked(makeConfig());
-    const result = await checkInterrupt(config, CAMPAIGN);
+    const result = await checkInterrupt(config);
     expect(result).toEqual({ interrupted: false });
   });
 
@@ -83,7 +88,7 @@ describe("check-interrupt", () => {
       character: "eamon-lightward",
     });
 
-    const result = await checkInterrupt(config, CAMPAIGN);
+    const result = await checkInterrupt(config);
 
     expect(result.interrupted).toBe(true);
     expect(result.message).toBe("I want to ask the NPC about the artifact");
@@ -107,7 +112,7 @@ describe("check-interrupt", () => {
       timestamp: Date.now(),
     });
 
-    const result = await checkInterrupt(config, CAMPAIGN);
+    const result = await checkInterrupt(config);
 
     expect(result.interrupted).toBe(true);
     expect(result.message).toBe("Hello from the human! Just testing.");
@@ -120,12 +125,11 @@ describe("check-interrupt", () => {
     const config = tracked(makeConfig());
     writeFile(config, "player.lock");
 
-    const result = await checkInterrupt(config, CAMPAIGN);
+    const result = await checkInterrupt(config);
 
     expect(result.interrupted).toBe(true);
     expect(result.message).toBeNull();
     expect(result.id).toBeNull();
-    // Lock still exists
     expect(fileExists(config, "player.lock")).toBe(true);
   });
 
@@ -134,8 +138,8 @@ describe("check-interrupt", () => {
     writeFile(config, "player.lock");
     writeJsonFile(config, "player-interrupt.json", { message: "test" });
 
-    const r1 = await checkInterrupt(config, CAMPAIGN);
-    const r2 = await checkInterrupt(config, CAMPAIGN);
+    const r1 = await checkInterrupt(config);
+    const r2 = await checkInterrupt(config);
 
     expect(r1.id).toBe(r2.id);
   });
@@ -153,8 +157,8 @@ describe("clear-interrupt", () => {
       message: "Please pause",
     });
 
-    const check = await checkInterrupt(config, CAMPAIGN);
-    const result = await clearInterrupt(config, CAMPAIGN, check.id!);
+    const check = await checkInterrupt(config);
+    const result = await clearInterrupt(config, check.id!);
 
     expect(result.cleared).toBe(true);
     expect(fileExists(config, "player.lock")).toBe(false);
@@ -166,7 +170,7 @@ describe("clear-interrupt", () => {
     writeFile(config, "player.lock");
     writeJsonFile(config, "player-interrupt.json", { message: "first" });
 
-    const check = await checkInterrupt(config, CAMPAIGN);
+    const check = await checkInterrupt(config);
 
     // A new interrupt arrives before clear
     writeJsonFile(config, "player-interrupt.json", {
@@ -175,14 +179,12 @@ describe("clear-interrupt", () => {
       mode_change: "human",
     });
 
-    const result = await clearInterrupt(config, CAMPAIGN, check.id!);
+    const result = await clearInterrupt(config, check.id!);
 
     expect(result.cleared).toBe(false);
     expect(result.reason).toBe("id_mismatch_newer_interrupt");
-    // Files should still exist
     expect(fileExists(config, "player.lock")).toBe(true);
     expect(fileExists(config, "player-interrupt.json")).toBe(true);
-    // Should include the newer interrupt content
     expect(result.new_interrupt).toBeDefined();
     expect(result.new_interrupt!.interrupted).toBe(true);
     expect(result.new_interrupt!.message).toBe("second — urgent!");
@@ -194,7 +196,7 @@ describe("clear-interrupt", () => {
 
   it("handles already-deleted files gracefully", async () => {
     const config = tracked(makeConfig());
-    const result = await clearInterrupt(config, CAMPAIGN, "doesntmatter");
+    const result = await clearInterrupt(config, "doesntmatter");
 
     expect(result.cleared).toBe(true);
     expect(result.reason).toBe("files_already_gone");
@@ -208,8 +210,8 @@ describe("clear-interrupt", () => {
       mode_change: "full_auto",
     });
 
-    const check = await checkInterrupt(config, CAMPAIGN);
-    await clearInterrupt(config, CAMPAIGN, check.id!);
+    const check = await checkInterrupt(config);
+    await clearInterrupt(config, check.id!);
 
     expect(fileExists(config, "eamon-lightward.auto")).toBe(true);
   });
@@ -223,8 +225,8 @@ describe("clear-interrupt", () => {
       mode_change: "human",
     });
 
-    const check = await checkInterrupt(config, CAMPAIGN);
-    await clearInterrupt(config, CAMPAIGN, check.id!);
+    const check = await checkInterrupt(config);
+    await clearInterrupt(config, check.id!);
 
     expect(fileExists(config, "eamon-lightward.auto")).toBe(false);
   });
@@ -236,8 +238,8 @@ describe("clear-interrupt", () => {
       mode_change: "pause",
     });
 
-    const check = await checkInterrupt(config, CAMPAIGN);
-    await clearInterrupt(config, CAMPAIGN, check.id!);
+    const check = await checkInterrupt(config);
+    await clearInterrupt(config, check.id!);
 
     expect(fileExists(config, "player.pause")).toBe(true);
   });
@@ -253,7 +255,6 @@ describe("ask-player", () => {
     writeFile(config, "eamon-lightward.auto");
 
     const result = await askPlayer(config, {
-      campaign: CAMPAIGN,
       character: "eamon-lightward",
       prompt: "What do you do?",
       deadlineMs: Date.now() + 5000,
@@ -266,7 +267,6 @@ describe("ask-player", () => {
     const config = tracked(makeConfig({ spectatorUp: false }));
 
     const result = await askPlayer(config, {
-      campaign: CAMPAIGN,
       character: "eamon-lightward",
       prompt: "What do you do?",
       deadlineMs: Date.now() + 5000,
@@ -278,7 +278,6 @@ describe("ask-player", () => {
   it("returns web response when response file appears", async () => {
     const config = tracked(makeConfig({ spectatorUp: true }));
 
-    // Write response file before calling (simulates instant human response)
     writeJsonFile(config, "eamon-lightward-response.json", {
       message: "I examine the artifact",
       skip: false,
@@ -286,7 +285,6 @@ describe("ask-player", () => {
     });
 
     const result = await askPlayer(config, {
-      campaign: CAMPAIGN,
       character: "eamon-lightward",
       prompt: "What do you do?",
       deadlineMs: Date.now() + 5000,
@@ -298,7 +296,6 @@ describe("ask-player", () => {
       response: "I examine the artifact",
     });
 
-    // Prompt and response files should be cleaned up
     expect(fileExists(config, "eamon-lightward-prompt.json")).toBe(false);
     expect(fileExists(config, "eamon-lightward-response.json")).toBe(false);
   });
@@ -307,7 +304,6 @@ describe("ask-player", () => {
     const config = tracked(makeConfig({ spectatorUp: true }));
     const deadline = Date.now() + 200;
 
-    // Write response after a tiny delay so prompt file gets written first
     setTimeout(() => {
       writeJsonFile(config, "eamon-lightward-response.json", {
         message: "ok",
@@ -316,28 +312,22 @@ describe("ask-player", () => {
     }, 30);
 
     await askPlayer(config, {
-      campaign: CAMPAIGN,
       character: "eamon-lightward",
       prompt: "What do you do?",
       deadlineMs: deadline,
     });
-
-    // Can't check prompt file (cleaned up), but the response was read — proves flow works
   });
 
   it("returns ai_takeover on timeout", async () => {
     const config = tracked(makeConfig({ spectatorUp: true }));
 
     const result = await askPlayer(config, {
-      campaign: CAMPAIGN,
       character: "eamon-lightward",
       prompt: "What do you do?",
-      deadlineMs: Date.now() + 50, // 50ms deadline — will expire quickly
+      deadlineMs: Date.now() + 50,
     });
 
     expect(result).toEqual({ mode: "ai_takeover", character: "eamon-lightward" });
-
-    // Prompt file should be cleaned up even on timeout
     expect(fileExists(config, "eamon-lightward-prompt.json")).toBe(false);
   });
 
@@ -350,7 +340,6 @@ describe("ask-player", () => {
     });
 
     const result = await askPlayer(config, {
-      campaign: CAMPAIGN,
       character: "eamon-lightward",
       prompt: "What do you do?",
       deadlineMs: Date.now() + 5000,
@@ -363,9 +352,8 @@ describe("ask-player", () => {
     const config = tracked(makeConfig({ spectatorUp: true }));
     writeFile(config, "player.pause");
 
-    // Remove pause after 30ms, write response after 60ms
     setTimeout(() => {
-      try { rmSync(tmpPath(config, "player.pause")); } catch {}
+      try { rmSync(fp(config, "player.pause")); } catch {}
     }, 30);
     setTimeout(() => {
       writeJsonFile(config, "eamon-lightward-response.json", {
@@ -374,7 +362,6 @@ describe("ask-player", () => {
     }, 60);
 
     const result = await askPlayer(config, {
-      campaign: CAMPAIGN,
       character: "eamon-lightward",
       prompt: "What do you do?",
       deadlineMs: Date.now() + 2000,
@@ -391,10 +378,9 @@ describe("ask-player", () => {
     writeFile(config, "player.pause");
 
     const result = await askPlayer(config, {
-      campaign: CAMPAIGN,
       character: "eamon-lightward",
       prompt: "What do you do?",
-      deadlineMs: Date.now() + 50, // Pause won't be lifted in 50ms
+      deadlineMs: Date.now() + 50,
     });
 
     expect(result).toEqual({ mode: "ai_takeover", character: "eamon-lightward" });
@@ -403,7 +389,6 @@ describe("ask-player", () => {
   it("handles delayed response within deadline", async () => {
     const config = tracked(makeConfig({ spectatorUp: true }));
 
-    // Write response after 50ms
     setTimeout(() => {
       writeJsonFile(config, "eamon-lightward-response.json", {
         message: "delayed response",
@@ -411,7 +396,6 @@ describe("ask-player", () => {
     }, 50);
 
     const result = await askPlayer(config, {
-      campaign: CAMPAIGN,
       character: "eamon-lightward",
       prompt: "What do you do?",
       deadlineMs: Date.now() + 2000,
@@ -432,19 +416,16 @@ describe("parallel invocations", () => {
   it("handles two characters simultaneously", async () => {
     const config = tracked(makeConfig({ spectatorUp: true }));
 
-    // Pre-write responses for both characters
     writeJsonFile(config, "eamon-lightward-response.json", { message: "I attack" });
     writeJsonFile(config, "silani-shen-response.json", { message: "I cast a spell" });
 
     const [eamon, silani] = await Promise.all([
       askPlayer(config, {
-        campaign: CAMPAIGN,
         character: "eamon-lightward",
         prompt: "What do you do?",
         deadlineMs: Date.now() + 5000,
       }),
       askPlayer(config, {
-        campaign: CAMPAIGN,
         character: "silani-shen",
         prompt: "What do you do?",
         deadlineMs: Date.now() + 5000,
@@ -454,7 +435,6 @@ describe("parallel invocations", () => {
     expect(eamon).toEqual({ mode: "web", character: "eamon-lightward", response: "I attack" });
     expect(silani).toEqual({ mode: "web", character: "silani-shen", response: "I cast a spell" });
 
-    // Both cleaned up
     expect(fileExists(config, "eamon-lightward-prompt.json")).toBe(false);
     expect(fileExists(config, "silani-shen-prompt.json")).toBe(false);
   });
@@ -466,13 +446,11 @@ describe("parallel invocations", () => {
 
     const [korimeth, eamon] = await Promise.all([
       askPlayer(config, {
-        campaign: CAMPAIGN,
         character: "korimeth",
         prompt: "What do you do?",
         deadlineMs: Date.now() + 5000,
       }),
       askPlayer(config, {
-        campaign: CAMPAIGN,
         character: "eamon-lightward",
         prompt: "What do you do?",
         deadlineMs: Date.now() + 5000,
