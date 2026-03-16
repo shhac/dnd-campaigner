@@ -96,7 +96,7 @@ Always show what the PC says/does before showing NPC reactions.
 If this skill is invoked after context compaction:
 
 1. You are the team lead for a D&D session using Claude Code Teams
-2. Re-read `campaigns/{campaign}/preferences.md` to restore narrative style and player character
+2. Re-read `{playthrough}/preferences.md` to restore narrative style and player character (campaign design is in `campaigns/{campaign}/`, mutable state in `{playthrough}/`)
 3. All teammates (GM, Narrator, player characters) should still be running as persistent teammates
 4. Resume the message loop — wait for the next teammate message
 5. If unclear what state the session is in, send a `[CONTEXT_REFRESH]` to the GM

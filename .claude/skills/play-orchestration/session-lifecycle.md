@@ -14,15 +14,16 @@ Detailed procedures for starting, saving, ending, and recovering D&D sessions us
 ```
 1. Validate campaign
 2. Load preferences (or ask player) — includes verbosity setting
-3. Create team
-4. Determine AI-controlled characters
-5. Spawn GM teammate
-6. Spawn Narrator teammate
-7. Spawn all player teammates (parallel) — human's character uses Control: HUMAN, AI characters use Control: AI
-8. File access audit (verify information isolation)
-9. Send session-start to GM (includes verbosity)
-10. Wait for opening [NARRATIVE]
-11. Display to human, begin core loop + health checks
+3. Select or create playthrough
+4. Create team
+5. Determine AI-controlled characters
+6. Spawn GM teammate
+7. Spawn Narrator teammate
+8. Spawn all player teammates (parallel) — human's character uses Control: HUMAN, AI characters use Control: AI
+9. File access audit (verify information isolation)
+10. Send session-start to GM (includes verbosity)
+11. Wait for opening [NARRATIVE]
+12. Display to human, begin core loop + health checks
 ```
 
 ### Step-by-Step
@@ -45,7 +46,42 @@ Read `campaigns/{campaign}/preferences.md` for:
 
 Save any new preferences to the file.
 
-#### 3. Create Team
+#### 3. Select or Create Playthrough
+
+List existing playthroughs:
+```
+ls playthroughs/{campaign}/
+```
+
+**If no playthroughs exist** (or player wants a new one):
+1. Ask for a game name via AskUserQuestion (suggest: "playthrough-1", incrementing)
+2. Create directory structure:
+   ```bash
+   mkdir -p playthroughs/{campaign}/{game-name}/party
+   mkdir -p playthroughs/{campaign}/{game-name}/scenes
+   mkdir -p playthroughs/{campaign}/{game-name}/npcs
+   mkdir -p playthroughs/{campaign}/{game-name}/items
+   mkdir -p playthroughs/{campaign}/{game-name}/tmp
+   ```
+3. Seed files from campaign:
+   ```bash
+   cp campaigns/{campaign}/story-state.md playthroughs/{campaign}/{game-name}/
+   cp campaigns/{campaign}/party-knowledge.md playthroughs/{campaign}/{game-name}/
+   cp campaigns/{campaign}/preferences.md playthroughs/{campaign}/{game-name}/
+   # Copy character sheets (not briefs, not journals)
+   for f in campaigns/{campaign}/party/*.md; do
+     [[ "$f" == *-brief.md || "$f" == *-journal.md || "$f" == *-relationships.md ]] && continue
+     cp "$f" playthroughs/{campaign}/{game-name}/party/
+   done
+   ```
+4. Set `player_character` in `playthroughs/{campaign}/{game-name}/preferences.md`
+
+**If playthroughs exist**:
+Ask which to resume, or start new.
+
+Set `{playthrough}` = `playthroughs/{campaign}/{game-name}` for all subsequent steps.
+
+#### 4. Create Team
 
 ```
 TeamCreate:
@@ -69,7 +105,7 @@ AskUserQuestion:
 If "Start fresh": TeamDelete the old team first, then TeamCreate.
 If "Resume": Skip to step 10 (re-read team config to find existing teammates).
 
-#### 4. Determine AI Characters
+#### 5. Determine AI Characters
 
 ```
 List: campaigns/{campaign}/party/*.md (exclude *-journal.md)
@@ -77,7 +113,7 @@ Remove: {player_character} from list
 Result: AI-controlled character list
 ```
 
-#### 5. Spawn GM Teammate
+#### 6. Spawn GM Teammate
 
 ```
 Task:
@@ -86,13 +122,15 @@ Task:
   name: gm
   prompt: |
     You are the Game Master for the "{campaign}" campaign.
+    Campaign: {campaign}
+    Playthrough: {playthrough}
     Use {narrative_style} formatting style.
     The human player controls {player_character}.
 
     Read your campaign files and wait for the session-start message.
 ```
 
-#### 6. Spawn Narrator Teammate
+#### 7. Spawn Narrator Teammate
 
 ```
 Task:
@@ -100,16 +138,16 @@ Task:
   team_name: dnd-{campaign}
   name: narrator
   prompt: |
+    Campaign: {campaign}
+    Playthrough: {playthrough}
     You are the Narrator for the "{campaign}" campaign.
-    Observe all broadcasts and peer DM activity.
-    Write scene files to campaigns/{campaign}/scenes/.
-
-    Read campaigns/{campaign}/preferences.md for narrative style.
-    Check campaigns/{campaign}/scenes/ for existing scene files
+    Write scene files to {playthrough}/scenes/.
+    Read {playthrough}/preferences.md for narrative style.
+    Check {playthrough}/scenes/ for existing scene files
     and continue numbering from the highest existing number + 1.
 ```
 
-#### 7. Spawn All Player Teammates
+#### 8. Spawn All Player Teammates
 
 Spawn all player teammates in parallel. The human's character and AI characters both use the `player-teammate` agent type. The human's character is distinguished by `Control: HUMAN` (it uses the `ask_player` CLI via Bash to get human input).
 
@@ -120,6 +158,7 @@ Task:
   name: {player_character}
   prompt: |
     Campaign: {campaign}
+    Playthrough: {playthrough}
     Character: {player_character}
     Control: HUMAN
 
@@ -140,6 +179,7 @@ Task:
   name: {character}
   prompt: |
     Campaign: {campaign}
+    Playthrough: {playthrough}
     Character: {character}
     Control: AI
 
@@ -149,13 +189,14 @@ Task:
 
 **Spawn all player teammates in a single message with multiple Task calls** (parallel).
 
-#### 8. Send Session-Start
+#### 9. Send Session-Start
 
 ```
 SendMessage → gm:
   [SESSION_COMMAND]
   command: start
   campaign: {campaign}
+  playthrough: {playthrough}
   player_character: {player_character}
   narrative_style: {narrative_style}
   verbosity: {verbosity}
@@ -164,7 +205,7 @@ SendMessage → gm:
     - {char2}
 ```
 
-#### 9-10. Wait and Display
+#### 10-11. Wait and Display
 
 Wait for the GM's opening `[NARRATIVE]` broadcast. Display it to the human. Begin the core loop.
 
@@ -174,9 +215,9 @@ Saves are handled directly by the GM:
 - **Human request**: Player says "let's save" — team lead sends `[SESSION_COMMAND] save` to GM
 - **GM initiative**: GM saves at natural beat boundaries (end of combat, scene transition, etc.)
 
-The GM updates `story-state.md` and `party-knowledge.md` directly. No intermediate delta files or background agents are needed for state persistence.
+The GM updates `{playthrough}/story-state.md` and `{playthrough}/party-knowledge.md` directly. No intermediate delta files or background agents are needed for state persistence.
 
-**Write ownership**: The GM is the sole writer of `story-state.md`, `party-knowledge.md`, and `relationships.md`. The team lead never writes these files. See "State File Ownership" in the main orchestration skill for the full ownership table and recommended atomic write pattern.
+**Write ownership**: The GM is the sole writer of `{playthrough}/story-state.md`, `{playthrough}/party-knowledge.md`, and `{playthrough}/relationships.md`. The team lead never writes these files. See "State File Ownership" in the main orchestration skill for the full ownership table and recommended atomic write pattern.
 
 ### Human-Requested Save
 
@@ -189,7 +230,7 @@ SendMessage → gm:
   reason: "Player requested save"
 ```
 
-The GM will update `story-state.md` and `party-knowledge.md` directly and continue the session.
+The GM will update `{playthrough}/story-state.md` and `{playthrough}/party-knowledge.md` directly and continue the session.
 
 ## Session End
 
@@ -206,7 +247,7 @@ SendMessage → gm:
 
 The GM will:
 1. Find a narratively appropriate stopping point
-2. Update `story-state.md` and `party-knowledge.md` directly
+2. Update `{playthrough}/story-state.md` and `{playthrough}/party-knowledge.md` directly
 3. Send `[SESSION_END]` with summary and next_hook
 
 ### Processing [SESSION_END]
@@ -282,9 +323,9 @@ You may lose context during long sessions. Signs:
 
 ### Recovery Procedure
 
-1. **Re-read preferences**: `campaigns/{campaign}/preferences.md`
+1. **Re-read preferences**: `{playthrough}/preferences.md`
 2. **Re-read team config**: `~/.claude/teams/dnd-{campaign}/config.json` to verify teammates
-3. **Re-read latest scene file**: `campaigns/{campaign}/scenes/` (highest numbered file)
+3. **Re-read latest scene file**: `{playthrough}/scenes/` (highest numbered file)
 4. **Send context refresh to GM**:
 
 ```
@@ -323,7 +364,7 @@ Check: ~/.claude/teams/dnd-{campaign}/ should not exist
 Check: ~/.claude/tasks/dnd-{campaign}/ should not exist
 ```
 
-Campaign files (`campaigns/{campaign}/`) are NOT deleted — they persist between sessions.
+Campaign design files persist in `campaigns/{campaign}/`. Playthrough state persists in `playthroughs/{campaign}/{game-name}/`.
 
 ## Quick Reference: Lifecycle Commands
 

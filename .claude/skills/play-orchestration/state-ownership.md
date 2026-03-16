@@ -2,23 +2,31 @@
 
 Campaign state files have **exclusive write ownership** to prevent concurrent write corruption. No two agents should ever write to the same file.
 
+During play, `campaigns/{campaign}/` is **read-only** (design material). All mutable state lives in `{playthrough}/` (the active playthrough directory under `playthroughs/{campaign}/{game-name}/`).
+
 ## Write Ownership Rules
 
-| File | Owner | Other Agents |
-|------|-------|-------------|
-| `story-state.md` | GM | Read-only (GM only reads it too — players never access) |
-| `party-knowledge.md` | GM | Read-only |
-| `relationships.md` | GM | Read-only |
-| `party/{character}-journal.md` | That character's player teammate | Read-only for others |
-| `scenes/scene-*.md` | Narrator | Read-only for others |
-| `preferences.md` | Team lead | Read-only during session |
-| `decision-log.md` | Decision-log agent (post-session) | Read-only |
+| File | Owner | Location |
+|------|-------|----------|
+| `{playthrough}/story-state.md` | GM | Playthrough (GM-only read/write) |
+| `{playthrough}/party-knowledge.md` | GM | Playthrough (read by players) |
+| `{playthrough}/relationships.md` | GM | Playthrough |
+| `{playthrough}/faction-standings.md` | GM | Playthrough |
+| `{playthrough}/party/{character}-journal.md` | That character's player teammate | Playthrough |
+| `{playthrough}/party/{character}-relationships.md` | GM (at session end) | Playthrough |
+| `{playthrough}/scenes/*.md` | Narrator | Playthrough |
+| `{playthrough}/npcs/{npc}-interactions.md` | GM | Playthrough (NPC base stays in campaign) |
+| `{playthrough}/tmp/dashboard.md` | GM | Playthrough |
+| `{playthrough}/preferences.md` | Team lead | Playthrough (seeded from campaign) |
+| `campaigns/{campaign}/party/*.md` | Read-only during play | Campaign (template) |
+| `campaigns/{campaign}/npcs/*.md` | Read-only during play | Campaign (base definitions) |
 
 ## Enforcement
 
-- The **team lead never writes** to `story-state.md`, `party-knowledge.md`, or `relationships.md` — these are exclusively GM-owned
-- Each **player teammate writes only** to their own journal file
-- The **narrator writes only** to `scenes/` directory
+- The **team lead never writes** to `{playthrough}/story-state.md`, `{playthrough}/party-knowledge.md`, or `{playthrough}/relationships.md` — these are exclusively GM-owned
+- Each **player teammate writes only** to their own journal file in `{playthrough}/party/`
+- The **narrator writes only** to `{playthrough}/scenes/` directory
+- Campaign files under `campaigns/{campaign}/` are **read-only** during play — no agent writes to them
 - If two agents need to update the same file, that is a design error — flag it
 
 ## Recommended Write Pattern

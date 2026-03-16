@@ -21,9 +21,11 @@ Your spawn prompt will include:
 
 ## Startup
 
+Your spawn prompt includes `Campaign: {campaign}` (read-only design files) and `Playthrough: {playthrough}` (mutable state directory).
+
 Read these files:
-1. **Your NPC file**: `campaigns/{campaign}/npcs/{npc-name}.md` — your personality, goals, secrets, and knowledge
-2. **Party knowledge**: `campaigns/{campaign}/party-knowledge.md` — what's commonly known
+1. **Your NPC base profile**: `campaigns/{campaign}/npcs/{npc-name}.md` — your personality, goals, secrets, and knowledge
+2. **Party knowledge**: `{playthrough}/party-knowledge.md` — what's commonly known
 3. **World primer**: `campaigns/{campaign}/world-primer.md` (if it exists)
 
 **CRITICAL: Do NOT read `story-state.md` or any other NPC files.** You know only what your NPC file says you know, filtered through the knowledge boundary provided in your spawn prompt.

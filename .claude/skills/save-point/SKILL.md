@@ -14,11 +14,11 @@ Persistent player teammates retain full session context, but saves are still cri
 - Session resume (between play sessions, teammates start fresh)
 - The narrator's scene files (durable record of what happened)
 
-`story-state.md` and `party-knowledge.md` are the canonical game state. Always keep them current.
+`{playthrough}/story-state.md` and `{playthrough}/party-knowledge.md` are the canonical game state. Always keep them current.
 
 ## How State Updates Work
 
-The GM updates `story-state.md` and `party-knowledge.md` directly after each scene closes (or when meaningful state changes accumulate). No intermediate delta files or background agents are needed — the GM writes to the canonical files as part of the normal play loop.
+The GM updates `{playthrough}/story-state.md` and `{playthrough}/party-knowledge.md` directly after each scene closes (or when meaningful state changes accumulate). No intermediate delta files or background agents are needed — the GM writes to the canonical files as part of the normal play loop.
 
 ## Mandatory Save Triggers
 
@@ -36,7 +36,7 @@ You MUST save at these moments:
 
 ## The Two State Files
 
-### `story-state.md` (GM Only)
+### `{playthrough}/story-state.md` (GM Only)
 
 Contains GM secrets. AI players NEVER read this.
 
@@ -48,7 +48,7 @@ Contains GM secrets. AI players NEVER read this.
 - Party resources (HP, gold, spell slots)
 - Session number and timestamp
 
-### `party-knowledge.md` (Shared)
+### `{playthrough}/party-knowledge.md` (Shared)
 
 AI players READ this for context. Keep it current.
 
@@ -65,18 +65,18 @@ AI players READ this for context. Keep it current.
 At each save point:
 
 ```
-[ ] story-state.md updated
-[ ] party-knowledge.md updated
-[ ] relationships.md updated (if social dynamics changed — NPC dispositions, party bonds, faction standings)
-[ ] Update `## Party Interactions` in NPC files for any NPCs encountered this beat
-[ ] Update `faction-standings.md` if any faction-relevant decisions were made this beat
-[ ] Update `tmp/dashboard.md` with current scene, party status, quest progress, and session log
+[ ] {playthrough}/story-state.md updated
+[ ] {playthrough}/party-knowledge.md updated
+[ ] {playthrough}/relationships.md updated (if social dynamics changed)
+[ ] Write NPC interaction updates to {playthrough}/npcs/{npc}-interactions.md (NOT the campaign NPC file)
+[ ] Update {playthrough}/faction-standings.md if any faction-relevant decisions were made
+[ ] Update {playthrough}/tmp/dashboard.md with current scene, party status, quest progress
 ```
 
 At session end (in addition to above):
 
 ```
-[ ] Update each character's `{character}-relationships.md` based on significant interactions this session. Adjust trust scores and add key moments.
+[ ] Update each character's `{playthrough}/party/{character}-relationships.md` based on significant interactions this session. Adjust trust scores and add key moments.
 ```
 
 ## Detailed Procedures

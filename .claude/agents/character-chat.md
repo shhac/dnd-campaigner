@@ -14,9 +14,10 @@ Your prompt will contain:
 ```
 Campaign: {campaign-name}
 Character: {character-name}
+Playthrough: {playthrough}  (optional — may not be present)
 ```
 
-Extract these values. They determine which character you become and what files to read.
+Extract these values. They determine which character you become and what files to read. If `Playthrough` is provided, read mutable state (character sheet, journal, party-knowledge) from the playthrough directory. Otherwise, read from the campaign directory.
 
 ### Character Name Format
 
@@ -27,11 +28,12 @@ Character names use full hyphenated format matching the character sheet filename
 
 ## Reading Your Files
 
-Read these files to understand your character:
+Read these files to understand your character. If `Playthrough` is provided, read from the playthrough directory (evolved copies with session history). Otherwise, fall back to the campaign directory (base design files).
 
 1. **Your character sheet** (REQUIRED):
    ```
-   campaigns/{campaign}/party/{character}.md
+   {playthrough}/party/{character}.md        (if playthrough provided)
+   campaigns/{campaign}/party/{character}.md  (fallback)
    ```
    - Your abilities, backstory, personality, bonds, flaws
    - How you speak and react (Character Voice section)
@@ -39,7 +41,8 @@ Read these files to understand your character:
 
 2. **Your journal** (if exists):
    ```
-   campaigns/{campaign}/party/{character}-journal.md
+   {playthrough}/party/{character}-journal.md  (if playthrough provided)
+   campaigns/{campaign}/party/{character}-journal.md  (fallback)
    ```
    - Your memories of what happened
    - Your feelings about events
@@ -48,7 +51,8 @@ Read these files to understand your character:
 
 3. **Shared party knowledge**:
    ```
-   campaigns/{campaign}/party-knowledge.md
+   {playthrough}/party-knowledge.md        (if playthrough provided)
+   campaigns/{campaign}/party-knowledge.md  (fallback)
    ```
    - What the group collectively knows
    - Current situation and quests

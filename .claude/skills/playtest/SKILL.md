@@ -28,19 +28,39 @@ TeamCreate: playtest-{campaign}
 
 Read `campaigns/{campaign}/preferences.md` for narrative style. List character sheets in `campaigns/{campaign}/party/` (exclude `*-brief.md` and `*-journal.md`).
 
-### 3. Spawn teammates (all in parallel)
+### 3. Create playthrough
+
+Create a temporary playthrough for the test:
+
+```bash
+mkdir -p playthroughs/{campaign}/playtest/party playthroughs/{campaign}/playtest/scenes playthroughs/{campaign}/playtest/npcs playthroughs/{campaign}/playtest/items playthroughs/{campaign}/playtest/tmp
+cp campaigns/{campaign}/story-state.md playthroughs/{campaign}/playtest/
+cp campaigns/{campaign}/party-knowledge.md playthroughs/{campaign}/playtest/
+cp campaigns/{campaign}/preferences.md playthroughs/{campaign}/playtest/
+# Copy character sheets (not briefs, not journals)
+for f in campaigns/{campaign}/party/*.md; do
+  [[ "$f" == *-brief.md || "$f" == *-journal.md || "$f" == *-relationships.md ]] && continue
+  cp "$f" playthroughs/{campaign}/playtest/party/
+done
+```
+
+Set `{playthrough}` = `playthroughs/{campaign}/playtest`.
+
+### 4. Spawn teammates (all in parallel)
 
 Spawn 6 agents as teammates on the team:
 
 | Name | Agent Type | Prompt Includes |
 |------|-----------|-----------------|
-| `gm` | `gm` | Campaign name, `mode: full_auto`, narrative style, list of AI characters |
-| `narrator` | `narrator` | Campaign name |
-| One per character | `player-teammate` | Campaign name, character name |
+| `gm` | `gm` | Campaign, playthrough, `mode: full_auto`, narrative style, AI characters |
+| `narrator` | `narrator` | Campaign, playthrough |
+| One per character | `player-teammate` | Campaign, playthrough, character name |
 
 Example spawn prompt for GM:
 ```
 You are the Game Master for the "{campaign}" campaign.
+Campaign: {campaign}
+Playthrough: {playthrough}
 Use {narrative_style} formatting style.
 Mode: full_auto (all characters are AI-controlled, no human player).
 AI characters: {char1}, {char2}, {char3}, {char4}
@@ -51,13 +71,15 @@ Read your campaign files and wait for the session-start message.
 Example spawn prompt for players:
 ```
 Campaign: {campaign}
+Playthrough: {playthrough}
 Character: {character}
+Control: AI
 
 You are {character} in the "{campaign}" campaign.
 Read your character files and wait for the session to begin.
 ```
 
-### 4. Send session-start command
+### 5. Send session-start command
 
 Once all teammates are idle (ready), send to GM:
 
@@ -65,6 +87,7 @@ Once all teammates are idle (ready), send to GM:
 [SESSION_COMMAND]
 command: start
 campaign: {campaign}
+playthrough: {playthrough}
 player_character: none
 narrative_style: {style}
 verbosity: verbose
@@ -120,18 +143,15 @@ Wait for `[COMMAND_ACK]` then `[SESSION_END]` with session metrics.
 
 Send shutdown requests to all 6 teammates. Players may journal before shutting down — this is expected.
 
-### 2. Revert campaign files
+### 2. Delete playthrough
 
-The playtest writes to campaign state files, journals, and scenes. Revert everything:
+The playtest writes all state to the playthrough directory. Delete it:
 
 ```bash
-git checkout -- campaigns/{campaign}/
-rm -rf campaigns/{campaign}/scenes/
-# Journals may be new untracked files:
-rm -f campaigns/{campaign}/party/*-journal.md
+rm -rf playthroughs/{campaign}/playtest/
 ```
 
-Verify with `git status -s` — should be clean.
+Campaign files are untouched — no `git checkout` needed. Verify with `git status -s`.
 
 ### 3. Score and report
 

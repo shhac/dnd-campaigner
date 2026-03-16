@@ -88,33 +88,39 @@ Every beat should have at least one mechanical check. If you finished a beat wit
 
 ## Startup — Tiered Context Loading
 
+Your spawn prompt includes `Campaign: {campaign}` (read-only design files in `campaigns/{campaign}/`) and `Playthrough: {playthrough}` (mutable state directory).
+
 ### Tier 1 — Always Read at Startup
 
-- `campaigns/{campaign}/preferences.md` — Narrative style and player character
-- `campaigns/{campaign}/story-state.md` — Current situation (slim — no future arc secrets)
+- `{playthrough}/preferences.md` — Narrative style and player character
+- `{playthrough}/story-state.md` — Current situation (slim — no future arc secrets)
 - `campaigns/{campaign}/story-arcs/UNLOCK.md` — Check which acts are available, read ONLY unlocked act files
-- `campaigns/{campaign}/party-knowledge.md` — What the whole party knows (you maintain this)
-- **Active scene participants' character sheets** — Human player's + any immediately relevant PCs (1-2 sheets)
+- `{playthrough}/party-knowledge.md` — What the whole party knows (you maintain this)
+- **Active scene participants' character sheets** from `{playthrough}/party/` — Human player's + any immediately relevant PCs (1-2 sheets)
 
 ### Tier 2 — Skim at Startup
 
 - `campaigns/{campaign}/overview.md` — **Setting**, **Tone**, **Hook** sections only
-- Other PC sheets — Skim Personality Traits, Bonds, Flaws, Goals only
-- Active NPCs referenced in story-state.md
-- `campaigns/{campaign}/faction-standings.md` (if it exists) — Current faction reputations
-- Latest 1-2 `campaigns/{campaign}/scenes/*.md` — Continuity
+- Other PC sheets from `{playthrough}/party/` — Skim Personality Traits, Bonds, Flaws, Goals only
+- Active NPCs referenced in story-state.md — base profiles from `campaigns/{campaign}/npcs/`, overlays from `{playthrough}/npcs/`
+- `{playthrough}/faction-standings.md` (if it exists) — Current faction reputations
+- Latest 1-2 `{playthrough}/scenes/*.md` — Continuity
 
 ### Tier 3 — On-Demand
 
-NPC files, location files, faction files, older scenes — use the Read tool when needed.
+NPC files (`campaigns/{campaign}/npcs/`), location files (`campaigns/{campaign}/locations/`), faction files (`campaigns/{campaign}/factions/`), older scenes (`{playthrough}/scenes/`) — use the Read tool when needed.
+
+### NPC Reading
+
+When reading an NPC, read the base profile from `campaigns/{campaign}/npcs/{npc}.md`, then check `{playthrough}/npcs/{npc}-interactions.md` for prior party interactions. Write new interactions to the playthrough file only.
 
 ### Story Arc Loading
 
-Read `story-arcs/UNLOCK.md` at startup. For each arc:
+Read `campaigns/{campaign}/story-arcs/UNLOCK.md` at startup. For each arc:
 - **UNLOCKED**: Read the full arc file
 - **LOCKED**: Do NOT read. You don't need it yet. Use only the foreshadowing hints in UNLOCK.md.
 
-If `story-arcs/` doesn't exist (older campaign format), read `story-state.md` as before.
+If `campaigns/{campaign}/story-arcs/` doesn't exist (older campaign format), read `{playthrough}/story-state.md` as before.
 
 **Use the narrative style** from preferences.md: `hybrid`, `script`, `novel`, or `minimal`.
 
@@ -246,7 +252,7 @@ When a player sends `type: VETO`: read their reason, send a new `FULL_CONTEXT` w
 
 ## Session Opening — "Previously On..." (Sessions 2+)
 
-If this is NOT the first session (check if scene files exist in `scenes/`):
+If this is NOT the first session (check if scene files exist in `{playthrough}/scenes/`):
 
 Before your first `[NARRATIVE]`, broadcast a **"Previously On..."** recap:
 
@@ -263,7 +269,7 @@ Before your first `[NARRATIVE]`, broadcast a **"Previously On..."** recap:
 ---
 ```
 
-Keep it under 500 words. Draw from `story-state.md`, the latest scene files, and `party-knowledge.md`. Focus on what's *unresolved*, not what's settled.
+Keep it under 500 words. Draw from `{playthrough}/story-state.md`, the latest scene files in `{playthrough}/scenes/`, and `{playthrough}/party-knowledge.md`. Focus on what's *unresolved*, not what's settled.
 
 ---
 
@@ -288,13 +294,18 @@ Before moving to the next plot beat, check the `gm-pacing` skill:
 
 ## File Responsibilities
 
+All writes go to the playthrough directory. Campaign files are read-only design material.
+
 ### What You Write
 
-- **`story-state.md`** — Current situation, GM secrets, quest progress
-- **`party-knowledge.md`** — Player-visible knowledge (no secrets)
-- **Character sheets** (`party/*.md`) — Permanent changes only
-- **`relationships.md`** — After significant social encounters
-- **`items/{item-name}.md`** — When notable items appear
+- **`{playthrough}/story-state.md`** — Current situation, GM secrets, quest progress
+- **`{playthrough}/party-knowledge.md`** — Player-visible knowledge (no secrets)
+- **`{playthrough}/party/*.md`** — Permanent changes only (level-ups, etc.)
+- **`{playthrough}/relationships.md`** — After significant social encounters
+- **`{playthrough}/faction-standings.md`** — Current faction reputations
+- **`{playthrough}/party/{char}-relationships.md`** — Per-character relationship tracking
+- **`{playthrough}/npcs/{npc}-interactions.md`** — NPC interaction history (NOT the campaign NPC file)
+- **`{playthrough}/items/{item-name}.md`** — When notable new items appear
 
 ### What You Don't Write
 
@@ -305,12 +316,12 @@ Before moving to the next plot beat, check the `gm-pacing` skill:
 
 Update state files **after every major beat** — not just at scene end. See `save-point` skill for triggers.
 
-- `story-state.md`: Current situation, secrets, NPC status, upcoming events
-- `party-knowledge.md`: Current situation from party's perspective, no secrets
+- `{playthrough}/story-state.md`: Current situation, secrets, NPC status, upcoming events
+- `{playthrough}/party-knowledge.md`: Current situation from party's perspective, no secrets
 
 ### Dashboard Update
 
-After each beat save, also update `campaigns/{campaign}/tmp/dashboard.md`:
+After each beat save, also update `{playthrough}/tmp/dashboard.md`:
 - Current scene/location/time
 - Party HP and conditions from working memory
 - Active quests from story-state
@@ -352,8 +363,8 @@ When `mode: full_auto` (no human player):
 ## Context Compaction Recovery
 
 If context is compacted:
-1. Re-read campaign files (story-state, party-knowledge, character sheets)
-2. Read latest scene files for continuity
+1. Re-read playthrough files (`{playthrough}/story-state.md`, `{playthrough}/party-knowledge.md`, character sheets from `{playthrough}/party/`)
+2. Read latest scene files from `{playthrough}/scenes/` for continuity
 3. If team lead sends `[CONTEXT_REFRESH]`, use provided context
 4. Resume narration
 
@@ -381,7 +392,7 @@ If context is compacted:
 
 ## Relationship Updates (Session End Only)
 
-Before sending `[SESSION_END]`, update each character's `party/{character}-relationships.md`:
+Before sending `[SESSION_END]`, update each character's `{playthrough}/party/{character}-relationships.md`:
 - Adjust trust scores based on this session's interactions (+1 for acts of trust/vulnerability, -1 for deception/betrayal/selfishness)
 - Update dynamic descriptors if the relationship shifted
 - Add key moments from this session

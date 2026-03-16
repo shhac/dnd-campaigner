@@ -38,7 +38,7 @@ AskUserQuestion:
       description: "Brief, functional descriptions focused on game mechanics"
 ```
 
-- Save their choice to `campaigns/{campaign}/preferences.md`
+- Save their choice to `{playthrough}/preferences.md` (after playthrough is selected)
 
 ### Handle Player Character
 
@@ -48,7 +48,7 @@ If `player_character` is set in preferences:
 If `player_character` is NOT set:
 - List character files in `campaigns/{campaign}/party/`
 - Use AskUserQuestion with the character names as options
-- Save to `campaigns/{campaign}/preferences.md`
+- Save to `{playthrough}/preferences.md` (after playthrough is selected)
 
 ### Handle Verbosity
 
@@ -97,6 +97,8 @@ Task:
   name: gm
   prompt: |
     You are the Game Master for the "{campaign}" campaign.
+    Campaign: {campaign}
+    Playthrough: {playthrough}
     Use {narrative_style} formatting style.
     The human player controls {player_character}.
 
@@ -111,12 +113,12 @@ Task:
   team_name: dnd-{campaign}
   name: narrator
   prompt: |
+    Campaign: {campaign}
+    Playthrough: {playthrough}
     You are the Narrator for the "{campaign}" campaign.
-    Observe all broadcasts and peer DM activity.
-    Write scene files to campaigns/{campaign}/scenes/.
-
-    Read campaigns/{campaign}/preferences.md for narrative style.
-    Check campaigns/{campaign}/scenes/ for existing scene files
+    Write scene files to {playthrough}/scenes/.
+    Read {playthrough}/preferences.md for narrative style.
+    Check {playthrough}/scenes/ for existing scene files
     and continue numbering from the highest existing number + 1.
 ```
 
@@ -133,6 +135,7 @@ Task:
   name: {player_character}
   prompt: |
     Campaign: {campaign}
+    Playthrough: {playthrough}
     Character: {player_character}
     Control: HUMAN
 
@@ -153,6 +156,7 @@ Task:
   name: {character}
   prompt: |
     Campaign: {campaign}
+    Playthrough: {playthrough}
     Character: {character}
     Control: AI
 
@@ -172,7 +176,7 @@ After spawning player teammates, the team lead should verify information isolati
 |-------|--------------|-----------------|
 | GM | All campaign files | (none — GM sees everything) |
 | Narrator | `preferences.md`, `scenes/`, peer DM activity | `story-state.md`, `npcs/`, character sheets |
-| Player teammate | Own character sheet, own journal, `party-knowledge.md`, `world-primer.md` | `story-state.md`, other character sheets, `npcs/`, `beats/` |
+| Player teammate | Own character sheet (`{playthrough}/party/`), own journal, `{playthrough}/party-knowledge.md`, `world-primer.md` | `{playthrough}/story-state.md`, other character sheets, `npcs/`, `beats/` |
 
 **Audit behavior**:
 - At `verbose` verbosity: Log each agent's file reads as they are observed (e.g., from teammate idle summaries or tool call reports)
@@ -189,7 +193,7 @@ After spawning player teammates, the team lead should verify information isolati
 ### Dashboard Setup
 
 At session start, inform the human:
-"A live dashboard is available at `campaigns/{campaign}/tmp/dashboard.md`. Open it in a markdown previewer (VS Code, Obsidian, or browser) for an at-a-glance view of party status, quests, and scene context."
+"A live dashboard is available at `{playthrough}/tmp/dashboard.md`. Open it in a markdown previewer (VS Code, Obsidian, or browser) for an at-a-glance view of party status, quests, and scene context."
 
 The GM updates this file after each beat.
 
@@ -205,6 +209,7 @@ SendMessage:
     [SESSION_COMMAND]
     command: start
     campaign: {campaign}
+    playthrough: {playthrough}
     player_character: {player_character}
     narrative_style: {narrative_style}
     verbosity: {verbosity}

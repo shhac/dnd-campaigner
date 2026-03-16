@@ -23,21 +23,23 @@ Read these files to understand what occurred:
 
 ### Required Files
 
-1. **Story State**: `campaigns/{campaign}/story-state.md`
+Your spawn prompt includes `Campaign: {campaign}` and `Playthrough: {playthrough}`.
+
+1. **Story State**: `{playthrough}/story-state.md`
    - Contains current situation, recent events, and GM perspective on what happened
    - Look at "Current Situation" and "Recent Events Summary" sections
 
-2. **Party Knowledge**: `campaigns/{campaign}/party-knowledge.md`
+2. **Party Knowledge**: `{playthrough}/party-knowledge.md`
    - Contains what the party knows and recent session summary
    - Cross-reference with story state for accuracy
 
 ### Scene and Journal Files
 
-3. **Latest scene file**: `campaigns/{campaign}/scenes/`
+3. **Latest scene file**: `{playthrough}/scenes/`
    - Use Glob to find the most recent scene file (highest number)
    - Contains the narrator's record of what happened in the current beat
 
-4. **Player journals** (skim latest entries): `campaigns/{campaign}/party/*-journal.md`
+4. **Player journals** (skim latest entries): `{playthrough}/party/*-journal.md`
    - Each player's perspective on recent events
    - Look at the last 1-2 entries for what characters experienced
 
@@ -72,7 +74,7 @@ For each character who acted or decided:
 
 Write your log to:
 ```
-campaigns/{campaign}/decision-log.md
+{playthrough}/decision-log.md
 ```
 
 **Append** entries to this file. Do not overwrite previous entries.
@@ -212,13 +214,13 @@ Then append your first entry.
 
 ## Process
 
-1. **Parse your invocation** to get the campaign name
-2. **Read story-state.md** for current situation and recent events
-3. **Read party-knowledge.md** for shared context
-4. **Read the latest scene file** from `campaigns/{campaign}/scenes/` for narrative record
-5. **Skim player journals** (`party/*-journal.md`) for character perspectives
+1. **Parse your invocation** to get the campaign and playthrough paths
+2. **Read `{playthrough}/story-state.md`** for current situation and recent events
+3. **Read `{playthrough}/party-knowledge.md`** for shared context
+4. **Read the latest scene file** from `{playthrough}/scenes/` for narrative record
+5. **Skim player journals** (`{playthrough}/party/*-journal.md`) for character perspectives
 6. **Identify the key decisions** made in the recent events
-7. **Append a log entry** to `decision-log.md`
+7. **Append a log entry** to `{playthrough}/decision-log.md`
 8. **Confirm completion** with a brief summary of what you logged
 
 ## Invocation Format
@@ -226,9 +228,10 @@ Then append your first entry.
 You will be invoked with:
 ```
 Campaign: {campaign-name}
+Playthrough: {playthrough}
 ```
 
-Use this to construct file paths.
+Use these to construct file paths. `Campaign` points to read-only design files. `Playthrough` points to the mutable state directory.
 
 ## Completion
 

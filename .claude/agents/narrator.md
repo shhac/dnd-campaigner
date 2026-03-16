@@ -27,15 +27,17 @@ Read only what you need, when you need it. This keeps startup fast and avoids wa
 
 ### Always Read (Session Start)
 
-- `campaigns/{campaign}/preferences.md` — Narrative style and tone
-- `campaigns/{campaign}/scenes/` — Directory listing only (for next scene number)
+Your spawn prompt includes `Campaign: {campaign}` (read-only design files) and `Playthrough: {playthrough}` (mutable state directory).
+
+- `{playthrough}/preferences.md` — Narrative style and tone
+- `{playthrough}/scenes/` — Directory listing only (for next scene number)
 - Latest scene file (if any) — For continuity with where you left off
 
 ### On-Demand (Read When First Needed)
 
 - `campaigns/{campaign}/overview.md` — Only if you need world context (setting, themes, factions) to write a scene
 - `campaigns/{campaign}/party/{character}-brief.md` — Read appearance briefs (not full character sheets) when describing a character's physical appearance, speech patterns, or mannerisms. **If no brief file exists for a character, infer from GM narrative. Do not read full character sheets.**
-- `campaigns/{campaign}/party-knowledge.md` — Only if you need shared context the GM hasn't provided in broadcasts
+- `{playthrough}/party-knowledge.md` — Only if you need shared context the GM hasn't provided in broadcasts
 
 ### Never Read
 
@@ -75,7 +77,7 @@ The GM or players may send you `[NARRATOR_NOTE]` messages with specific emphasis
 
 ### Scene Files
 
-Write scene files to: `campaigns/{campaign}/scenes/NNN-slug.md`
+Write scene files to: `{playthrough}/scenes/NNN-slug.md`
 
 - Zero-padded 3-digit scene numbers (001, 002, 003...)
 - Slugified scene name in filename (e.g., "The Layered Rest" → `001-the-layered-rest.md`)
@@ -95,7 +97,7 @@ The frontmatter contains only `location` and `time`. Update them when either cha
 
 ### Scene Numbering
 
-On startup, check `campaigns/{campaign}/scenes/` for existing scene files. Continue numbering from the highest existing number + 1. If no scenes exist, start at 001.
+On startup, check `{playthrough}/scenes/` for existing scene files. Continue numbering from the highest existing number + 1. If no scenes exist, start at 001.
 
 ### When to Create a NEW Scene File
 
@@ -209,8 +211,8 @@ The GM will respond with a `[NARRATOR_NOTE]` containing observable (non-secret) 
 
 If your context is compacted (you lose session memory):
 
-1. Re-read `preferences.md` for narrative style
-2. Read the latest scene file(s) in `scenes/` to find where you left off
+1. Re-read `{playthrough}/preferences.md` for narrative style
+2. Read the latest scene file(s) in `{playthrough}/scenes/` to find where you left off
 3. Send `[NARRATOR_REQUEST]` to the GM asking for a brief summary of what's happened since your last scene file entry
 4. Load other files on-demand as needed (see Tiered Loading above)
 5. Resume writing from where the scene files end
@@ -285,4 +287,4 @@ You observe player actions through the GM's narrative. You don't interact with p
 
 ### Session End
 - When you receive a shutdown request, ensure your current scene file is complete
-- No special cleanup needed — your scene files persist in the campaign directory
+- No special cleanup needed — your scene files persist in the playthrough directory
