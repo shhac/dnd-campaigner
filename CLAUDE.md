@@ -76,34 +76,46 @@ apps/spectator/         # Spectator web app (session viewer + player input)
 └── test/               # CLI timeout test server
 
 templates/              # Markdown templates for campaign content
-campaigns/{campaign}/   # Individual campaign data
+
+campaigns/{campaign}/   # Read-only campaign design (templates)
 ├── overview.md         # World setting, themes, factions
 ├── world-primer.md     # Common knowledge any inhabitant would know
-├── story-state.md      # Current situation, secrets (GM only)
-├── party-knowledge.md  # Shared knowledge (no secrets)
-├── decision-log.md     # Character decisions and actions
-├── preferences.md      # Narrative style, player character
-├── party/              # Player character sheets
-├── npcs/               # NPC details and secrets
-├── items/              # Notable items and artifacts
+├── preferences.md      # Template (copied to playthrough)
+├── story-state.md      # Starting state (copied to playthrough)
+├── party-knowledge.md  # Starting knowledge (copied to playthrough)
+├── party/              # Character sheet templates
+├── npcs/               # NPC base definitions
+├── items/              # Item definitions
 ├── locations/          # Location descriptions
 ├── factions/           # Faction details
 ├── beats/              # GM planning docs (beat sheets)
-├── scenes/             # Narrative output (written by Narrator)
 ├── story-arcs/         # Gated plot secrets (per-act)
 │   ├── UNLOCK.md       # Act preconditions and foreshadowing hints
 │   ├── act-1.md        # Current act (UNLOCKED)
-│   ├── act-2.md        # Future act (LOCKED)
-│   └── act-3.md        # Endgame (LOCKED)
-└── novel/              # Novelization output (if created)
-    ├── outline.md
-    ├── chapter-NN.md
-    └── chatterbox/     # Audiobook files (if created)
+│   └── ...
+└── novel/              # Novelization output (tied to playthrough — TBD)
+
+playthroughs/{campaign}/{game-name}/  # Mutable per-playthrough state
+├── preferences.md      # Authoritative during play
+├── story-state.md      # Evolves each session
+├── party-knowledge.md  # Evolves each session
+├── decision-log.md
+├── relationships.md
+├── party/              # Evolved character sheets + journals
+│   ├── {char}.md
+│   ├── {char}-journal.md
+│   └── {char}-relationships.md
+├── npcs/               # NPC interaction overlays
+├── items/              # New items discovered
+├── scenes/             # Narrator writes here
+└── tmp/
+    └── dashboard.md
 ```
 
 ## Path Conventions
 
 - `{campaign}`: Campaign directory name (kebab-case, e.g., `the-rot-beneath`)
+- `{game-name}`: Playthrough name within a campaign (kebab-case, e.g., `playthrough-1`)
 - `{character}`: Full hyphenated character name (e.g., `tilda-brannock`, matching the character sheet filename)
 
 ## Core Design Principle: Information Isolation
@@ -154,7 +166,7 @@ Creates PCs or NPCs with full sheets. **Time estimate:** 10-15 minutes per chara
 ```
 /play {campaign-name}
 ```
-Starts a session using Claude Code Teams. All participants are persistent teammates: GM, Narrator, and every player character. All player characters use the same unified agent -- human-controlled characters use the `ask_player` CLI (via Bash tool) for input, AI characters decide autonomously. Any character can be toggled between human and AI control mid-session, enabling multiplayer. The team lead is a lightweight delegate handling session lifecycle.
+Starts a session using Claude Code Teams. Prompts for playthrough selection (or creates a new one seeded from campaign templates). All participants are persistent teammates: GM, Narrator, and every player character. All player characters use the same unified agent -- human-controlled characters use the `ask_player` CLI (via Bash tool) for input, AI characters decide autonomously. Any character can be toggled between human and AI control mid-session, enabling multiplayer. The team lead is a lightweight delegate handling session lifecycle.
 
 **Time estimate:** 30-90 minutes per session (3-5 major scenes).
 
@@ -182,7 +194,7 @@ All responses flow back to the GM, who weaves them into the next narrative beat 
 
 This cycle (narrative -> prompts -> responses -> narrative) repeats until a natural stopping point. The GM targets 3-5 major beats per session and actively looks for good stopping points after the third beat. The human can also end the session at any time by saying "end session" (or clicking Pause in the spectator UI).
 
-Between beats, AI players may talk to each other in character, journal significant moments, and the narrator writes scene files to `scenes/` for the permanent record. All campaign state is saved automatically -- `story-state.md`, `party-knowledge.md`, and character journals are updated so the next session picks up seamlessly.
+Between beats, AI players may talk to each other in character, journal significant moments, and the narrator writes scene files to the playthrough's `scenes/` directory for the permanent record. All playthrough state is saved automatically -- `story-state.md`, `party-knowledge.md`, and character journals in the playthrough directory are updated so the next session picks up seamlessly.
 
 See [QUICKSTART.md](QUICKSTART.md) for a step-by-step first session walkthrough.
 
@@ -255,21 +267,28 @@ Generates MP3 audiobook files from novelized chapters using Chatterbox TTS. **Ti
 
 ## Campaign File Purposes
 
-| File | Purpose | Who Reads It |
-|------|---------|--------------|
-| `overview.md` | World setting, themes, major factions | GM, reference |
-| `world-primer.md` | Common knowledge any inhabitant would know | GM, AI players |
-| `story-state.md` | Current situation and active quests (slim, no future secrets) | GM only |
-| `party-knowledge.md` | Shared knowledge for AI players (no secrets) | GM, AI players |
-| `party/{name}.md` | Character sheet | GM, that character's agent |
-| `npcs/{name}.md` | NPC details + secrets | GM only |
-| `items/{name}.md` | Notable items, artifacts, equipment | GM, reference |
-| `locations/{name}.md` | Location descriptions and details | GM, reference |
-| `factions/{name}.md` | Faction details and goals | GM, reference |
-| `decision-log.md` | Character decisions and actions for context reconstruction | GM, reference |
-| `preferences.md` | Narrative style, player character selection | Team lead |
-| `story-arcs/UNLOCK.md` | Act preconditions and foreshadowing hints | GM only |
-| `story-arcs/act-*.md` | Per-act secrets (GM reads only UNLOCKED acts) | GM only |
+| File | Location | Purpose | Who Reads It |
+|------|----------|---------|--------------|
+| `overview.md` | campaign | World setting, themes, major factions | GM, reference |
+| `world-primer.md` | campaign | Common knowledge any inhabitant would know | GM, AI players |
+| `party/{name}.md` | campaign | Character sheet templates | GM, reference |
+| `npcs/{name}.md` | campaign | NPC base definitions + secrets | GM only |
+| `items/{name}.md` | campaign | Item definitions | GM, reference |
+| `locations/{name}.md` | campaign | Location descriptions and details | GM, reference |
+| `factions/{name}.md` | campaign | Faction details and goals | GM, reference |
+| `beats/` | campaign | GM planning docs (beat sheets) | GM only |
+| `story-arcs/UNLOCK.md` | campaign | Act preconditions and foreshadowing hints | GM only |
+| `story-arcs/act-*.md` | campaign | Per-act secrets (GM reads only UNLOCKED acts) | GM only |
+| `preferences.md` | playthrough | Narrative style, player character selection | Team lead |
+| `story-state.md` | playthrough | Current situation and active quests (evolves each session) | GM only |
+| `party-knowledge.md` | playthrough | Shared knowledge for AI players (no secrets) | GM, AI players |
+| `decision-log.md` | playthrough | Character decisions and actions for context reconstruction | GM, reference |
+| `relationships.md` | playthrough | Party relationship tracker | GM, reference |
+| `party/{name}.md` | playthrough | Evolved character sheets | GM, that character's agent |
+| `party/{name}-journal.md` | playthrough | Character journals | That character's agent |
+| `scenes/` | playthrough | Narrative output (written by Narrator) | Narrator, novelization |
+| `npcs/` | playthrough | NPC interaction overlays | GM only |
+| `items/` | playthrough | New items discovered during play | GM, reference |
 
 ### Novel Directory (`novel/`)
 
@@ -301,7 +320,7 @@ For the full list of agents (gameplay, novelization, audiobook, utility) and ski
 
 ## Example Campaign
 
-The [campaigns/the-dimming/](campaigns/the-dimming/) directory contains a complete campaign: world-building, four characters with distinct voices, session scenes, and decision logs. Browse it to understand what `/new-campaign` and `/play` produce, or play it directly:
+The [campaigns/the-dimming/](campaigns/the-dimming/) directory contains a complete campaign design: world-building, four characters with distinct voices, and beat sheets. Playthrough state (scenes, decision logs, evolved character sheets) lives in `playthroughs/the-dimming/`. Browse both to understand what `/new-campaign` and `/play` produce, or play it directly:
 
 ```
 /play the-dimming

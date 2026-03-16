@@ -47,9 +47,9 @@ The `/play` command uses Claude Code Teams to run D&D sessions with persistent t
 ### How It Works
 
 A team named `dnd-{campaign}` is created with:
-- **GM teammate** (`gm` agent): Persistent for the entire session. Reads campaign files once, communicates via `SendMessage`. Broadcasts `[NARRATIVE]` to all teammates, sends `[GM_TO_PLAYER]` directly to each player teammate, sends `[SESSION_END]` to the team lead. Updates `story-state.md` and `party-knowledge.md` directly after each scene.
-- **Narrator teammate** (`narrator` agent): Observes GM broadcasts and peer DM activity. Writes scene files to `scenes/` in real-time. Output is secret-free.
-- **Player teammates** (`player-teammate` agent): Persistent for the entire session. All characters — AI and human-controlled — use the same agent type. AI players decide autonomously. Human-controlled characters use the `ask_player` CLI (via Bash tool) to get input via the spectator web UI (or terminal fallback). From the GM's perspective, all players are identical. Any character can be toggled between human and AI control mid-session, enabling multiplayer. All players communicate directly with the GM via `[PLAYER_TO_GM]` and message each other via `[PLAYER_TO_PLAYER]`. Each player self-journals at beat boundaries.
+- **GM teammate** (`gm` agent): Persistent for the entire session. Reads campaign design files and playthrough state once, communicates via `SendMessage`. Broadcasts `[NARRATIVE]` to all teammates, sends `[GM_TO_PLAYER]` directly to each player teammate, sends `[SESSION_END]` to the team lead. Updates `story-state.md` and `party-knowledge.md` in the playthrough directory directly after each scene.
+- **Narrator teammate** (`narrator` agent): Observes GM broadcasts and peer DM activity. Writes scene files to the playthrough's `scenes/` directory in real-time. Output is secret-free.
+- **Player teammates** (`player-teammate` agent): Persistent for the entire session. All characters — AI and human-controlled — use the same agent type. AI players decide autonomously. Human-controlled characters use the `ask_player` CLI (via Bash tool) to get input via the spectator web UI (or terminal fallback). From the GM's perspective, all players are identical. Any character can be toggled between human and AI control mid-session, enabling multiplayer. All players communicate directly with the GM via `[PLAYER_TO_GM]` and message each other via `[PLAYER_TO_PLAYER]`. Each player self-journals at beat boundaries to the playthrough directory.
 - **Team lead** (main conversation): Lightweight delegate orchestrator. Creates the team, spawns all teammates, manages session lifecycle. Does NOT relay messages between GM and players — they communicate directly. Human input is handled by the player agent itself via the CLI.
 
 ### Human Control via CLI
@@ -105,7 +105,7 @@ Players can veto GM actions or reject NPC offers using `[PLAYER_TO_GM] type: VET
 
 ### Enforcement
 
-Each player teammate only reads their own character sheet, their journal, and `party-knowledge.md`. The GM is trusted to include only character-appropriate information in `[GM_TO_PLAYER]` messages. Player teammates never read `story-state.md`, other character sheets, or NPC files.
+Each player teammate only reads their own character sheet and journal (from the playthrough directory) and `party-knowledge.md`. The GM is trusted to include only character-appropriate information in `[GM_TO_PLAYER]` messages. Player teammates never read `story-state.md`, other character sheets, or NPC files.
 
 The `/play` command handles this orchestration automatically.
 
@@ -135,10 +135,18 @@ campaigns/{campaign}/
 ```
 
 - `UNLOCK.md` defines preconditions and foreshadowing hints for each act
-- `story-state.md` is now slim -- current situation only, no future secrets
-- At startup, the GM reads only UNLOCKED act files, preventing accidental leakage of future plot
+- `story-state.md` in the playthrough directory is slim -- current situation only, no future secrets
+- At startup, the GM reads only UNLOCKED act files from the campaign's `story-arcs/`, preventing accidental leakage of future plot
 
 This replaces the previous model where `story-state.md` contained all secrets for the entire campaign.
+
+## Playthroughs
+
+Campaign directories (`campaigns/{campaign}/`) are **read-only design material** -- world setting, character templates, beat sheets, story arcs, and NPC definitions. They are never modified during play.
+
+Mutable game state lives in **playthrough directories** (`playthroughs/{campaign}/{game-name}/`). A playthrough is seeded on first play by copying key files from the campaign templates (`preferences.md`, `story-state.md`, `party-knowledge.md`, character sheets). From that point forward, the playthrough evolves independently -- the GM updates `story-state.md` and `party-knowledge.md` after each scene, players journal and update their character sheets, and the narrator writes scene files.
+
+Multiple playthroughs of the same campaign are supported. Each playthrough has its own game state, allowing different groups or replays to diverge from the same starting point. The `/play` command prompts for playthrough selection (or creates a new one).
 
 ## Agent Descriptions
 
