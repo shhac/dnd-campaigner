@@ -40,8 +40,11 @@ Your prompt will include a header:
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CAMPAIGN: {campaign}
+PLAYTHROUGH: {playthrough}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
+
+`{playthrough}` is the path to the playthrough directory (e.g., `playthroughs/the-dimming/playthrough-1`). All novel files live here.
 
 ---
 
@@ -93,10 +96,10 @@ Where does this book sit in the fantasy landscape? Consider:
 
 Read the following files:
 
-1. **Outline**: `campaigns/{campaign}/novel/outline.md`
+1. **Outline**: `{playthrough}/novel/outline.md`
    - Understand intended structure, POV rotation, chapter types
 
-2. **All edited chapters**: `campaigns/{campaign}/novel/chapter-*.md`
+2. **All edited chapters**: `{playthrough}/novel/chapter-*.md`
    - Read only the final edited versions (not drafts)
    - Use glob pattern `chapter-[0-9][0-9].md` to avoid drafts
 
@@ -167,7 +170,7 @@ Use this scale for overall assessment:
 
 ### Write Publisher Feedback
 
-Write your assessment to: `campaigns/{campaign}/novel/publisher-feedback.md`
+Write your assessment to: `{playthrough}/novel/publisher-feedback.md`
 
 The file should contain a human-readable report with sections for:
 - Overall Assessment

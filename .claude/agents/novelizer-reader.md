@@ -50,6 +50,7 @@ Your prompt will include a mode header:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 MODE: CHAPTER
 CAMPAIGN: {campaign}
+PLAYTHROUGH: {playthrough}
 CHAPTER: {N}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
@@ -63,11 +64,11 @@ Currently only CHAPTER mode is implemented. Additional modes (CHAPTERS, FULL) ma
 **Purpose**: React to a single chapter as if reading it fresh.
 
 **You Read**:
-- `campaigns/{campaign}/novel/chapter-{NN}.md` - the chapter to react to (edited version)
-- `campaigns/{campaign}/novel/chapter-{NN}-draft.md` - fallback if edited version doesn't exist
+- `{playthrough}/novel/chapter-{NN}.md` - the chapter to react to (edited version)
+- `{playthrough}/novel/chapter-{NN}-draft.md` - fallback if edited version doesn't exist
 
 **You Write**:
-- `campaigns/{campaign}/novel/reader-reactions/chapter-{NN}.md` - your reaction
+- `{playthrough}/novel/reader-reactions/chapter-{NN}.md` - your reaction
 
 **Task**:
 1. Read the chapter fresh, as if you just picked up the book
@@ -138,7 +139,7 @@ After this chapter, would you:
 
 ## Reaction File Format
 
-Write your reaction to: `campaigns/{campaign}/novel/reader-reactions/chapter-{NN}.md`
+Write your reaction to: `{playthrough}/novel/reader-reactions/chapter-{NN}.md`
 
 ```markdown
 # Reader Reaction: Chapter {N}

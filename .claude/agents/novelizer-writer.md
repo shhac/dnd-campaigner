@@ -15,28 +15,31 @@ Your prompt includes a header:
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CAMPAIGN: {campaign}
+PLAYTHROUGH: {playthrough}
 CHAPTER: {N}
 [VOICE_FEEDBACK: "..."]  # Optional - style adjustments
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
+`{playthrough}` is the path to the playthrough directory (e.g., `playthroughs/the-dimming/playthrough-1`). Game state (scenes, decision-log, party files, novel output) lives here. Campaign-level design files (overview) live in `campaigns/{campaign}/`.
+
 ---
 
 ## You Read
 
-1. **`campaigns/{campaign}/novel/outline.md`** - chapter spec (title, POV, type, scenes, target words)
-2. **`campaigns/{campaign}/decision-log.md`** - structured scene summaries (those listed in chapter spec)
-3. **`campaigns/{campaign}/scenes/*.md`** - full GM prose narrative for relevant scenes (see Scene Files below)
-4. **`campaigns/{campaign}/party/{pov-character}.md`** - POV character sheet
-5. **`campaigns/{campaign}/party/{pov-character}-journal.md`** - emotional context (optional, may not exist)
-6. **`campaigns/{campaign}/novel/story-so-far.md`** - running plot/character summary for continuity context (if exists; especially useful for Chapter 3+)
-7. **`campaigns/{campaign}/novel/chapter-{N-1}.md`** - previous chapter's FINAL version for voice continuity (if N > 1; skip for Chapter 1)
+1. **`{playthrough}/novel/outline.md`** - chapter spec (title, POV, type, scenes, target words)
+2. **`{playthrough}/decision-log.md`** - structured scene summaries (those listed in chapter spec)
+3. **`{playthrough}/scenes/*.md`** - full GM prose narrative for relevant scenes (see Scene Files below)
+4. **`{playthrough}/party/{pov-character}.md`** - POV character sheet
+5. **`{playthrough}/party/{pov-character}-journal.md`** - emotional context (optional, may not exist)
+6. **`{playthrough}/novel/story-so-far.md`** - running plot/character summary for continuity context (if exists; especially useful for Chapter 3+)
+7. **`{playthrough}/novel/chapter-{N-1}.md`** - previous chapter's FINAL version for voice continuity (if N > 1; skip for Chapter 1)
 8. **`.claude/skills/novelization-style/tones/{tone}.md`** - tone guidance (tone from outline metadata)
 9. **`.claude/skills/novelization-style/styles/fantasy-novel.md`** - style guidance
 
 ### Scene Files
 
-Scene files in `campaigns/{campaign}/scenes/` contain the full GM prose narrative. They are numbered sequentially (e.g., `001-arrival-at-the-station.md`, `002-the-first-clue.md`) and include YAML frontmatter with location and time metadata.
+Scene files in `{playthrough}/scenes/` contain the full GM prose narrative. They are numbered sequentially (e.g., `001-arrival-at-the-station.md`, `002-the-first-clue.md`) and include YAML frontmatter with location and time metadata.
 
 **How to use scene files**:
 - Match scene files to the scenes listed in your chapter spec
@@ -46,7 +49,7 @@ Scene files in `campaigns/{campaign}/scenes/` contain the full GM prose narrativ
 
 ## You Write
 
-- **`campaigns/{campaign}/novel/chapter-{NN}-draft.md`** - chapter draft (NN is zero-padded, e.g., `chapter-03-draft.md`)
+- **`{playthrough}/novel/chapter-{NN}-draft.md`** - chapter draft (NN is zero-padded, e.g., `chapter-03-draft.md`)
 
 ### Filename Convention
 

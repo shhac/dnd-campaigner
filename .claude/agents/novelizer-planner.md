@@ -19,11 +19,14 @@ Your prompt includes a mode header:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 MODE: PLAN | VALIDATE
 CAMPAIGN: {campaign}
+PLAYTHROUGH: {playthrough}
 [DRY_RUN: true]          # PLAN mode only
 [APPEND: true]           # PLAN mode only
 [EXISTING_CHAPTERS: {N}] # Required with APPEND
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
+
+`{playthrough}` is the path to the playthrough directory (e.g., `playthroughs/the-dimming/playthrough-1`). Game state (scenes, decision-log, party files, novel output) lives here. Campaign-level design files (overview, themes) live in `campaigns/{campaign}/`.
 
 ---
 
@@ -32,16 +35,16 @@ CAMPAIGN: {campaign}
 **Purpose**: Create the novel outline from campaign source materials.
 
 **You Read**:
-- `campaigns/{campaign}/overview.md` - themes, setting, tone hints
-- `campaigns/{campaign}/decision-log.md` - structured summaries of all scenes and events
-- `campaigns/{campaign}/scenes/*.md` - full GM prose narrative (numbered files like `001-scene-slug.md`)
-- `campaigns/{campaign}/party/*.md` - character information
+- `campaigns/{campaign}/overview.md` - themes, setting, tone hints (read-only campaign design)
+- `{playthrough}/decision-log.md` - structured summaries of all scenes and events
+- `{playthrough}/scenes/*.md` - full GM prose narrative (numbered files like `001-scene-slug.md`)
+- `{playthrough}/party/*.md` - character information
 - `.claude/skills/novelization-style/tones/*.md` - available tones
 
 **Scene Files**: Scene files contain full GM narrative prose with YAML frontmatter (location, time). They complement the decision-log: decision-log has structured summaries for planning, while scene files have the actual prose descriptions, dialogue, and atmosphere you can draw from for chapter content.
 
 **You Write**:
-- `campaigns/{campaign}/novel/outline.md` - complete outline with progress tracking
+- `{playthrough}/novel/outline.md` - complete outline with progress tracking
 - **Exception**: If `DRY_RUN: true` is set, do NOT write the file. Return the outline content in `outline_preview` instead.
 
 **Task**:
@@ -149,13 +152,13 @@ outline_preview: |
 **Purpose**: Check outline quality BEFORE writing begins. Catches structural issues early.
 
 **You Read**:
-- `campaigns/{campaign}/novel/outline.md` - the outline to validate
-- `campaigns/{campaign}/decision-log.md` - to verify all major decisions are covered
-- `campaigns/{campaign}/scenes/*.md` - to verify scene coverage and content
-- `campaigns/{campaign}/party/*.md` - to verify POV characters exist
+- `{playthrough}/novel/outline.md` - the outline to validate
+- `{playthrough}/decision-log.md` - to verify all major decisions are covered
+- `{playthrough}/scenes/*.md` - to verify scene coverage and content
+- `{playthrough}/party/*.md` - to verify POV characters exist
 
 **You Write**:
-- `campaigns/{campaign}/novel/validation-report.md` - only if issues are found
+- `{playthrough}/novel/validation-report.md` - only if issues are found
 
 ### Validation Checks
 
@@ -269,7 +272,7 @@ The following sub-skills are loaded in your frontmatter:
 
 ### Character Name Format
 
-Use hyphenated lowercase names matching character sheet filenames (e.g., `tilda-brannock`, `corwin-voss`). This ensures POV assignments can be validated against `party/*.md` files.
+Use hyphenated lowercase names matching character sheet filenames (e.g., `tilda-brannock`, `corwin-voss`). This ensures POV assignments can be validated against `{playthrough}/party/*.md` files.
 
 ---
 

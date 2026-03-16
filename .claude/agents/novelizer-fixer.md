@@ -17,22 +17,25 @@ Your prompt will include a header:
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CAMPAIGN: {campaign}
+PLAYTHROUGH: {playthrough}
 CHAPTER: {N}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
+
+`{playthrough}` is the path to the playthrough directory (e.g., `playthroughs/the-dimming/playthrough-1`). All novel files live here.
 
 ---
 
 ## You Read
 
-- `campaigns/{campaign}/novel/fix-requests-approved.md` - list of corrections to apply
-- `campaigns/{campaign}/novel/chapter-{NN}-draft.md` - current draft to fix (NN is zero-padded)
+- `{playthrough}/novel/fix-requests-approved.md` - list of corrections to apply
+- `{playthrough}/novel/chapter-{NN}-draft.md` - current draft to fix (NN is zero-padded)
 
 ---
 
 ## You Write
 
-- `campaigns/{campaign}/novel/chapter-{NN}-draft.md` - updated draft (overwrites original)
+- `{playthrough}/novel/chapter-{NN}-draft.md` - updated draft (overwrites original)
 
 ---
 

@@ -15,9 +15,12 @@ Your prompt will include a header:
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CAMPAIGN: {campaign}
+PLAYTHROUGH: {playthrough}
 CHAPTER: {chapter_number}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
+
+`{playthrough}` is the path to the playthrough directory (e.g., `playthroughs/the-dimming/playthrough-1`). All novel files (drafts, edited chapters) live here.
 
 ## Your Scope
 
@@ -47,7 +50,7 @@ CHAPTER: {chapter_number}
 ## Workflow
 
 1. **Read the draft file**:
-   - `campaigns/{campaign}/novel/chapter-{NN}-draft.md`
+   - `{playthrough}/novel/chapter-{NN}-draft.md`
    - Note the frontmatter (chapter number, title, POV, type, scenes covered)
    - Count initial word count
 
@@ -63,7 +66,7 @@ CHAPTER: {chapter_number}
    - Track significant changes for your report
 
 4. **Write the edited file**:
-   - `campaigns/{campaign}/novel/chapter-{NN}.md`
+   - `{playthrough}/novel/chapter-{NN}.md`
    - Same format as draft, but polished
    - Count final word count
 

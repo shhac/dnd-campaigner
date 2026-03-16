@@ -14,9 +14,12 @@ Your prompt will include a header:
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CAMPAIGN: {campaign}
+PLAYTHROUGH: {playthrough}
 CHAPTER: {chapter_number}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
+
+`{playthrough}` is the path to the playthrough directory (e.g., `playthroughs/the-dimming/playthrough-1`). All novel files live here.
 
 ## Your Scope
 
@@ -48,7 +51,7 @@ You work at a higher level - chapter architecture rather than prose mechanics.
 ## Workflow
 
 1. **Read publisher feedback**:
-   - `campaigns/{campaign}/novel/publisher-feedback.md`
+   - `{playthrough}/novel/publisher-feedback.md`
    - Note specific issues for this chapter
    - Identify any global recommendations that apply
 
@@ -57,7 +60,7 @@ You work at a higher level - chapter architecture rather than prose mechanics.
    - Load the relevant tone file if mentioned in the outline
 
 3. **Read the edited chapter**:
-   - `campaigns/{campaign}/novel/chapter-{NN}.md`
+   - `{playthrough}/novel/chapter-{NN}.md`
    - Note current word count
    - Identify the issues flagged by publisher
 
@@ -67,7 +70,7 @@ You work at a higher level - chapter architecture rather than prose mechanics.
    - Track what you change and why
 
 5. **Write the revised chapter**:
-   - Same location: `campaigns/{campaign}/novel/chapter-{NN}.md`
+   - Same location: `{playthrough}/novel/chapter-{NN}.md`
    - Preserve all frontmatter exactly
    - Note final word count
 

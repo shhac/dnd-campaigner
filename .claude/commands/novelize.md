@@ -1,6 +1,6 @@
 ---
 description: Convert campaign sessions into novel chapters
-argument-hint: <campaign> [--auto] [--resume] [--fresh] [--skip-publisher] [--review-each] [--dry-run] [--append] [--chapter N]
+argument-hint: <campaign> <game-name> [--auto] [--resume] [--fresh] [--skip-publisher] [--review-each] [--dry-run] [--append] [--chapter N]
 ---
 
 # /novelize
@@ -24,6 +24,7 @@ This command transforms your D&D campaign's decision logs and character journals
 ## Arguments
 
 - `campaign` (required): Campaign name (e.g., `the-rot-beneath`)
+- `game-name` (required): Playthrough name (e.g., `playthrough-1`)
 - `--auto`: Automatic mode - pause only for voice lock and blocking issues
 - `--resume`: Continue from last checkpoint (reads novelization-state.yaml)
 - `--fresh`: Start over, archiving any existing novel
@@ -36,21 +37,21 @@ This command transforms your D&D campaign's decision logs and character journals
 ## Examples
 
 ```
-/novelize the-rot-beneath                    # Interactive mode with all checkpoints
-/novelize the-rot-beneath --auto             # Auto mode (voice lock + blocking only)
-/novelize the-rot-beneath --resume           # Continue interrupted session
-/novelize the-rot-beneath --fresh --auto     # Start over, automatic
-/novelize the-rot-beneath --skip-publisher   # Skip reader experience review
-/novelize the-rot-beneath --review-each      # Pause after every chapter
-/novelize the-rot-beneath --dry-run          # Preview plan only
-/novelize the-rot-beneath --append           # Add new chapters from recent sessions
-/novelize the-rot-beneath --chapter 3        # Regenerate only chapter 3
+/novelize the-rot-beneath playthrough-1                    # Interactive mode with all checkpoints
+/novelize the-rot-beneath playthrough-1 --auto             # Auto mode (voice lock + blocking only)
+/novelize the-rot-beneath playthrough-1 --resume           # Continue interrupted session
+/novelize the-rot-beneath playthrough-1 --fresh --auto     # Start over, automatic
+/novelize the-rot-beneath playthrough-1 --skip-publisher   # Skip reader experience review
+/novelize the-rot-beneath playthrough-1 --review-each      # Pause after every chapter
+/novelize the-rot-beneath playthrough-1 --dry-run          # Preview plan only
+/novelize the-rot-beneath playthrough-1 --append           # Add new chapters from recent sessions
+/novelize the-rot-beneath playthrough-1 --chapter 3        # Regenerate only chapter 3
 ```
 
 ## What Gets Created
 
 ```
-campaigns/{campaign}/novel/
+playthroughs/{campaign}/{game-name}/novel/
 ├── outline.md                 # Chapter plan with progress tracking
 ├── chapter-01.md              # Final edited chapter
 ├── chapter-02.md
@@ -114,6 +115,8 @@ Agents are self-sufficient. They read their own sources and write their own file
 
 ```
 campaign: first positional argument (required)
+game_name: second positional argument (required)
+playthrough: playthroughs/{campaign}/{game_name}  (derived path)
 auto_mode: --auto flag present
 resume_mode: --resume flag present
 fresh_mode: --fresh flag present
@@ -127,11 +130,13 @@ single_chapter: --chapter N (extract N as integer)
 ### Validation
 
 1. **Campaign exists**: Check `campaigns/{campaign}/` directory exists
-2. **Decision-log exists**: Check `campaigns/{campaign}/decision-log.md` exists
-3. **Resume mode**: If `--resume`, verify `novel/novelization-state.yaml` exists
+2. **Playthrough exists**: Check `playthroughs/{campaign}/{game_name}/` directory exists
+3. **Decision-log exists**: Check `{playthrough}/decision-log.md` exists
+4. **Resume mode**: If `--resume`, verify `{playthrough}/novel/novelization-state.yaml` exists
 
 If validation fails:
 - Campaign not found: List available campaigns
+- Playthrough not found: List available playthroughs for the campaign
 - Decision-log missing: Explain it's required
 - State file missing for resume: Suggest starting fresh
 
@@ -144,6 +149,7 @@ If `--dry-run`:
    MODE: PLAN
    DRY_RUN: true
    CAMPAIGN: {campaign}
+   PLAYTHROUGH: {playthrough}
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    ```
 2. Display outline summary to user
@@ -154,8 +160,8 @@ If `--dry-run`:
 ### Append Mode
 
 If `--append`:
-1. **Prerequisites**: Existing `novel/outline.md` and at least one chapter must exist
-2. **Detect new content**: Compare decision-log.md against existing outline to find new sessions/events
+1. **Prerequisites**: Existing `{playthrough}/novel/outline.md` and at least one chapter must exist
+2. **Detect new content**: Compare `{playthrough}/decision-log.md` against existing outline to find new sessions/events
 3. **Extend outline**:
    - Spawn novelizer-planner with APPEND header:
      ```
@@ -163,6 +169,7 @@ If `--append`:
      MODE: PLAN
      APPEND: true
      CAMPAIGN: {campaign}
+     PLAYTHROUGH: {playthrough}
      EXISTING_CHAPTERS: {N}
      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
      ```
@@ -175,7 +182,7 @@ If `--append`:
 ### Single Chapter Regeneration
 
 If `--chapter N`:
-1. **Prerequisites**: Existing `novel/outline.md` must exist with chapter N defined
+1. **Prerequisites**: Existing `{playthrough}/novel/outline.md` must exist with chapter N defined
 2. **Regenerate chapter N only**:
    - Spawn novelizer-writer for chapter N
    - Spawn novelizer-editor for chapter N
@@ -187,9 +194,9 @@ If `--chapter N`:
 
 ### Fresh Mode / Archive Behavior
 
-If `--fresh` and `novel/` exists:
+If `--fresh` and `{playthrough}/novel/` exists:
 1. Create timestamp: `YYYYMMDD-HHMMSS`
-2. Create archive: `novel/archive-{timestamp}/`
+2. Create archive: `{playthrough}/novel/archive-{timestamp}/`
 3. Move all existing files to archive
 4. Proceed with fresh novelization
 
@@ -249,6 +256,7 @@ drafts_archived: false  # true after Phase 6 archival
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    MODE: PLAN
    CAMPAIGN: {campaign}
+   PLAYTHROUGH: {playthrough}
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 2. Receive status (outline summary, tone, chapter count)
@@ -271,6 +279,7 @@ After outline approval, validate that the plan is coherent before writing begins
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    MODE: VALIDATE
    CAMPAIGN: {campaign}
+   PLAYTHROUGH: {playthrough}
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 2. Validation checks:
@@ -297,6 +306,7 @@ For each chapter N:
     Spawn novelizer-writer:
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     CAMPAIGN: {campaign}
+    PLAYTHROUGH: {playthrough}
     CHAPTER: {N}
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -307,6 +317,7 @@ For each chapter N:
     Spawn novelizer-editor:
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     CAMPAIGN: {campaign}
+    PLAYTHROUGH: {playthrough}
     CHAPTER: {N}
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -322,6 +333,7 @@ For each chapter N:
       - Re-run WRITE and EDIT for chapter 1 with VOICE_FEEDBACK header:
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         CAMPAIGN: {campaign}
+        PLAYTHROUGH: {playthrough}
         CHAPTER: 1
         VOICE_FEEDBACK: "more gritty, less formal"
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -351,6 +363,7 @@ For each chapter N:
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     MODE: INCREMENTAL
     CAMPAIGN: {campaign}
+    PLAYTHROUGH: {playthrough}
     CHAPTERS: [{chapters to check}]
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -369,6 +382,7 @@ For each chapter N:
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    MODE: FULL
    CAMPAIGN: {campaign}
+   PLAYTHROUGH: {playthrough}
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 2. Receive status: blocking count, advisory count, issue summaries
@@ -416,6 +430,7 @@ Scan for repetitive prose patterns across all chapters.
 1. Spawn novelizer-pattern-reviewer:
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    CAMPAIGN: {campaign}
+   PLAYTHROUGH: {playthrough}
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 2. Receive status: high/medium/low severity counts, top patterns
@@ -449,6 +464,7 @@ For each chapter with approved fixes:
 1. Spawn novelizer-fixer:
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    CAMPAIGN: {campaign}
+   PLAYTHROUGH: {playthrough}
    CHAPTER: {N}
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -465,6 +481,7 @@ For each chapter with approved fixes:
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    MODE: INCREMENTAL
    CAMPAIGN: {campaign}
+   PLAYTHROUGH: {playthrough}
    CHAPTERS: [{fixed chapter numbers}]
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -497,6 +514,7 @@ For each chapter (or every 2-3 chapters for longer novels):
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    MODE: CHAPTER
    CAMPAIGN: {campaign}
+   PLAYTHROUGH: {playthrough}
    CHAPTER: {N}
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -527,6 +545,7 @@ Skip if `--skip-publisher`.
 1. Spawn novelizer-publisher:
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    CAMPAIGN: {campaign}
+   PLAYTHROUGH: {playthrough}
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 2. Receive status: overall assessment, rating, key recommendations
@@ -548,6 +567,7 @@ If publisher review identified issues worth addressing and user requests revisio
 1. Spawn novelizer-reviser:
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    CAMPAIGN: {campaign}
+   PLAYTHROUGH: {playthrough}
    FEEDBACK_SOURCE: publisher
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -558,6 +578,7 @@ If publisher review identified issues worth addressing and user requests revisio
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    MODE: INCREMENTAL
    CAMPAIGN: {campaign}
+   PLAYTHROUGH: {playthrough}
    CHAPTERS: [{revised chapter numbers}]
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -687,7 +708,7 @@ These are suggestions for future revision. Continue to final assembly?
 
 When `--resume`:
 
-1. Read `novelization-state.yaml`
+1. Read `{playthrough}/novel/novelization-state.yaml`
 2. Determine current phase and chapter
 3. Resume from that point:
    - If mid-writing: continue with next chapter
@@ -729,7 +750,7 @@ Quality:
 - Continuity: {N} issues found, {N} fixed
 - Publisher: {rating}/10
 
-Output: campaigns/{campaign}/novel/
+Output: {playthrough}/novel/
 
 Files:
 - outline.md

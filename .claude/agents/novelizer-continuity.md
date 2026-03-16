@@ -35,8 +35,11 @@ Your prompt will include a mode header:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 MODE: {INCREMENTAL|FULL|PATTERN|PATTERN_INCREMENTAL}
 CAMPAIGN: {campaign}
+PLAYTHROUGH: {playthrough}
 CHAPTERS: [{list}]        # For INCREMENTAL only
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+`{playthrough}` is the path to the playthrough directory (e.g., `playthroughs/the-dimming/playthrough-1`). All novel and party files live here. Campaign-level design files live in `campaigns/{campaign}/`.
 ```
 
 Modes: INCREMENTAL, FULL, PATTERN, PATTERN_INCREMENTAL
@@ -50,20 +53,20 @@ Modes: INCREMENTAL, FULL, PATTERN, PATTERN_INCREMENTAL
 **Input**: Campaign name, list of chapters to check (e.g., [3, 4])
 
 **Task**:
-1. Read recent chapters from `campaigns/{campaign}/novel/chapter-{NN}.md`
-2. Read existing manifest from `campaigns/{campaign}/novel/continuity-manifest.md`
+1. Read recent chapters from `{playthrough}/novel/chapter-{NN}.md`
+2. Read existing manifest from `{playthrough}/novel/continuity-manifest.md`
 3. Extract new characters, locations, timeline events, established facts
 4. Check for contradictions against existing manifest
 5. Update the manifest with new entries
 6. Report any blocking or advisory issues found
 
 **Files to Read**:
-- `campaigns/{campaign}/novel/chapter-{NN}.md` (for each chapter in the list)
-- `campaigns/{campaign}/novel/continuity-manifest.md` (existing, if present)
+- `{playthrough}/novel/chapter-{NN}.md` (for each chapter in the list)
+- `{playthrough}/novel/continuity-manifest.md` (existing, if present)
 
 **Files to Write/Update**:
-- `campaigns/{campaign}/novel/continuity-manifest.md`
-- `campaigns/{campaign}/novel/story-so-far.md` - running summary for writer context
+- `{playthrough}/novel/continuity-manifest.md`
+- `{playthrough}/novel/story-so-far.md` - running summary for writer context
 
 **Output Format**:
 ```yaml
@@ -114,9 +117,9 @@ INVALID (do not do):
 **Input**: Campaign name
 
 **Task**:
-1. Read all chapters from `campaigns/{campaign}/novel/chapter-*.md`
-2. Read character sheets from `campaigns/{campaign}/party/*.md`
-3. Read outline from `campaigns/{campaign}/novel/outline.md`
+1. Read all chapters from `{playthrough}/novel/chapter-*.md`
+2. Read character sheets from `{playthrough}/party/*.md`
+3. Read outline from `{playthrough}/novel/outline.md`
 4. Build complete picture of all characters, locations, timeline, facts
 5. Cross-reference for contradictions across all chapters
 6. Identify voice drift between chapters
@@ -124,13 +127,13 @@ INVALID (do not do):
 8. If blocking issues exist, write fix requests
 
 **Files to Read**:
-- `campaigns/{campaign}/novel/chapter-*.md` (all edited chapters)
-- `campaigns/{campaign}/party/*.md` (character sheets for reference)
-- `campaigns/{campaign}/novel/outline.md`
+- `{playthrough}/novel/chapter-*.md` (all edited chapters)
+- `{playthrough}/party/*.md` (character sheets for reference)
+- `{playthrough}/novel/outline.md`
 
 **Files to Write**:
-- `campaigns/{campaign}/novel/continuity-notes.md` (always)
-- `campaigns/{campaign}/novel/fix-requests.md` (only if blocking issues exist)
+- `{playthrough}/novel/continuity-notes.md` (always)
+- `{playthrough}/novel/fix-requests.md` (only if blocking issues exist)
 
 **Output Format**:
 ```yaml
@@ -182,16 +185,16 @@ INVALID (do not do):
 **Input**: Campaign name
 
 **Task**:
-1. Read all chapters from `campaigns/{campaign}/novel/chapter-*.md`
+1. Read all chapters from `{playthrough}/novel/chapter-*.md`
 2. Analyze for repetitive patterns across the novel (not just within single chapters)
 3. Classify issues by severity (HIGH, MEDIUM, LOW)
 4. Write pattern report with specific examples and suggestions
 
 **Files to Read**:
-- `campaigns/{campaign}/novel/chapter-*.md` (all edited chapters)
+- `{playthrough}/novel/chapter-*.md` (all edited chapters)
 
 **Files to Write**:
-- `campaigns/{campaign}/novel/pattern-report.md`
+- `{playthrough}/novel/pattern-report.md`
 
 **What You Check**:
 - **Overused words/phrases**: Same distinctive word/phrase 6+ times across chapters, or 3+ times within 2 consecutive chapters
@@ -241,7 +244,7 @@ files_written:
 **Input**: Campaign name, list of chapters to check (e.g., [5, 6])
 
 **Task**:
-1. Read the specified chapters from `campaigns/{campaign}/novel/chapter-{NN}.md`
+1. Read the specified chapters from `{playthrough}/novel/chapter-{NN}.md`
 2. Analyze for repetitive patterns across the window
 3. Classify issues by severity
 4. Report findings (no separate file written — inline YAML output only)
@@ -485,7 +488,7 @@ Chapters Analyzed: 1-6
    - Note any description changes for advisory review
 
 5. **Update Story So Far**
-   After each incremental check, update `campaigns/{campaign}/novel/story-so-far.md` with a running summary (~500 words max):
+   After each incremental check, update `{playthrough}/novel/story-so-far.md` with a running summary (~500 words max):
    - Major plot events so far (1 sentence each)
    - Character emotional states as of the latest chapter
    - Unresolved tensions and open questions
