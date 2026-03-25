@@ -191,7 +191,7 @@ Used for members of the Ash Veil Communion and their institutions.
 
 - **Content approach**: The romance and horror elements involve intimacy, body horror (slow and specific), psychological manipulation (by the Mark itself), addiction dynamics, and moral compromise. These are features, not bugs. The campaign follows where the characters go — nothing is closed off by default. See `preferences.md` for full content guidance.
 - **Player expectations**: This is a dark romance horror campaign. Relationships matter. People will change. Some will be lost. The campaign explores what it means to be human when the boundaries blur, what love costs when it's parasitic, and whether informed consent is possible when the thing you're consenting to reshapes your capacity to refuse. The question isn't whether there's a cost — it's what you're willing to pay, and whether you can still recognize yourself after paying it.
-- **Character connections**: The party forms around the hero at Gorundtzal. Companions arrive over sessions — not all at once. Initial party is 2-3, growing to 4-5 active members from a designed pool of 7.
+- **Character connections**: The party forms around the hero at Gorundtzal. Companions arrive over sessions — not all at once. Initial party is 3-4, growing to 4-5 active members from a designed pool of 8 companions. Not all are expected to survive.
 - **Human(?)**: All characters are human. The question mark is the entire campaign.
 
 ## GM Guidance: The Mark in Play

@@ -52,6 +52,7 @@ Lean and weather-worn, with dark auburn hair kept in a practical braid that reac
 - She has been selling information to the Communion. Not out of loyalty — purely transactional. She tells them where refugee groups are heading, how many, how well-armed. She tells herself this is harmless intelligence they'd gather anyway. She's not entirely wrong, but people have died because of it.
 - She's seen the Grey Wasting firsthand. Not in Communion territory — here, in Valduri. A patch of dead earth in the western forests, perfectly circular, where the ground is warm and smells of ash. She didn't tell anyone because she doesn't want to be the one who confirms the Communion's justification for invasion.
 - She's noticed the hero's Mark and recognized something about it — not what it is, but that it reminds her of the patterns she saw in the dead earth patch. Branching lines, like veins. She hasn't connected the two consciously, but if pressed, she might.
+- She recognizes Verdakho from House Pellinaste's records but hasn't revealed this connection. He was a reliable clerk — competent, fair, forgettable. She's weighing whether acknowledging the link serves her or exposes her.
 
 ## Relationship to Party
 

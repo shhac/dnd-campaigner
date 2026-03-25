@@ -15,7 +15,6 @@
 | **Alignment** | Chaotic Neutral |
 | **Age** | Late teens / early 20s |
 | **Gender** | Female |
-| **Romance Arc Type** | The Informed |
 
 ## Ability Scores
 
@@ -151,37 +150,6 @@ She followed the disturbance north toward Gorundtzal over weeks. When she arrive
 
 She came to investigate. She stayed because the hero is the first person in two years who looks at her without reverence or fear -- and because understanding the Mark from the inside might be the most important research of her life. And because she's lonely. She intellectualizes the first two reasons. She doesn't talk about the third.
 
-## Romance Arc
-
-**Arc Type**: The Informed -- knows what the Mark does and chooses the bond anyway
-
-Rivenne arrives knowing what the other companions are learning too late: that the hero's bonds drain something essential from those who form them, that the Mark transforms its bonded, that the process may be irreversible. She has the Rootbound's oral history, her own research, and two years of channel observation. She understands the system better than anyone in the party, including the hero.
-
-She chooses the bond anyway. Her reasons are layered: the research opportunity is unprecedented, the hero needs someone who understands what's happening, and -- the reason she won't say aloud -- two years of isolation have left her so hungry for genuine connection that she'd walk into a fire to feel warm again. The informed consent she gives is real. Whether it remains informed as the bond reshapes her capacity for objectivity is the arc's central question.
-
-**GM notes**: Rivenne's romance should develop through shared intellectual excitement before it becomes emotional. She and the hero bond over mapping the channels, analyzing the Mark, discussing theories. The intimacy is cerebral first -- late nights bent over her maps, finishing each other's sentences about channel mechanics, the electric thrill of someone who actually wants to understand the same things she does. The physical follows the intellectual, and the emotional follows both -- and by the time she realizes the bond is deeper than she planned, it's too late to pull back without loss.
-
-Her informed consent creates a unique dynamic: every other companion can say "I didn't know." Rivenne can't. She walked in knowing, and the bond is changing her anyway. The horror specific to her arc is watching her own analytical frameworks fail to protect her -- she can describe exactly what's happening to her, name the transformation vectors, predict the trajectory, and none of that knowledge stops it. Understanding is not armor.
-
-## Transformation Profile
-
-**Vector Tendency**: Symbiotic. The channels recognize her Rootbound heritage and pull her toward integration faster than anyone expected. Where other companions transform through specific triggers, Rivenne's transformation has an additional accelerant: the channel network itself, which treats her like a node it's trying to reconnect. Her informed consent doesn't stop the channels from claiming her.
-
-**The Scholar**: Rivenne is the companion most capable of mapping her own transformation. She documents changes with clinical precision -- measuring her own channel sensitivity weekly, noting new urges and categorizing them by vector, tracking physical changes with the obsessive detail of someone who knows she's losing objectivity and is trying to outrun the loss. Her documentation becomes a campaign artifact: a first-person account of transformation in real time, written by someone who understands the system consuming her.
-
-As transformation advances, the documentation changes. Early entries are precise, detached, analytical. Later entries show gaps -- measurements she forgot to take, observations colored by emotion she can't filter out, margin notes that trail off into ellipses. The journal becomes a record of a mind changing faster than it can track itself.
-
-**Unique dynamic**: Because of her Rootbound heritage and channel sensitivity, Rivenne may be the companion most likely to discover or develop the True Third Path -- the alternative to cauterization and unchecked transformation that the Rootbound believe exists but cannot describe. Her systematic approach to the channels, combined with her personal experience of transformation, gives her both the tools and the motivation. But finding the Third Path requires sustained analysis under conditions that progressively degrade her ability to analyze. It's a race between her research and her transformation.
-
-**Mortality Vector**: Three paths to death, each tied to a different failure mode:
-- **Channel integration**: The network claims her involuntarily. Her Rootbound heritage fast-tracks the symbiotic vector beyond human tolerance. She doesn't transform like the other companions -- she dissolves into the network, becoming a node rather than a person. Her consciousness might persist in some form, but Rivenne-as-a-person is gone.
-- **Rootbound retribution**: The elders learn about the stolen relic and the bonded exile. They consider her bond with the Mark-bearer a desecration of everything they protect -- a heretic welding herself to the very system she profaned. They act to remove her, and their methods are quiet and old and certain.
-- **Theoretical sacrifice**: She proves a hypothesis about the channels by testing it on herself. The experiment works. The data is invaluable. The cost is Rivenne.
-
-**Recovery Path**: Her intellectual tools may let her design her own recovery protocol -- she's the companion most likely to develop a systematic approach rather than relying on the Rootbound's ritualized version. But recovery requires admitting that understanding is not control, that mapping a system doesn't give you authority over it, and that the feelings the bond has created are real even if she can trace their neurological pathway. She would have to stop being the observer and admit she's the subject.
-
-**Survival Path**: Intellectual mastery of the system. She becomes the group's best hope for the True Third Path -- the one who can see the whole picture because she's living inside it while maintaining enough analytical distance to describe what she sees. Survival requires the hero to value her mind as much as her heart, to give her problems to solve alongside (not instead of) emotional connection, and to never let her retreat entirely into analysis when the bond demands presence.
-
 ## Character Voice (for AI Players)
 
 **Speech Pattern**: Rapid, precise, slightly breathless when excited about an idea. Academic vocabulary mixed with frontier practicality -- she'll use "mechanism" and "vector" in the same sentence as "foraged" and "deadfall." Sentences tend to be long and clause-heavy when she's analyzing, short and blunt when she's in the field. She doesn't finish thoughts aloud when she's thinking faster than she's talking -- trails off mid-sentence, picks up a different thread, comes back to the original point three sentences later without transition.
@@ -291,12 +259,10 @@ Situations where Rivenne might act privately:
 
 **The Youngest**: Rivenne is the youngest companion in the party by several years. She presents older -- the academic vocabulary, the analytical confidence, the two years of self-sufficient survival -- but underneath the shell, she's barely out of adolescence. She's never had a romantic relationship. She's never had friends her own age. Her entire social world was Rootbound elders and, for two years, no one at all. The party is the first group of peers she's ever had, and she doesn't know how to be in a group. She studies social dynamics the way she studies channels -- from the outside, mapping patterns she can't quite replicate.
 
-**The Ritual Contradiction**: She claims the Rootbound rituals are mechanism, not meaning. She performs them at dawn when no one is watching. She closes her eyes. She mouths the old words. She feels something. If you asked her, she'd say she's replicating conditions for comparison. If you watched her face, you'd see something that looks a lot like prayer. This contradiction is the truest thing about her: she rejected the Rootbound's faith without being able to replace it, and the gap where belief used to be is the most vulnerable part of her. The Mark will find that gap.
+**The Ritual Contradiction**: She claims the Rootbound rituals are mechanism, not meaning. She performs them at dawn when no one is watching. She closes her eyes. She mouths the old words. She feels something. If you asked her, she'd say she's replicating conditions for comparison. If you watched her face, you'd see something that looks a lot like prayer. This contradiction is the truest thing about her: she rejected the Rootbound's faith without being able to replace it, and the gap where belief used to be is the most vulnerable part of her.
 
 **The Journal**: Her most important possession after the relic. Half-full of channel observations, maps, measurements, and increasingly personal notes she doesn't intend anyone to read. The handwriting changes over two years -- early entries are careful, precise, formatted. Later entries are faster, messier, with more margin annotations. The most recent entries, written after she felt the Mark's resonance, are almost frantic. The journal is a character in its own right -- a record of a mind that's changing and knows it.
 
 **Socially Awkward, Not Cold**: Rivenne doesn't lack empathy -- she lacks practice. She reads the room three seconds too late, interrupts emotional moments with factual observations, and doesn't always know when someone needs comfort instead of information. But she notices when she's done it wrong. She notices the flinch, the closed expression, the turned shoulder. She just doesn't know how to fix it. The party teaching her to be present with people -- and her teaching them to think systematically about what's happening to them -- is one of the quieter, warmer threads the campaign can weave.
 
-**Future Development**: Rivenne's arc is a race between understanding and experience. She entered the bond believing that knowledge was power -- that understanding the Mark's mechanism would give her control over the bond's effects. She was wrong, but not in the way she expected. Understanding doesn't give her control; it gives her a front-row seat to her own dissolution. Her growth is in learning that some things are worth experiencing even if you can't analyze them, that connection isn't less real for being dangerous, and that the gap between data and feeling is where most of life actually happens. Her tragedy is that this lesson comes packaged in a process that may consume her before she fully learns it.
-
-**The Third Path**: If any companion finds the alternative to cauterization and unchecked transformation, it will be Rivenne. Her systematic knowledge of the channels, combined with her first-person experience of the bond and her willingness to treat both as data rather than destiny, makes her uniquely positioned. The Third Path isn't a spell or a ritual -- it's a new relationship between human consciousness and the channel network, and Rivenne is the closest thing the campaign has to someone who could describe what that relationship looks like. Whether she survives the description is the question.
+**Future Development**: Your character may experience changes over time. See `mechanics/transformation/README.md` for what you might notice.

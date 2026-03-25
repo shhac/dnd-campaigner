@@ -19,6 +19,7 @@ Read this index at Tier 2. Then read these at startup:
 - `transformation/sensory-guide.md` — On-demand (read before narrating transformation details)
 - `transformation/recovery.md` — On-demand (read when recovery becomes relevant, typically Act 2+)
 - `romance/gm-guide.md` — **READ AT STARTUP** — Intimacy framework, progression milestones
+- `transformation/companion-vectors.md` — **READ AT STARTUP** — Per-companion transformation profiles, romance arcs, arrival triggers, mortality/survival vectors (consolidated from character design)
 - `domain-building/gm-guide.md` — On-demand (read during downtime/domain scenes)
 
 ## Gated Mechanics

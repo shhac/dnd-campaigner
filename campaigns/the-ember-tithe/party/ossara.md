@@ -13,7 +13,6 @@
 | **Background** | Merchant's Daughter (Guild Merchant variant) |
 | **Alignment** | True Neutral |
 | **Role** | Companion 3 — The Opportunist |
-| **Romance Arc Type** | Reluctant Bond |
 
 ## Ability Scores
 
@@ -105,7 +104,7 @@ A hidden pouch of 28 silver coins she tells no one about. This is not wealth. Th
 
 **Bond**: I built something once. It burned. I won't let that stop me from building again — but this time I'll own the deed, not just work the counter.
 
-**Flaw**: She defines herself through what she possesses and controls. Without wealth and status, her identity is in freefall. She fills the void with bravado, but underneath she's terrified she's no one without her ledgers. The Mark exploits this vacuum — dissolution fills what identity crisis hollows out.
+**Flaw**: She defines herself through what she possesses and controls. Without wealth and status, her identity is in freefall. She fills the void with bravado, but underneath she's terrified she's no one without her ledgers.
 
 ## Backstory
 
@@ -117,19 +116,7 @@ The Ash Veil Communion took Kethenvari in a single night. Ossara went from silk 
 
 She is not mourning. She is furious. Everything she was built for — the eye, the numbers, the careful architecture of commercial relationships — is useless in a world of ash and rubble. She refuses to pretend that starting over in a ruin is a "fresh start." It is a catastrophe, and the people who smile through catastrophes are the ones who had nothing to lose.
 
-The Mark appeared during the fall. She doesn't understand it — the branching warmth on the hero's skin, the pull she feels toward them that she can't explain and can't control. She was raised to read the fine print, and the Mark's terms are unacceptable. She can feel it drawing her in, and she hates it the way she hates any deal where the other party won't show their hand.
-
-## Transformation Profile
-
-**Vector Tendency**: Dissolution — her identity is already fractured by loss of status and purpose. The Mark fills the void with something fluid and beautiful but fundamentally not her.
-
-**The Detective**: Most likely companion to independently figure out what the Mark is doing. Her merchant's instinct for bad deals applies to supernatural parasitism too. She notices patterns — the warmth after emotional moments, the fatigue that follows, the way people agree with the hero too easily. She keeps a mental ledger. The numbers don't add up, and Ossara always checks the numbers.
-
-**Mortality Vector**: Identity erasure. Her resistance weakens as her sense of self fragments. The woman who could see the manipulation stops remembering why she was fighting. "Death" is the moment she stops arguing and smiles with a face that isn't quite hers.
-
-**Recovery Path**: Radical honesty — tell truths that cost everything. The opposite of a merchant's instinct to protect information. To reclaim herself, she must give away every secret, every hidden coin, every careful lie. She must be worth nothing on paper to be worth everything in fact.
-
-**Survival Path**: Discovers the Mark's nature, becomes the group's conscience, forces informed consent. Uses her ability to read deals to read the Mark's deal — and insists everyone knows what they're signing.
+Something changed during the fall. She doesn't understand it -- the pull she feels toward the hero, the warmth that rises in her chest when he's near, the way her instincts lean toward him despite every rational objection. She was raised to read the fine print, and whatever this is, its terms are unacceptable. She can feel it drawing her in, and she hates it the way she hates any deal where the other party won't show their hand.
 
 ## Character Voice (for AI Players)
 
@@ -225,12 +212,8 @@ Situations where Ossara might act privately if given the opportunity:
 
 ## Notes
 
-**The Reluctant Bond**: Ossara's romance arc is built on resistance. She feels the Mark's pull and recognizes it as something she can't control — and control is everything to her. Every moment of vulnerability costs her. Every time she softens toward the hero, she resents it afterward. The bond grows in hostile soil, pushing through cracks in her defenses that she patches and the Mark erodes.
+**The Identity Crisis**: Three weeks ago she was Ossara, Davenne's daughter, the one with the eye, the future of the shop. Now she is Ossara, refugee, nobody, a woman whose skills -- reading contracts, managing suppliers, tracking inventory -- are useless in a world that has no contracts, no suppliers, and nothing to inventory. She is a woman defined by external structures, stripped of every structure she had.
 
-The cruelest dimension: the moments of surrender feel good. Not just the Mark's warmth — the *relief* of letting go, of not calculating, of being with someone without terms. She has never experienced that before, and she doesn't know if it's real or if it's the Mark rewiring her reward system. She can't tell, and not being able to tell is what terrifies her most.
+**The Detective Instinct**: Ossara notices patterns others miss. Her merchant's habit of tracking costs and returns, her suspicion of anything that feels too good -- these are the tools she applies to everything, including the strange pull she feels toward the hero and the way others respond to him.
 
-**The Identity Crisis**: Three weeks ago she was Ossara, Davenne's daughter, the one with the eye, the future of the shop. Now she is Ossara, refugee, nobody, a woman whose skills — reading contracts, managing suppliers, tracking inventory — are useless in a world that has no contracts, no suppliers, and nothing to inventory. The Mark finds her at her most vulnerable: a woman who defined herself through external structures, stripped of every structure she had. Dissolution doesn't have to break down her walls. There are no walls left. It just has to fill the empty space — and she's all empty space.
-
-**The Detective Thread**: Ossara's transformation arc has a built-in counterweight: she is the companion most likely to figure out what the Mark is doing. Her merchant's instinct for bad deals, her habit of tracking costs and returns, her suspicion of anything that feels too good — these are the tools that could save the entire group. The question is whether she figures it out before the dissolution erodes the part of her that asks questions. The detective who stops trusting her own judgment is worse than no detective at all.
-
-**Development Potential**: Ossara's arc bends toward one of two endpoints. If she maintains her identity long enough to decode the Mark, she becomes the group's conscience — the one who insists on informed consent, who forces the hero to confront the cost, who turns her merchant's eye from commodities to ethics. If the dissolution takes her first, she becomes something fluid and agreeable and helpful and utterly unlike herself — a woman who smiles instead of argues, who gives instead of counts, who loves the hero without reservation. Everyone would prefer the second Ossara. That's the horror.
+**Future Development**: Your character may experience changes over time. See `mechanics/transformation/README.md` for what you might notice.

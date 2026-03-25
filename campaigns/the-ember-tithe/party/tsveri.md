@@ -12,6 +12,9 @@
 | **Level** | 1 |
 | **Background** | Communion Infantry (Soldier variant) |
 | **Alignment** | Chaotic Neutral |
+| **Age** | Early 20s |
+| **Gender** | Female |
+| **Role** | Companion 4 -- The Deserter (Mid-campaign arrival, Sessions 3-4) |
 
 ## Ability Scores
 
@@ -74,30 +77,6 @@ Tsveri has no formal class. What she has is Communion infantry training -- six m
 ### Background Feature
 - **Communion Deserter**: Tsveri knows Communion military structure from the inside -- patrol schedules, chain of command, the hymns they sing before a cauterization, the substance they pour into the channels, the blessing the officers read over the dead. This knowledge is tactically valuable and emotionally unbearable. When the party encounters Communion forces, she can identify unit types, estimate strength, and predict tactics -- but each time she does, it costs her something she doesn't show.
 
-### Transformation Profile
-
-**Vector Tendency**: Predatory -- already halfway there before the bond forms. The Mark doesn't make her into something new. It refines what she already is. Faster reflexes. Predatory grace. A beauty that makes your heart race the way a hunting cat's movement does. She doesn't become monstrous; she becomes magnificent.
-
-**Romance Arc Type**: Dark Mirror -- her transformation speaks to the hero's hidden desires. Verdakho's attraction to her dangerous beauty accelerates her change. He likes who she's becoming, and that complicity is the horror.
-
-**Dark Mirror Dynamics**:
-- The hero finds her violence attractive. Not in theory -- in practice. The way she moves in a fight, the efficiency, the absence of hesitation. He watches her and feels something he doesn't want to name.
-- She can feel his attention. It makes her better. Faster. More precise. The Mark is feeding her his desire and sculpting her toward it.
-- The transformation makes her more of what the hero secretly wants: someone dangerous and beautiful and entirely devoted to him. The horror is that she'd be horrified by this if she could see it clearly -- but the bond makes it feel like love, and the love makes it feel like choice.
-
-**Mortality Vectors**:
-- **Combat glory**: She takes the worst fights because she's magnificent in them. Every battle accelerates the transformation. She starts seeking danger not for duty but for the feeling of being watched and admired while she destroys something.
-- **Rejection-break**: If the hero pulls back from the dynamic -- admits he's been complicit and withdraws -- she crumbles. She's addicted to his approval. Without it, the transformation has no anchor, and the predatory instincts turn inward.
-
-**Recovery Path**: The hero must confront his own complicity. Not "I need to save you" -- that's still the dynamic. He must say: "I've been enjoying what's happening to you. I liked watching you become this. That's my fault, and I'm stopping." The honesty -- the first time someone has been truly honest with her about what they want from her -- cracks the dynamic open. Recovery is possible if someone is honest with her. She's capable of radical change if she's not being lied to.
-
-**Survival Path**: Someone tells her the truth for the first time in her life. Not a gentle truth. The real one. She can take it. She's taken worse.
-
-**Advancement Notes**:
-- Sessions 3-4: Arrival. Stage 1 (Dormant) but with existing Predatory vector at 2 (pre-existing from her violence history). The Mark calms her -- that calm is the first hook.
-- Sessions 5-6: Psychological shifts begin immediately. She was already having intrusive thoughts about violence. The Mark gives them shape and direction.
-- Sessions 7+: Early physical changes manifest as enhancement of existing qualities. Faster. More graceful. Eyes that track movement in peripheral vision. Skin that runs warm to the touch.
-
 ## Equipment
 
 ### Worn/Carried
@@ -126,7 +105,7 @@ None. She has nothing.
 
 **Bond**: The hero's presence is the first time the shaking stops. I don't know what that means. I know I don't want it to stop.
 
-**Flaw**: She's violent. Not angry-violent -- competent-violent. She knows exactly how to hurt people, and the Mark's transformation is refining this into something beautiful and terrible. She fights like breathing. The hero finds this attractive, and that attraction is the Dark Mirror.
+**Flaw**: She's violent. Not angry-violent -- competent-violent. She knows exactly how to hurt people, and she's good at it in a way that frightens her. She fights like breathing. She doesn't know why the hero watches her when she fights, but she can feel his attention, and it makes something inside her sharpen.
 
 ## Backstory
 
@@ -178,7 +157,9 @@ She walked for eleven days. She ate what she could find, stole what she couldn't
 
 **Initial Impressions**:
 - **Verdakho**: "He looks at me like I'm a person. Not a weapon. Not an enemy. I don't remember the last time someone looked at me like that. It hurts."
-- **Other companions**: "They don't trust me. Good. They shouldn't. I wouldn't trust me either."
+- **Drakkenne**: "Soldier. Like me. Not like me. She follows orders she chose. I followed orders I was given. She looks at me like she's measuring whether I'll turn. She's right to."
+- **Lasinne**: "The healer. She touched my arm without asking. In the Communion, touching someone without permission gets you hit. She didn't flinch. I don't understand her."
+- **Ossara**: "The angry one. I understand angry. She uses words where I would use fists. Same thing, different weapon."
 
 ## Internal Conflict Engine (ICE)
 
@@ -189,9 +170,9 @@ Roll when: The hero is present and she has to choose between what she feels and 
 - **Below 7**: Logic wins. She pulls back, assesses, makes the smart choice. This is rare -- emotion dominates her.
 - **7 or above**: Emotion wins. She follows the feeling, stays close to the hero, acts on instinct rather than analysis.
 
-### Competing Goals (Threshold: 10)
+### Competing Goals (Threshold: 8)
 Roll when: Violence offers a solution but she's trying to be different, when protecting the hero conflicts with protecting herself, when the person she was (soldier) conflicts with the person she's trying to become.
-- **Below 10**: The old self wins. The soldier, the killer, the one who knows exactly how to end a problem permanently.
+- **Below 8**: The old self wins. The soldier, the killer, the one who knows exactly how to end a problem permanently. This happens more often than not — the old self is strong.
 - **10 or above**: The new self wins. She holds back, finds another way, asks instead of acts. This costs her visibly -- restraint looks like pain on her.
 
 ### Flaw Activation (Threshold: 7)
@@ -237,7 +218,7 @@ Situations where Tsveri might act privately:
 
 **Secrecy Style**: Not subtle. She's not good at deception -- her face shows everything she's feeling, which is why the dead-eyed combat stillness is so disturbing by contrast. She hides things through avoidance and deflection, not lies. If caught praying, she'll say nothing and leave the room. If caught watching the hero, she'll look away and busy her hands.
 
-**Moral Limits**: Will not harm civilians under any circumstances. Will not follow orders that echo the cauterization operations. Will not betray the hero -- but this isn't a moral principle, it's a dependency, and the distinction matters for the Dark Mirror arc. She would die for him. That's not heroism; that's the transformation talking.
+**Moral Limits**: Will not harm civilians under any circumstances. Will not follow orders that echo the cauterization operations. Will not betray the hero -- not as a moral principle, but as something deeper she can't name. She would die for him. She doesn't examine why too closely.
 
 ## Knowledge & Secrets
 
@@ -261,18 +242,18 @@ Situations where Tsveri might act privately:
 - The Communion's mission might have a real reason behind it -- the Grey Wasting is killing her homeland. She hates that the people who burned villages might not be entirely wrong about the threat, even if they're monstrous in their response.
 - Something is changing inside her. Not the trauma -- something else. She's faster than she was. Her senses are sharper. She chalks it up to survival instinct. She's wrong.
 
-**Secret**: She didn't just kill her officer. She killed two other soldiers who tried to stop her. She doesn't mention this. If asked, she'll say she "had to fight her way out." The truth is she was thorough and efficient and part of her enjoyed it. Three dead in under a minute. The training the Communion gave her, turned back on them with a precision that should have horrified her more than it did. This secret isn't about guilt -- she feels guilty about all of it. It's about the enjoyment. The fraction of a second where her body was doing exactly what it was built to do, and it felt right. That's the thing she can't say. That's the thing the Dark Mirror will exploit.
+**Secret**: She didn't just kill her officer. She killed two other soldiers who tried to stop her. She doesn't mention this. If asked, she'll say she "had to fight her way out." The truth is she was thorough and efficient and part of her enjoyed it. Three dead in under a minute. The training the Communion gave her, turned back on them with a precision that should have horrified her more than it did. This secret isn't about guilt -- she feels guilty about all of it. It's about the enjoyment. The fraction of a second where her body was doing exactly what it was built to do, and it felt right. That's the thing she can't say.
 
 ## Notes
 
-**The Weapon Who Wants to Be a Person**: Tsveri's arc is the inverse of a redemption story. She starts wanting to be different -- to shed the soldier, to become someone who doesn't solve problems with violence. But the Mark wants the opposite. It's refining her into the most beautiful, efficient, terrifying version of what she already is. Her growth isn't toward gentleness; it's toward accepting that she can be both -- violent and tender, dangerous and kind. The recovery path requires someone (Verdakho) to be honest about enjoying her transformation. The honesty doesn't fix her. It gives her something real to build on.
+**The Weapon Who Wants to Be a Person**: Tsveri wants to be different -- to shed the soldier, to become someone who doesn't solve problems with violence. Her growth isn't toward gentleness; it's toward accepting that she can be both -- violent and tender, dangerous and kind.
 
-**The Prayer Medallion**: She can't throw it away. She's tried. Her mother gave it to her. The faith is gone but the object connects her to the last moment she was just a farmer's daughter being sent away. If someone finds her praying, the conversation that follows should be one of the campaign's most painful -- because she doesn't believe any of it, and she can't stop.
+**The Prayer Medallion**: She can't throw it away. She's tried. Her mother gave it to her. The faith is gone but the object connects her to the last moment she was just a farmer's daughter being sent away. She doesn't believe any of it, and she can't stop.
 
-**The Shaking**: Her hands shake. Constantly, subtly, a tremor she tries to hide by keeping her hands busy. Near the hero, it stops. This is the bond's first and most insidious hook -- physical relief from trauma symptoms. She associates his presence with safety before she associates it with anything romantic. The romance grows from the dependency, not the other way around, and that ordering is the Dark Mirror's foundation.
+**The Shaking**: Her hands shake. Constantly, subtly, a tremor she tries to hide by keeping her hands busy. Near the hero, it stops. She doesn't understand why. She doesn't want to understand. She just knows his presence is the first thing that's felt safe since she deserted.
 
-**Arrival Timing**: Mid-campaign (Sessions 3-4). She arrives at Gorundtzal half-starved and hostile, speaking broken Valduri, with a Communion sword and a Communion accent. Every reason to be turned away. The hero's Mark reacts to her immediately -- warmth, pull, recognition. The companions should be suspicious. The hero should be drawn. The tension between these reactions is her introduction.
-
-**Combat as Worship**: The most disturbing aspect of her transformation isn't the violence itself -- it's that combat becomes her primary mode of self-expression. In a fight, she's present, clear, alive in a way that nothing else achieves. The grin isn't bloodlust. It's the joy of a person doing the one thing they're unambiguously good at. The hero watching this -- and finding it beautiful -- is the Dark Mirror's engine. Every fight they survive together is a love scene and a transformation trigger simultaneously.
+**Combat as Expression**: In a fight, she's present, clear, alive in a way that nothing else achieves. The grin isn't bloodlust. It's the joy of a person doing the one thing they're unambiguously good at.
 
 **The Officer's Name**: Mkvari. She says his name sometimes, when she's half-asleep or scrubbing her hands. Not with hate. With a specificity that's worse than hate. She remembers exactly how he sounded reading the blessing. She can reproduce the cadence perfectly. She'll never be free of his voice.
+
+**Future Development**: Your character may experience changes over time. See `mechanics/transformation/README.md` for what you might notice.

@@ -240,6 +240,7 @@ Situations where Verdakho might act privately if given the opportunity:
 - Why the Communion burned Kethenvari (beyond the obvious -- conquest)
 - What the Rootbound are or what they protect
 - How to fight, properly. The belt knife is a tool, not a weapon, and he knows the difference.
+- The frontier trader Pellinaste at Gorundtzal is from the same family as his former employers. He hasn't recognized her yet -- she married into a branch family and uses a different given name.
 
 **What He Suspects**:
 - Something changed inside him the night of the fall. Not just trauma -- something physical, structural.
