@@ -41,7 +41,29 @@ The `ask_player` and `check_interrupt` MCP tools were designed to be called dire
 - The spectator web app's viewer functionality (reading JSONL transcripts, WebSocket streaming) is unaffected
 - The spectator server API endpoints work independently of MCP
 
-### Possible Workarounds
+### Workaround: Pre-allow MCP Tools in Project Permissions
+
+**Discovered**: 2026-03-25
+
+Adding the MCP tool to `permissions.allow` in `.claude/settings.local.json` lets teammates call it without triggering the approval gate. The tool executes directly, no prompt appears.
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "mcp__ping-pong__ping",
+      "mcp__spectator-input__check_interrupt",
+      "mcp__spectator-input__ask_player"
+    ]
+  }
+}
+```
+
+This was verified with a dedicated ping-pong MCP test server (`test-mcp/`):
+- **Without permission**: Teammate hits "Waiting for team lead approval" — deadlock (bug reproduced)
+- **With permission in settings.local.json**: Teammate calls MCP tool successfully, no approval prompt
+
+### Other Workarounds
 
 1. **Team lead as MCP proxy**: Teammate agents send structured messages to the team lead requesting player input. The team lead calls the MCP tool (which it can do) and relays the response back. Adds latency but works within the platform.
 
