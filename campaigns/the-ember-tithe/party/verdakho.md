@@ -84,11 +84,11 @@ A branching ember-veined pattern across his chest and left arm, like the veins o
 - He hasn't told anyone about it.
 
 **What Verdakho Doesn't Know**:
-- The bonds are parasitic. He is sustained at the cost of those bonded to him.
-- The Mark is ancient -- far older than the Communion, far older than Valduri.
-- The Rootbound know what it is. The Communion fears it.
+- The Mark's full cost is hidden from him. He doesn't know what it takes from the people closest to him.
+- The Mark is ancient — far older than anything he's encountered.
+- Others know what it is. They haven't told him.
 
-**Mechanical Note**: The Mark's effects are tracked by the GM using `mechanics/the-mark/gm-guide.md`. The player experiences the Mark through narration, not numbers. Bond formation, transformation, and hero stability are GM-side systems.
+**Mechanical Note**: The Mark's effects emerge through narration, not numbers. Trust the GM.
 
 ## Equipment
 

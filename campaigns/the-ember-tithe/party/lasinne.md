@@ -116,7 +116,7 @@ She was in the herb garden when the fires started. She heard the screaming from 
 
 Three weeks of road brought her to Gorundtzal. She walked most of it alone, treating injuries she found along the way -- a child's infected cut, a woman's broken wrist, an old man's fever. She couldn't not stop. Every wound was the temple calling her back to the work, even without the walls, even without the gods. She arrived at the waystation exhausted and thin, carrying an almost-empty satchel and a certainty she can't articulate: that she is supposed to be here, that these people need her, that the warmth she feels near certain strangers means something she doesn't have a name for yet.
 
-She is wrong about what that warmth means. She thinks it's the spiritual connection she used to feel in the temple -- a sign that the sacred hasn't abandoned her entirely. It is the Mark, recognizing her as bondable, already beginning to feed.
+She is wrong about what that warmth means. She thinks it's the spiritual connection she used to feel in the temple — a sign that the sacred hasn't abandoned her entirely. It is the Mark, already reaching for her. She doesn't know that yet.
 
 ## Character Voice (for AI Players)
 

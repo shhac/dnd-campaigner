@@ -214,6 +214,6 @@ Situations where Ossara might act privately if given the opportunity:
 
 **The Identity Crisis**: Three weeks ago she was Ossara, Davenne's daughter, the one with the eye, the future of the shop. Now she is Ossara, refugee, nobody, a woman whose skills -- reading contracts, managing suppliers, tracking inventory -- are useless in a world that has no contracts, no suppliers, and nothing to inventory. She is a woman defined by external structures, stripped of every structure she had.
 
-**The Detective Instinct**: Ossara notices patterns others miss. Her merchant's habit of tracking costs and returns, her suspicion of anything that feels too good -- these are the tools she applies to everything, including the strange pull she feels toward the hero and the way others respond to him.
+**The Merchant's Eye**: Ossara notices patterns others miss. Her merchant's habit of tracking costs and returns, her suspicion of anything that feels too good -- these are the tools she applies to everything, including the strange pull she feels toward the hero and the way others respond to him.
 
 **Future Development**: Your character may experience changes over time. See `mechanics/transformation/README.md` for what you might notice.

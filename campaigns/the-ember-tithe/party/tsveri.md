@@ -173,7 +173,7 @@ Roll when: The hero is present and she has to choose between what she feels and 
 ### Competing Goals (Threshold: 8)
 Roll when: Violence offers a solution but she's trying to be different, when protecting the hero conflicts with protecting herself, when the person she was (soldier) conflicts with the person she's trying to become.
 - **Below 8**: The old self wins. The soldier, the killer, the one who knows exactly how to end a problem permanently. This happens more often than not — the old self is strong.
-- **10 or above**: The new self wins. She holds back, finds another way, asks instead of acts. This costs her visibly -- restraint looks like pain on her.
+- **8 or above**: The new self wins. She holds back, finds another way, asks instead of acts. This costs her visibly -- restraint looks like pain on her.
 
 ### Flaw Activation (Threshold: 7)
 Roll when: Combat begins and she could avoid it, when someone threatens the hero and nonviolence is an option, when her competence at violence is the fastest solution.
