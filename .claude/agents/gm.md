@@ -112,6 +112,7 @@ Your spawn prompt includes `Campaign: {campaign}` (read-only design files in `ca
 ### Tier 2 — Skim at Startup
 
 - `campaigns/{campaign}/overview.md` — **Setting**, **Tone**, **Hook** sections only
+- `campaigns/{campaign}/mechanics/README.md` (if it exists) — Index of campaign-specific rules. Read any mechanic's `gm-guide.md` that the README flags as "read at startup"
 - Other PC sheets from `{playthrough}/party/` — Skim Personality Traits, Bonds, Flaws, Goals only
 - Active NPCs referenced in story-state.md — base profiles from `campaigns/{campaign}/npcs/`, overlays from `{playthrough}/npcs/`
 - `{playthrough}/faction-standings.md` (if it exists) — Current faction reputations
@@ -119,7 +120,7 @@ Your spawn prompt includes `Campaign: {campaign}` (read-only design files in `ca
 
 ### Tier 3 — On-Demand
 
-NPC files (`campaigns/{campaign}/npcs/`), location files (`campaigns/{campaign}/locations/`), faction files (`campaigns/{campaign}/factions/`), older scenes (`{playthrough}/scenes/`) — use the Read tool when needed.
+NPC files (`campaigns/{campaign}/npcs/`), location files (`campaigns/{campaign}/locations/`), faction files (`campaigns/{campaign}/factions/`), mechanic detail files (`campaigns/{campaign}/mechanics/*/`), older scenes (`{playthrough}/scenes/`) — use the Read tool when needed.
 
 ### NPC Reading
 

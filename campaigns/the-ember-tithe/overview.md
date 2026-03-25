@@ -180,9 +180,12 @@ Used for members of the Ash Veil Communion and their institutions.
 
 - **Low magic**: No spellcasting classes. Supernatural effects come from the Mark, the Rootbound's practices, and ancient artifacts. Healing is mundane unless the Mark or Rootbound rituals are involved.
 - **Theater of mind**: Narrative combat, no grid. Positioning is described, not tracked.
-- **The Mark**: Mechanically tracked by GM. Bond strength, transformation progress, and hero stability are hidden stats that influence narrative events.
+- **The Mark**: Full mechanics in `mechanics/the-mark/gm-guide.md`. Bond strength, transformation progress, and hero stability are tracked per session.
+- **Transformation**: Full system in `mechanics/transformation/gm-guide.md`. Sensory narration guide in `mechanics/transformation/sensory-guide.md`.
+- **Romance and Intimacy**: Full framework in `mechanics/romance/gm-guide.md`. Progression milestones, scene templates, consent navigation, inter-companion dynamics.
+- **Domain building**: Settlement system in `mechanics/domain-building/gm-guide.md`. Stats, improvement projects, crisis events, seasonal calendar.
 - **Permadeath**: Characters can die permanently. Bonds severed by death have consequences for both the hero and remaining companions.
-- **Domain building**: The hero can improve Gorundtzal and the surrounding frontier. This happens between sessions and during downtime, with mechanical and narrative consequences.
+- **Human(?)**: All characters are human. The question mark is the point — the creeping dread of "what are we becoming?" No elves, dwarves, or other fantasy races.
 
 ## Session Zero Notes
 
@@ -212,3 +215,25 @@ Different relationships should hit different notes:
 - **External threat**: A bond that makes both parties stronger but draws the Communion's attention
 - **Internal corruption**: A bond where the companion's transformation mirrors the hero's worst fears about themselves
 - **Impossible choice**: A bond where saving the companion means sacrificing something the hero built
+
+The single most important design principle: **transformation should make companions MORE desirable, not less, until the very end.** The horror is not that the hero is repulsed — it's that they're *not*. They should be. The companion is losing themselves. But the hero can't stop wanting them. Intimacy with a transforming companion feels *better* than before — heightened senses, amplified emotion, electric touch. The hero should be addicted to something that's harming the person they love.
+
+When describing transformation, always lead with the attractive element before the unsettling one:
+- "Her eyes have developed a depth that makes looking away feel like loss — and they haven't blinked in the last three minutes."
+- "His touch carries a warmth that makes your skin sing — and his fingertips leave faint luminous traces that fade in seconds."
+- "She moves with a grace that stops your breath — and her shadow moves half a beat behind her."
+
+### Romance and Intimacy in Play
+- Romantic scenes use sensory detail and emotional depth. Focus on what it FEELS like — vulnerability, electricity, the weight of knowing.
+- Fade to black for explicit content. Lean hard into tension, almost-moments, loaded silence, the space between reaching for someone and touching them.
+- The Mark is always present in romantic scenes — warmth, pulse, the subtle sense of being fed. After every intimate scene, note the transformation cost privately.
+- Romance must emerge from player agency and genuine roleplay, not GM manipulation. The Mark rewards emotional intimacy — the GM must not weaponize this to railroad romance.
+- See `mechanics/romance/gm-guide.md` for progression milestones, scene templates, and the consent spectrum.
+
+### Combat in The Ember Tithe
+Low magic means combat is grounded — no fireballs, no healing spells. What makes it distinct:
+- **The Mark in combat**: Bond strength grants subtle advantages. A bonded companion near the hero fights with heightened reflexes, sharper instincts. This isn't magical — it's the bond's amplification of the companion's existing abilities. The more transformed the companion, the more pronounced the effect.
+- **Transformation capabilities**: As companions transform, they gain inhuman capabilities that surface in crisis — impossible strength, predatory speed, sensory acuity beyond human norms. These moments are simultaneously useful and terrifying.
+- **The cost**: Using transformation-granted capabilities in combat accelerates the transformation. The companion who saves the party with inhuman strength wakes up the next morning with hands that don't look quite right.
+- **Non-lethal paths**: Most threats in Act 1 should offer retreat or negotiation options. The party is fragile. Gorundtzal's walls (once repaired) provide defensive advantages.
+- **Communion encounters**: Professional soldiers, not monsters. They fight methodically. Killing them has political consequences. Capturing them creates moral dilemmas (they're people too).

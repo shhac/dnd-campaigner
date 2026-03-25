@@ -46,23 +46,23 @@
 - The central provinces are occupied. The frontiers are contested or ungoverned.
 - Winter is perhaps two weeks away. Shelter and supplies are critical.
 - There is no organized resistance yet — only scattered survivors and rumors.
-- The hero bears a strange mark — a branching pattern on their chest and arm that appeared during the fall. It pulses faintly in low light.
+- The hero survived the fall of Kethenvari. They don't talk much about what happened that night.
 
 ## Party Resources
 
 **Gold**: Modest — whatever was carried from the fall
 **Notable Items**:
 - Basic survival gear
-- The hero's Mark (not an item, but notable)
+- Whatever the hero carries from the fall (they haven't shared details)
 
 ## Recent Session Summary
 
 ### Session 0
-We arrived at Gorundtzal, the ruined waystation on the northern frontier, three weeks after the Ash Veil Communion destroyed Kethenvari and conquered Valduri. The waystation is damaged but defensible, with stone walls and a working well. About thirty other survivors are here, disorganized and frightened. A former quartermaster named Currodze has taken informal charge of supply distribution, and a frontier trader named Pellinaste arrived with salvaged goods. Winter is approaching. No one is in charge. The hero carries a strange mark that appeared during the fall — no one knows what it means.
+We arrived at Gorundtzal, the ruined waystation on the northern frontier, three weeks after the Ash Veil Communion destroyed Kethenvari and conquered Valduri. The waystation is damaged but defensible, with stone walls and a working well. About thirty other survivors are here, disorganized and frightened. A former quartermaster named Currodze has taken informal charge of supply distribution, and a frontier trader named Pellinaste arrived with salvaged goods. Winter is approaching. No one is in charge.
 
 ## Unresolved Questions
 
-- What is the Mark on the hero's body? Why did it appear during the fall?
+- What happened to the hero during the fall? They seem... different.
 - Can the survivors at Gorundtzal be organized into something functional before winter?
 - How close is the nearest Communion garrison? How often do patrols come this far north?
 - Is there any organized resistance to the Communion?

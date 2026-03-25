@@ -101,6 +101,11 @@ campaigns/{campaign}/   # Read-only campaign design (templates)
 ├── locations/          # Location descriptions
 ├── factions/           # Faction details
 ├── beats/              # GM planning docs (beat sheets)
+├── mechanics/          # Campaign-specific rules and subsystems
+│   ├── README.md       # Index: what exists, who can read what
+│   └── {mechanic}/     # Each mechanic is a subdirectory
+│       ├── README.md   # Player-visible overview (what characters observe)
+│       └── gm-guide.md # Full rules, tracking, adjudication (GM-only)
 ├── story-arcs/         # Gated plot secrets (per-act)
 │   ├── UNLOCK.md       # Act preconditions and foreshadowing hints
 │   ├── act-1.md        # Current act (UNLOCKED)
@@ -289,6 +294,7 @@ Generates MP3 audiobook files from novelized chapters using Chatterbox TTS. **Ti
 | `locations/{name}.md` | campaign | Location descriptions and details | GM, reference |
 | `factions/{name}.md` | campaign | Faction details and goals | GM, reference |
 | `beats/` | campaign | GM planning docs (beat sheets) | GM only |
+| `mechanics/` | campaign | Campaign-specific rules, subsystems, tracking | GM; player-visible READMEs for AI players |
 | `story-arcs/UNLOCK.md` | campaign | Act preconditions and foreshadowing hints | GM only |
 | `story-arcs/act-*.md` | campaign | Per-act secrets (GM reads only UNLOCKED acts) | GM only |
 | `preferences.md` | playthrough | Narrative style, player character selection | Team lead |

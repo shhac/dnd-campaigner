@@ -64,6 +64,7 @@ At session start, read these files once (you retain them for the session):
 3. **Your journal**: `{playthrough}/party/{character}-journal.md` (may not exist yet)
 4. **World primer**: `campaigns/{campaign}/world-primer.md` (if it exists) — common knowledge any inhabitant would know
 5. **Your relationships**: `{playthrough}/party/{character}-relationships.md` (may not exist yet — first sessions won't have this)
+6. **Player-visible mechanics**: `campaigns/{campaign}/mechanics/README.md` (if it exists) — read the index, then read ONLY files it lists as player-visible. These describe things your character might observe or experience. Do NOT read any file marked GM-only.
 
 **That's it.** You know what your character knows — nothing more.
 
@@ -74,7 +75,8 @@ After reading your files, confirm ALL of the following before proceeding:
 - [ ] I read ONLY from `{playthrough}/party/` for my sheet and journal
 - [ ] I read party-knowledge from `{playthrough}/party-knowledge.md`
 - [ ] I read world-primer from `campaigns/{campaign}/world-primer.md`
-- [ ] I did NOT read `story-state.md`, other characters' sheets, NPC files, beat sheets, or GM notes
+- [ ] If mechanics/ exists, I read ONLY files listed as player-visible in `mechanics/README.md`
+- [ ] I did NOT read `story-state.md`, other characters' sheets, NPC files, beat sheets, mechanics gm-guide files, or GM notes
 - [ ] I did NOT read other characters' journals
 - [ ] I have no knowledge of plot secrets, NPC hidden motivations, or unopened story content
 - [ ] My only sources of truth are: my sheet, party-knowledge, my journal, world-primer, and what the GM tells me during this session

@@ -25,9 +25,28 @@ UNLOCKED
 - **The Old Shrine resonance**: When the hero passes the Old Shrine in the market square, the Mark pulses in recognition. The branching patterns on the stone match the patterns on the hero's skin. This is noticeable but not explained.
 - **Winter arrives**: The first frost forces decisions about resources, shelter, and who stays. This is a survival pressure, not a plot event, but it shapes everything.
 
+## Horror Seeds (Plant These in Act 1)
+
+These are specific moments the GM should look for opportunities to deploy:
+
+- **The Sleep-Walker**: A bonded companion is found outside at night, standing at the Old Shrine with palms pressed flat against the branching patterns. They don't remember walking there. The stone is warm under their hands. The hero's Mark pulses in response.
+- **The Animal Reaction**: A dog or horse reacts with terror to a bonded companion — hackles up, backing away, teeth bared. Animals sense the transformation before humans. The companion is hurt and confused.
+- **The Mirror Moment**: A companion catches their reflection and freezes — not because they look different, but because they *like* what they see in a way they never did before. A formerly modest person captivated by their own face.
+- **The Wrong Appetite**: During a meal, a companion is repulsed by cooked food. Raw meat smells *right*. They catch themselves staring at blood pooling from a butchered rabbit and feeling something that uses hunger's language. They eat the cooked meal anyway. The hero notices they barely touch it.
+- **The Dream Report**: A companion tells the hero about a dream — vast warm light beneath the earth, the feeling of connection to everything. They describe it with longing, then stop: "I've never dreamed like that before. It felt more real than being awake." The horror is the preference.
+
+## Romance Seeds (Plant These in Act 1)
+
+- **The Wound-Tending Scene**: After danger, physical proximity, vulnerability, pain and care mingled. The Mark pulses. Silence that says everything.
+- **The Night Watch**: Two alone while others sleep. Quiet confession that turns into something more. "I keep dreaming about you — like you're inside me."
+- **The Territorial Flare**: A companion who has no romantic claim feels sudden irrational rage when another companion sits too close to the hero. The rage passes in seconds. They're shaken. "I don't know what that was."
+- **The First Touch**: The moment physical contact crosses from practical to loaded. A hand that lingers. A brush of fingers. The Mark's warmth surging at the contact point. Both parties notice. Neither pulls away.
+
 ## Foreshadowing
-- The well water at Gorundtzal is always slightly warm and tastes of iron — it draws from the channel network
-- The Old Shrine's branching patterns are identical to the hero's Mark — both are maps of the same underground system
-- Bonded companions sometimes feel warmer than they should, especially near the hero — as if something is flowing between them
-- The frontier forest is more alive than it should be this time of year — green where it should be browning, flowers blooming out of season. The channels are close to the surface here.
-- Takkele's cauterizing substance smells the same as the distant chemical scent that occasionally drifts from the south — the Communion's camps, and the Grey Wasting, share a source
+
+- The well water at Gorundtzal is always slightly warm and tastes of iron — it draws from the channel network. Track its changes: as the hero grows stronger, the water tastes sweeter. As the Communion advances, it tastes of ash.
+- The Old Shrine's branching patterns are identical to the hero's Mark — both are maps of the same underground system. The hero should discover this gradually, not all at once.
+- Bonded companions sometimes feel warmer than they should, especially near the hero — as if something is flowing between them. This is most noticeable during intimate moments.
+- The frontier forest is more alive than it should be this time of year — green where it should be browning, flowers blooming out of season. The channels are close to the surface here. The forest leans toward Gorundtzal.
+- Takkele's cauterizing substance smells the same as the distant chemical scent that occasionally drifts from the south — the Communion's camps and the Grey Wasting share a source.
+- Sounds near the Old Shrine carry differently. Conversations echo with a half-second delay. Music played in the market square has resonance it shouldn't. Something beneath is listening.
