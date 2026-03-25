@@ -42,10 +42,22 @@ toss 1d20
 
 Only needed if you want to generate audiobooks from novelized campaigns. **Skip this for initial setup.**
 
-The repository includes Python virtual environments for TTS engines:
+Chatterbox TTS lives in `~/.chatterbox/` with this structure:
 
-- `.chatterbox-venv/` - Chatterbox TTS (high quality, slower)
-- `.piper-venv/` - Piper TTS (fast, lower quality)
+```
+~/.chatterbox/
+├── venv/       # Python virtual environment
+├── voices/     # Voice samples for cloning (.wav)
+├── outputs/    # Generated audio output
+└── voices.yaml # Voice configuration
+```
+
+**Setup:** Symlink into the repo so repo-relative paths work:
+
+```bash
+ln -s ~/.chatterbox/venv .chatterbox-venv
+ln -s ~/.chatterbox/voices .chatterbox-voices
+```
 
 **Important for Claude Code:** When running Python scripts via Bash, always activate the appropriate venv first:
 
@@ -306,9 +318,9 @@ Generates MP3 audiobook files from novelized chapters using Chatterbox TTS. **Ti
 | `voices.yaml` | POV character to TTS voice mapping (created by `/setup-voices`) |
 | `drafts/` | Archived intermediate files (drafts, fix-requests) |
 
-### Voice Samples (`.chatterbox-voices/`)
+### Voice Samples
 
-Chatterbox TTS voice samples for cloning. See **audiobook-orchestration/voice-samples** skill for full reference including available samples, creation commands, and guidelines.
+Chatterbox TTS voice samples for cloning live in `~/.chatterbox/voices/` (symlinked to `.chatterbox-voices`). See **audiobook-orchestration/voice-samples** skill for full reference including available samples, creation commands, and guidelines.
 
 ## Agents and Skills
 

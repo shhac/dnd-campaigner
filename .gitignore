@@ -32,7 +32,8 @@ __pycache__/
 .piper-voices/
 
 # Chatterbox TTS
-.chatterbox-venv/
+.chatterbox-venv
+.chatterbox-voices
 
 # Playwright MCP
 .playwright-mcp/
