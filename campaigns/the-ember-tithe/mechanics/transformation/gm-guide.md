@@ -123,6 +123,28 @@ What pushes a companion from one stage to the next. Advancement requires at leas
 - **Using transformation-granted capabilities**: If a companion leans into an emerging ability (enhanced senses, unusual strength, emotional reading), using it accelerates advancement. The body learns what the mind accepts.
 - **The hero drawing heavily on the bond during crisis**: When the hero needs power — to survive, to protect, to fight — the Mark pulls from bonded companions. This is the parasitic cost. If the hero draws hard, the companion pays.
 
+**Critical**: No single trigger can push transformation all the way. Intimacy alone doesn't complete the transformation — it's one accelerant among several. A companion could be physically intimate with the hero every session and still transform slowly if other factors (channel proximity, crisis events, capability use) are absent. Multiple vectors must compound for advancement to occur. This prevents the system from feeling mechanistic and preserves the ambiguity of what's actually causing the change.
+
+### The Inverse Psychology
+
+Not every companion connects emotionally through physical intimacy. For some, the body and the heart are separate territories:
+
+- A companion who treats physical closeness as comfort or habit — without deep emotional investment — may find that intimacy actually *slows* their transformation. Their bond strength doesn't increase through touch because the emotional resonance isn't there. The Mark feeds on genuine feeling, not physical proximity.
+- This creates its own horror: the companion expects to feel something (everyone else seems transformed by closeness to the hero) and feels nothing. They question whether the bond is real. Whether *they* are real. Whether something is wrong with them. The absence of transformation becomes its own form of dread.
+- Conversely, this companion may transform rapidly through other vectors — a shared intellectual breakthrough, an argument that cracks their defenses, a moment where they're unexpectedly vulnerable. The transformation catches them off guard because it comes from a direction they weren't guarding.
+- The hero may misread this companion — assuming physical distance means emotional distance, when in fact the companion's bond runs through entirely different channels.
+
+This dynamic should emerge from character personality, not be assigned. If a companion's behavior during play suggests this pattern, lean into it.
+
+### The Addiction Dynamic
+
+The Mark rewards bonding with euphoria, stability, and power. The hero will crave it. This is by design — and it should be played as addiction:
+
+- Early sessions: the warmth feels like healing. The hero seeks connection because it's good, and it helps.
+- Middle sessions: the hero catches themselves engineering emotional moments with companions because they need the hit. They're not being manipulative on purpose — but the Mark is shaping their behavior. The hero may start a vulnerable conversation not because they need to talk but because they need to *feel*.
+- Late sessions: the hero knows exactly what they're doing. Every intimate moment is simultaneously genuine and predatory. They love these people AND they need to feed. The guilt of this dual awareness is the campaign's emotional core.
+- The GM should narrate the Mark's reward response after bonding moments: warmth flooding through the hero, a sense of rightness, physical relief if stability was low. Make it feel good. The player needs to experience the pull to understand why the hero can't stop.
+
 ### Advancement Pace Guidelines
 
 - **Sessions 1-3**: No companion should advance past Stage 2 (Psychological). Even rapid bonds need time.

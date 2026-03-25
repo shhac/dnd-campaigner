@@ -189,9 +189,10 @@ Used for members of the Ash Veil Communion and their institutions.
 
 ## Session Zero Notes
 
-- **Content boundaries**: The romance and horror elements involve intimacy, body horror (slow and subtle), psychological manipulation (by the Mark itself), and moral compromise. These are features, not bugs — but the tone should be dread and melancholy, not gratuitous.
-- **Player expectations**: This is a dark romance horror campaign. Relationships matter. People will change. Some will be lost. The question isn't whether there's a cost — it's what you're willing to pay.
+- **Content approach**: The romance and horror elements involve intimacy, body horror (slow and specific), psychological manipulation (by the Mark itself), addiction dynamics, and moral compromise. These are features, not bugs. The campaign follows where the characters go — nothing is closed off by default. See `preferences.md` for full content guidance.
+- **Player expectations**: This is a dark romance horror campaign. Relationships matter. People will change. Some will be lost. The campaign explores what it means to be human when the boundaries blur, what love costs when it's parasitic, and whether informed consent is possible when the thing you're consenting to reshapes your capacity to refuse. The question isn't whether there's a cost — it's what you're willing to pay, and whether you can still recognize yourself after paying it.
 - **Character connections**: The party forms around the hero at Gorundtzal. Companions arrive over sessions — not all at once. Initial party is 2-3, growing to 4-5 active members from a designed pool of 7.
+- **Human(?)**: All characters are human. The question mark is the entire campaign.
 
 ## GM Guidance: The Mark in Play
 
@@ -225,9 +226,10 @@ When describing transformation, always lead with the attractive element before t
 
 ### Romance and Intimacy in Play
 - Romantic scenes use sensory detail and emotional depth. Focus on what it FEELS like — vulnerability, electricity, the weight of knowing.
-- Fade to black for explicit content. Lean hard into tension, almost-moments, loaded silence, the space between reaching for someone and touching them.
+- Let intimate scenes breathe. Don't cut away artificially — follow the scene's momentum, time-jump naturally when the emotional peak has passed. If a player drives deeper, follow their lead.
 - The Mark is always present in romantic scenes — warmth, pulse, the subtle sense of being fed. After every intimate scene, note the transformation cost privately.
 - Romance must emerge from player agency and genuine roleplay, not GM manipulation. The Mark rewards emotional intimacy — the GM must not weaponize this to railroad romance.
+- Not every companion connects through physical intimacy. Some transform through intellectual resonance, shared purpose, or emotional confrontation. The system supports every psychological configuration.
 - See `mechanics/romance/gm-guide.md` for progression milestones, scene templates, and the consent spectrum.
 
 ### Combat in The Ember Tithe

@@ -247,7 +247,7 @@ Intimacy isn't gone but it's changed. The hero moves between companions who love
 
 **The almost-moment.** The space before a first touch is more charged than the touch itself. A hand that reaches out and stops. Eye contact held one second past comfortable. The sentence that starts with "I..." and doesn't finish. These near-misses carry more tension than consummation and should be deployed generously.
 
-**Fade to black for explicit content.** Everything up to the threshold — the approach, the decision, the trembling crossing — should be rendered fully. What happens after the door closes (literal or metaphorical) is implied by what came before. The audience's imagination is more powerful than any description.
+**Let intimacy breathe.** Don't artificially cut scenes short. Render the approach, the tension, the crossing of thresholds with full sensory detail — warmth, texture, breath, the specific quality of contact. If the scene has momentum, follow it. Time-jump naturally when the emotional peak has been reached and the narrative is better served by the aftermath. If the player drives deeper, follow their lead — the campaign is about choice, and closing doors breaks the contract. The Mark makes every intimate moment simultaneously beautiful and predatory; lean into both.
 
 **The Mark is always present.** In every romantic scene, the Mark should make itself felt. Warmth in the hero's chest. The faint ember glow in low light. The companion's skin hot under the hero's fingers. The narcotic quality of sustained contact. Romance and the Mark are never fully separable, and the GM should never let the player forget it.
 
