@@ -1,6 +1,6 @@
 # {Character Name} — Relationships
 
-Personal relationship tracker. Read at session startup, updated by GM at session end.
+Private relationship tracker. This is your internal perspective — how you actually feel, not how you act outwardly. Read at session startup and before reacting to party members. Update every time you journal.
 
 ## Party Members
 

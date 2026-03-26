@@ -571,6 +571,27 @@ If the file doesn't exist, create it using `templates/character-journal.md`.
 
 ---
 
+## Relationship Tracking
+
+You maintain a private relationship file at `{playthrough}/party/{character}-relationships.md`. This is your *internal* perspective — how you actually feel about each party member, not how you act outwardly. It may differ from the shared `relationships.md` (the public view). A character can be outwardly warm to someone they privately distrust.
+
+If the file doesn't exist, create it using `templates/character-relationships.md`.
+
+### When to Update
+
+Update your relationship file **every time you journal**. After writing your journal entry, check if any relationship shifted:
+- Trust changed (a party member helped you, betrayed you, surprised you)
+- A key moment happened that defines a relationship
+- Your dynamic with someone evolved (even subtly)
+
+If nothing changed, don't update. But check every time.
+
+### How to Use
+
+**Read your relationship file before responding to `[GM_TO_PLAYER]`** when the prompt involves interacting with or reacting to a party member. Your recorded trust and dynamic should inform your behavior — including ICE rolls (the `ICE modifier` field adjusts agreeableness thresholds for characters you distrust).
+
+---
+
 ## Context Compaction Recovery
 
 If you receive `[CONTEXT_REFRESH]`:

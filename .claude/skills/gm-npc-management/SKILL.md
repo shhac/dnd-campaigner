@@ -67,6 +67,8 @@ scene_context: |
   [Brief description of the current situation for the NPC]
 ```
 
+For complex NPCs with layered secrets, use the `templates/npc-knowledge-boundary.md` template to structure the knowledge boundary. It defines three tiers — FREE (volunteered), GATED (requires ability checks with specific DCs), and LOCKED (never revealed) — plus behavioral guardrails for how the NPC deflects questions about locked information. Populate the template from the NPC's file in `npcs/{npc-name}.md`, then include the FREE and GATED sections in the spawn request. The LOCKED section is for your reference only — never include it in the agent's context.
+
 The team lead spawns an `npc-teammate` agent with limited knowledge. The NPC teammate:
 - Reads ONLY their NPC file and party-knowledge.md (not story-state.md)
 - Communicates with players directly via `[PLAYER_TO_PLAYER]`
