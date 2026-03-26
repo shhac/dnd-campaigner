@@ -248,18 +248,19 @@ main {
 .event.narrative .event-content p { margin-bottom: 10px; }
 .event.narrative .event-content p:last-child { margin-bottom: 0; }
 
-/* Reading aid — paragraph and sentence hover highlighting */
-.event-content p:hover,
-.event-content .para-block:hover {
+/* Reading aid — edge marker for narrative paragraphs only */
+.event.narrative .event-content p:hover {
   border-left: 2px solid rgba(196, 160, 74, 0.25);
   padding-left: 8px;
   margin-left: -10px;
 }
-.event-content .sentence {
+
+/* Sentence hover highlighting — all event types */
+.event .sentence {
   border-radius: 2px;
   transition: background 0.15s ease;
 }
-.event-content .sentence:hover {
+.event .sentence:hover {
   background: rgba(196, 160, 74, 0.18);
   box-shadow: 0 0 0 3px rgba(196, 160, 74, 0.12);
 }
