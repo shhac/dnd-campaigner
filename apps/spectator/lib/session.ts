@@ -5,6 +5,12 @@
 
 import type { SpectatorEvent } from "./parser";
 import type { CharacterInfo, CampaignInfo } from "./campaign";
+import {
+  isVisibleAgent,
+  inferRole,
+  formatAgentName,
+  getAgentMetadata,
+} from "./agents";
 
 export interface AgentState {
   id: string;
@@ -106,17 +112,17 @@ export class SessionManager {
 
   private updateAgentFromEvent(event: SpectatorEvent): void {
     const fromId = event.from;
-    if (!fromId || fromId === "team-lead" || fromId === "human") return;
+    if (!fromId || !isVisibleAgent(fromId)) return;
 
     // Ensure agent exists
     if (!this.state.agents.has(fromId)) {
       const character = this.characterLookup.get(fromId);
       this.state.agents.set(fromId, {
         id: fromId,
-        name: character?.name || this.formatAgentName(fromId),
+        name: character?.name || formatAgentName(fromId),
         color: event.color,
         status: "active",
-        role: this.inferRole(fromId),
+        role: inferRole(fromId),
         character,
       });
     }
@@ -157,20 +163,6 @@ export class SessionManager {
     }
   }
 
-  private formatAgentName(id: string): string {
-    return id
-      .split("-")
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(" ");
-  }
-
-  private inferRole(id: string): AgentState["role"] {
-    if (id === "gm") return "gm";
-    if (id === "narrator") return "narrator";
-    if (id === "team-lead") return "lead";
-    return "player";
-  }
-
   /**
    * Serialize state for WebSocket transmission.
    */
@@ -179,6 +171,7 @@ export class SessionManager {
       sessionId: this.state.sessionId,
       campaign: this.state.campaign,
       agents: Object.fromEntries(this.state.agents),
+      agentMeta: getAgentMetadata(),
       humanControlled: [...this.state.humanControlled],
       events: this.state.events,
       currentScene: this.state.currentScene,

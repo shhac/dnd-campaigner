@@ -26,16 +26,12 @@ const filters = {
   session: true,
 };
 
-// Agent color mapping
-const AGENT_COLORS = {
-  gm: "var(--color-gm)",
-  narrator: "var(--color-narrator)",
-  "team-lead": "var(--color-lead)",
-  human: "var(--color-human, #4fc3f7)",
-};
+// Agent identity metadata (populated from server on init)
+let agentMeta = {};
 
 function getAgentColor(id, color) {
-  if (AGENT_COLORS[id]) return AGENT_COLORS[id];
+  const meta = agentMeta[id];
+  if (meta) return `var(--color-${meta.color})`;
   if (color) return `var(--color-${color})`;
   const colors = ["yellow", "purple", "orange", "pink", "blue", "green", "cyan", "red"];
   let hash = 0;
@@ -44,10 +40,8 @@ function getAgentColor(id, color) {
 }
 
 function getAgentShortName(id) {
-  if (id === "gm") return "GM";
-  if (id === "narrator") return "Narrator";
-  if (id === "team-lead") return "Lead";
-  if (id === "human") return "You";
+  const meta = agentMeta[id];
+  if (meta) return meta.shortName;
   if (id === "*") return "All";
   const parts = id.split("-");
   return parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
@@ -56,8 +50,8 @@ function getAgentShortName(id) {
 function getAgentFullName(id) {
   const agent = state.agents[id];
   if (agent?.character?.name) return agent.character.name;
-  if (agent?.name) return agent.name;
-  if (id === "gm") return "Game Master";
+  const meta = agentMeta[id];
+  if (meta) return meta.displayName;
   if (id === "*") return "All";
   return id.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
 }
@@ -176,7 +170,7 @@ function shouldShow(event) {
 function renderEvent(event) {
   if (!shouldShow(event)) return null;
   // Skip team-lead internal chatter
-  if (event.from === "team-lead" && !["narrative", "session_command", "gm_to_player"].includes(event.type)) return null;
+  if (agentMeta[event.from]?.role === "lead" && !["narrative", "session_command", "gm_to_player"].includes(event.type)) return null;
 
   const el = document.createElement("div");
   el.className = `event ${event.type}`;
@@ -221,10 +215,9 @@ function renderEvent(event) {
 // --- Narrative (always full) ---
 
 function renderNarrative(event) {
-  const content = stripTag(event.content);
-  const activityIdx = content.indexOf("## Party Activity");
-  const narrative = activityIdx > -1 ? content.substring(0, activityIdx) : content;
-  const activity = activityIdx > -1 ? content.substring(activityIdx) : null;
+  const activityIdx = event.content.indexOf("## Party Activity");
+  const narrative = activityIdx > -1 ? event.content.substring(0, activityIdx) : event.content;
+  const activity = activityIdx > -1 ? event.content.substring(activityIdx) : null;
 
   return `
     <div class="event-header">
@@ -240,11 +233,10 @@ function renderNarrative(event) {
 // --- GM → Player (collapsed, shows request + dice only) ---
 
 function renderGmPrompt(event) {
-  const content = stripTag(event.content);
   const toName = getAgentShortName(event.to);
   const toColor = getAgentColor(event.to);
   const reqType = event.parsed.requestType;
-  const { request, dice, hasScene } = extractGmPromptSummary(content);
+  const { request, dice, hasScene } = extractGmPromptSummary(event.content);
 
   // Build the collapsed summary
   let summaryHtml = "";
@@ -259,7 +251,7 @@ function renderGmPrompt(event) {
 
   // If no request/dice extracted, show a brief excerpt
   if (!summaryHtml) {
-    const excerpt = content.split("\n").filter(l => l.trim() && !l.startsWith("request_type") && !l.startsWith("scene_number") && !l.startsWith("scene_slug")).slice(0, 3).join("\n");
+    const excerpt = event.content.split("\n").filter(l => l.trim() && !l.startsWith("request_type") && !l.startsWith("scene_number") && !l.startsWith("scene_slug")).slice(0, 3).join("\n");
     summaryHtml = `<div class="gm-prompt-request">${formatInlineMarkdown(excerpt)}</div>`;
   }
 
@@ -275,34 +267,19 @@ function renderGmPrompt(event) {
       <span class="event-meta">${formatTimestamp(event.timestamp)}</span>
     </div>
     ${summaryHtml}
-    ${hasScene ? `<div id="${expandId}" class="expandable collapsed"><div class="expandable-content">${formatInlineMarkdown(content)}</div></div>` : ""}
+    ${hasScene ? `<div id="${expandId}" class="expandable collapsed"><div class="expandable-content">${formatInlineMarkdown(event.content)}</div></div>` : ""}
   `;
 }
 
 // --- Player → GM / Player → Player (full content, formatted) ---
 
 function renderPlayerAction(event, fromColor) {
-  const content = stripTag(event.content);
   const fromName = getAgentShortName(event.from);
   const toName = event.to === "*" ? "All" : getAgentShortName(event.to);
   const toColor = event.to === "gm" ? "var(--color-gm)" : getAgentColor(event.to);
 
-  // Strip metadata fields from top (type:, character:, etc)
-  const lines = content.split("\n");
-  let bodyStart = 0;
-  for (let i = 0; i < lines.length && i < 5; i++) {
-    if (/^(type|character|scene_number|scene_slug|request_type)\s*:/.test(lines[i])) {
-      bodyStart = i + 1;
-    } else if (lines[i].trim() === "") {
-      if (bodyStart > 0) { bodyStart = i + 1; break; }
-    } else {
-      break;
-    }
-  }
-  const body = lines.slice(bodyStart).join("\n").trim();
-
   // Format the body with inline markdown
-  let rendered = formatInlineMarkdown(body);
+  let rendered = formatInlineMarkdown(event.content);
 
   // Action type badge
   const actionType = event.parsed.actionType;
@@ -327,7 +304,7 @@ function renderPlayerAction(event, fromColor) {
 function renderActivity(event, color) {
   const doingMatch = event.content.match(/doing:\s*(.+)/);
   const charMatch = event.content.match(/character:\s*(.+)/);
-  const doing = doingMatch ? doingMatch[1].trim() : stripTag(event.content);
+  const doing = doingMatch ? doingMatch[1].trim() : event.content;
   const name = charMatch
     ? getAgentShortName(charMatch[1].trim())
     : getAgentShortName(event.from);
@@ -338,15 +315,13 @@ function renderActivity(event, color) {
 // --- Session events ---
 
 function renderSessionCommand(event) {
-  const content = stripTag(event.content);
   // Show a clean one-liner
-  const cmdMatch = content.match(/command:\s*(\w+)/);
+  const cmdMatch = event.content.match(/command:\s*(\w+)/);
   const cmd = cmdMatch ? cmdMatch[1] : "unknown";
   return `<span class="session-marker">▶ SESSION ${cmd.toUpperCase()}</span>`;
 }
 
 function renderSessionEnd(event) {
-  const content = stripTag(event.content);
   const expandId = `expand-${event.id}`;
   // Show summary line, expandable for full metrics
   return `
@@ -356,7 +331,7 @@ function renderSessionEnd(event) {
       <span class="event-meta">${formatTimestamp(event.timestamp)}</span>
     </div>
     <div id="${expandId}" class="expandable collapsed">
-      <div class="expandable-content">${formatInlineMarkdown(content)}</div>
+      <div class="expandable-content">${formatInlineMarkdown(event.content)}</div>
     </div>
   `;
 }
@@ -548,6 +523,8 @@ function connect() {
 }
 
 function handleInit(data) {
+  agentMeta = data.agentMeta || {};
+
   state = {
     sessionId: data.sessionId,
     campaign: data.campaign,

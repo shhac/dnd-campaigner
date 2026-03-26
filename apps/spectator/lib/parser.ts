@@ -7,6 +7,8 @@
  * 3. Idle notifications — brief summaries of agent status
  */
 
+import { SYSTEM_AGENT_IDS, type SystemAgentId } from "./agents";
+
 export interface SpectatorEvent {
   id: string;
   timestamp: string;
@@ -45,17 +47,39 @@ export interface SpectatorEvent {
 
 let eventCounter = 0;
 
+// Track AskUserQuestion tool IDs → sender character for matching answers
+const pendingAskIds = new Map<string, string>();
+
+// Track the last character that sent [ASK_PLAYER] so we can attribute
+// the subsequent AskUserQuestion tool call to the right agent
+let lastAskPlayerFrom: string | null = null;
+
 function nextId(): string {
   return `evt-${++eventCounter}`;
 }
+
+// Agent ID constants derived from the agents module
+const GM: SystemAgentId = SYSTEM_AGENT_IDS[0]; // "gm"
+const TEAM_LEAD: SystemAgentId = SYSTEM_AGENT_IDS[2]; // "team-lead"
+const HUMAN: SystemAgentId = SYSTEM_AGENT_IDS[3]; // "human"
+
+const BROADCAST = "*";
 
 /**
  * Extract protocol tag from message content.
  * e.g., "[NARRATIVE]" or "[GM_TO_PLAYER]"
  */
-function extractTag(content: string): string | undefined {
+export function extractTag(content: string): string | undefined {
   const match = content.match(/^\[([A-Z_]+)\]/);
   return match ? match[1] : undefined;
+}
+
+/**
+ * Strip the protocol tag (e.g. `[NARRATIVE]\n`) from the start of content.
+ * Returns the content with the tag line removed.
+ */
+function stripTag(content: string): string {
+  return content.replace(/^\[[A-Z_]+\]\s*\n?/, "");
 }
 
 /**
@@ -93,8 +117,8 @@ function tagToEventType(
       return "narrator_note";
     default:
       // Infer from sender/recipient
-      if (from === "gm" && to !== "*") return "gm_to_player";
-      if (to === "gm" && from !== "gm") return "player_to_gm";
+      if (from === GM && to !== BROADCAST) return "gm_to_player";
+      if (to === GM && from !== GM) return "player_to_gm";
       return "system";
   }
 }
@@ -102,7 +126,7 @@ function tagToEventType(
 /**
  * Extract YAML-like fields from protocol message content.
  */
-function extractFields(content: string): Record<string, string> {
+export function extractFields(content: string): Record<string, string> {
   const fields: Record<string, string> = {};
   const lines = content.split("\n");
   for (const line of lines) {
@@ -118,7 +142,7 @@ function extractFields(content: string): Record<string, string> {
  * Extract dice roll expressions from content.
  * Looks for patterns like "1d20+5 = [14]+5 = 19" or "Roll: 1d20+3"
  */
-function extractDiceRolls(content: string): string[] {
+export function extractDiceRolls(content: string): string[] {
   const rolls: string[] = [];
   // Match "NdN+N = [result]" patterns
   const resultPattern = /\d+d\d+(?:[+-]\d+)?\s*=\s*\[\d+\][^\n]*/g;
@@ -134,6 +158,34 @@ function extractDiceRolls(content: string): string[] {
     }
   }
   return rolls;
+}
+
+/**
+ * Strip metadata field lines from the beginning of content.
+ * Removes lines matching known metadata keys (type, character, scene_number, etc.)
+ * up to the first line that is neither a field nor blank.
+ */
+export function stripMetadataFields(content: string): string {
+  const metadataPattern =
+    /^(type|character|scene_number|scene_slug|request_type|recipient|to)\s*:/;
+  const lines = content.split("\n");
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    if (metadataPattern.test(line) || line.trim() === "") {
+      i++;
+    } else {
+      break;
+    }
+  }
+  return lines.slice(i).join("\n");
+}
+
+/**
+ * Clean content for event emission: strip protocol tag and metadata fields.
+ */
+function cleanContent(content: string): string {
+  return stripMetadataFields(stripTag(content));
 }
 
 /**
@@ -158,21 +210,21 @@ function parseTeammateMessage(
   const contentMatch = xml.match(
     /<teammate-message[^>]*>\n?([\s\S]*?)(?:<\/teammate-message>|$)/
   );
-  const content = contentMatch?.[1]?.trim() ?? "";
+  const rawContent = contentMatch?.[1]?.trim() ?? "";
 
-  if (!content) return null;
+  if (!rawContent) return null;
 
   // Check for idle notification JSON
-  if (content.startsWith("{")) {
+  if (rawContent.startsWith("{")) {
     try {
-      const data = JSON.parse(content);
+      const data = JSON.parse(rawContent);
       if (data.type === "idle_notification") {
         return {
           id: nextId(),
           timestamp,
           type: "idle",
           from: data.from || from,
-          to: "*",
+          to: BROADCAST,
           content: data.summary || "",
           summary: data.summary,
           color,
@@ -185,7 +237,7 @@ function parseTeammateMessage(
           timestamp,
           type: "terminated",
           from: data.teammate_id || from,
-          to: "*",
+          to: BROADCAST,
           content: `${data.teammate_id} terminated`,
           parsed: {},
         };
@@ -195,8 +247,8 @@ function parseTeammateMessage(
     }
   }
 
-  const tag = extractTag(content);
-  const fields = extractFields(content);
+  const tag = extractTag(rawContent);
+  const fields = extractFields(rawContent);
 
   // [ASK_PLAYER] teammate-messages are followed by AskUserQuestion tool calls
   // with cleaner content. Record the sender and suppress the duplicate.
@@ -207,16 +259,18 @@ function parseTeammateMessage(
 
   // GM messages use "character:" to identify the recipient
   const to = fields.to || fields.recipient
-    || (from === "gm" && fields.character ? fields.character : null)
-    || "gm";
+    || (from === GM && fields.character ? fields.character : null)
+    || GM;
   const eventType = tagToEventType(tag, from, to);
+
+  const content = cleanContent(rawContent);
 
   return {
     id: nextId(),
     timestamp,
     type: eventType,
     from,
-    to: tag === "NARRATIVE" ? "*" : to,
+    to: tag === "NARRATIVE" ? BROADCAST : to,
     content,
     summary,
     color,
@@ -227,7 +281,7 @@ function parseTeammateMessage(
       sceneNumber: fields.scene_number,
       sceneSlug: fields.scene_slug,
       actionType: fields.type,
-      diceRolls: extractDiceRolls(content),
+      diceRolls: extractDiceRolls(rawContent),
     },
   };
 }
@@ -239,33 +293,35 @@ function parseSendMessage(
   input: Record<string, unknown>,
   timestamp: string
 ): SpectatorEvent | null {
-  const to = (input.to || input.recipient || "*") as string;
-  const content = (input.content || input.message || "") as string;
+  const to = (input.to || input.recipient || BROADCAST) as string;
+  const rawContent = (input.content || input.message || "") as string;
   const msgType = (input.type || "message") as string;
 
   if (msgType === "shutdown_request") {
     return null; // Hide shutdown internals
   }
 
-  const tag = extractTag(content);
-  const fields = extractFields(content);
+  const tag = extractTag(rawContent);
+  const fields = extractFields(rawContent);
 
   // Attribute sender based on protocol tag — the team lead relays GM messages
   const inferredFrom =
     tag === "NARRATIVE" || tag === "GM_TO_PLAYER" || tag === "ASK_PLAYER" || tag === "NARRATOR_NOTE"
-      ? "gm"
+      ? GM
       : tag === "SESSION_COMMAND"
-        ? "team-lead"
-        : "team-lead";
+        ? TEAM_LEAD
+        : TEAM_LEAD;
 
   const eventType = tagToEventType(tag, inferredFrom, to);
+
+  const content = cleanContent(rawContent);
 
   return {
     id: nextId(),
     timestamp,
     type: eventType,
     from: inferredFrom,
-    to: to === "*" ? "*" : to,
+    to: to === BROADCAST ? BROADCAST : to,
     content,
     summary: (input.summary as string) || undefined,
     parsed: {
@@ -274,7 +330,7 @@ function parseSendMessage(
       character: fields.character,
       sceneNumber: fields.scene_number,
       sceneSlug: fields.scene_slug,
-      diceRolls: extractDiceRolls(content),
+      diceRolls: extractDiceRolls(rawContent),
     },
   };
 }
@@ -303,7 +359,7 @@ function parseAskUserQuestion(
     content += "\n\n" + optionLines.join("\n");
   }
 
-  const sender = lastAskPlayerFrom || "gm";
+  const sender = lastAskPlayerFrom || GM;
   lastAskPlayerFrom = null;
 
   return {
@@ -311,7 +367,7 @@ function parseAskUserQuestion(
     timestamp,
     type: "ask_player",
     from: sender,
-    to: "human",
+    to: HUMAN,
     content,
     summary: header || question.slice(0, 80),
     parsed: {
@@ -321,12 +377,14 @@ function parseAskUserQuestion(
   };
 }
 
-// Track AskUserQuestion tool IDs → sender character for matching answers
-const pendingAskIds = new Map<string, string>();
-
-// Track the last character that sent [ASK_PLAYER] so we can attribute
-// the subsequent AskUserQuestion tool call to the right agent
-let lastAskPlayerFrom: string | null = null;
+/**
+ * Reset module-level parser state for test isolation.
+ */
+export function resetParserState(): void {
+  eventCounter = 0;
+  pendingAskIds.clear();
+  lastAskPlayerFrom = null;
+}
 
 /**
  * Parse a single JSONL line into zero or more SpectatorEvents.
@@ -363,7 +421,7 @@ export function parseLine(line: string): SpectatorEvent[] {
             block.type === "tool_result" &&
             pendingAskIds.has(block.tool_use_id)
           ) {
-            const answerTo = pendingAskIds.get(block.tool_use_id) || "gm";
+            const answerTo = pendingAskIds.get(block.tool_use_id) || GM;
             pendingAskIds.delete(block.tool_use_id);
             let text = block.content ?? "";
             if (Array.isArray(text)) {
@@ -381,7 +439,7 @@ export function parseLine(line: string): SpectatorEvent[] {
               id: nextId(),
               timestamp,
               type: "player_to_gm",
-              from: "human",
+              from: HUMAN,
               to: answerTo,
               content: answer,
               parsed: {
@@ -405,7 +463,7 @@ export function parseLine(line: string): SpectatorEvent[] {
             if (event) events.push(event);
           }
           if (block.name === "AskUserQuestion") {
-            pendingAskIds.set(block.id, lastAskPlayerFrom || "gm");
+            pendingAskIds.set(block.id, lastAskPlayerFrom || GM);
             const event = parseAskUserQuestion(
               block.input || {},
               block.id,

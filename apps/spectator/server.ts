@@ -21,6 +21,7 @@ import {
 import { JsonlWatcher } from "./lib/watcher";
 import { SessionManager } from "./lib/session";
 import { readCampaign } from "./lib/campaign";
+import { getAgentMetadata } from "./lib/agents";
 import type { SpectatorEvent } from "./lib/parser";
 
 // Parse CLI args
@@ -304,6 +305,11 @@ const server = Bun.serve({
       return handlePlayerApiAsync(req, url).then(
         (r) => r || new Response("Not Found", { status: 404 })
       );
+    }
+
+    // API: agent metadata
+    if (url.pathname === "/api/agents") {
+      return Response.json(getAgentMetadata());
     }
 
     // API: list sessions for picker
