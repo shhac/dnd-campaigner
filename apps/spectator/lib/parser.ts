@@ -50,9 +50,12 @@ let eventCounter = 0;
 // Track AskUserQuestion tool IDs → sender character for matching answers
 const pendingAskIds = new Map<string, string>();
 
-// Track the last character that sent [ASK_PLAYER] so we can attribute
-// the subsequent AskUserQuestion tool call to the right agent
+// Track the last character that sent [ASK_PLAYER] so we can suppress
+// the duplicate AskUserQuestion that typically follows within a few lines.
+// Expires after MAX_ASK_PLAYER_AGE parseLine calls to avoid stale state.
 let lastAskPlayerFrom: string | null = null;
+let lastAskPlayerAge = 0;
+const MAX_ASK_PLAYER_AGE = 5;
 
 function nextId(): string {
   return `evt-${++eventCounter}`;
@@ -254,6 +257,7 @@ function parseTeammateMessage(
   // Record the sender so we can suppress the duplicate AskUserQuestion that may follow.
   if (tag === "ASK_PLAYER") {
     lastAskPlayerFrom = from;
+    lastAskPlayerAge = 0;
     const content = cleanContent(rawContent);
     return {
       id: nextId(),
@@ -403,6 +407,7 @@ export function resetParserState(): void {
   eventCounter = 0;
   pendingAskIds.clear();
   lastAskPlayerFrom = null;
+  lastAskPlayerAge = 0;
 }
 
 /**
@@ -410,6 +415,15 @@ export function resetParserState(): void {
  */
 export function parseLine(line: string): SpectatorEvent[] {
   const events: SpectatorEvent[] = [];
+
+  // Expire stale ASK_PLAYER tracking after a few lines
+  if (lastAskPlayerFrom) {
+    lastAskPlayerAge++;
+    if (lastAskPlayerAge > MAX_ASK_PLAYER_AGE) {
+      lastAskPlayerFrom = null;
+      lastAskPlayerAge = 0;
+    }
+  }
 
   try {
     const record = JSON.parse(line);

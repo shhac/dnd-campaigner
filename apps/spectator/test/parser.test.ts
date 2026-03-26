@@ -360,6 +360,30 @@ describe("AskUserQuestion parsing", () => {
     expect(events).toHaveLength(0);
   });
 
+  it("expires stale ASK_PLAYER tracking after several lines", () => {
+    // ASK_PLAYER sets the flag
+    parseLine(teammateMsg("verdakho", "[ASK_PLAYER]\ncharacter: verdakho\n\nQ?"));
+
+    // Simulate several unrelated lines passing (expire the flag)
+    for (let i = 0; i < 6; i++) {
+      parseLine(JSON.stringify({ type: "user", timestamp: "2026-03-26T18:30:00Z", message: { content: "noop" } }));
+    }
+
+    // AskUserQuestion should NOT be suppressed — the flag expired
+    const events = parseLine(
+      assistantMsg([
+        {
+          type: "tool_use",
+          id: "ask_stale",
+          name: "AskUserQuestion",
+          input: { questions: [{ question: "Unrelated setup question" }] },
+        },
+      ])
+    );
+    expect(events).toHaveLength(1);
+    expect(events[0].from).toBe("gm"); // standalone, not attributed to verdakho
+  });
+
   it("falls back to gm when no preceding ASK_PLAYER", () => {
     const events = parseLine(
       assistantMsg([
