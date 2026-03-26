@@ -212,10 +212,16 @@ describe("teammate-message parsing", () => {
     expect(events[0].from).toBe("drakkenne");
   });
 
-  it("suppresses ASK_PLAYER teammate-messages", () => {
+  it("emits ASK_PLAYER teammate-messages as ask_player events", () => {
     const content = "[ASK_PLAYER]\ncharacter: verdakho\n\nWhat do you do?";
     const events = parseLine(teammateMsg("verdakho", content));
-    expect(events).toHaveLength(0);
+    expect(events).toHaveLength(1);
+    expect(events[0].type).toBe("ask_player");
+    expect(events[0].from).toBe("verdakho");
+    expect(events[0].to).toBe("human");
+    expect(events[0].content).toBe("What do you do?");
+    expect(events[0].content).not.toContain("[ASK_PLAYER]");
+    expect(events[0].content).not.toContain("character:");
   });
 
   it("handles multiple teammate-messages in one line", () => {
@@ -334,11 +340,13 @@ describe("AskUserQuestion parsing", () => {
     expect(events[0].summary).toBe("Your Move");
   });
 
-  it("attributes to preceding ASK_PLAYER sender", () => {
-    // First: teammate-message sets lastAskPlayerFrom
-    parseLine(teammateMsg("verdakho", "[ASK_PLAYER]\ncharacter: verdakho\n\nWhat do you do?"));
+  it("suppresses AskUserQuestion when preceding ASK_PLAYER already emitted", () => {
+    // First: teammate-message emits the ask_player event
+    const tmEvents = parseLine(teammateMsg("verdakho", "[ASK_PLAYER]\ncharacter: verdakho\n\nWhat do you do?"));
+    expect(tmEvents).toHaveLength(1);
+    expect(tmEvents[0].from).toBe("verdakho");
 
-    // Then: AskUserQuestion picks up the sender
+    // Then: AskUserQuestion is suppressed (duplicate)
     const events = parseLine(
       assistantMsg([
         {
@@ -349,8 +357,7 @@ describe("AskUserQuestion parsing", () => {
         },
       ])
     );
-    expect(events).toHaveLength(1);
-    expect(events[0].from).toBe("verdakho");
+    expect(events).toHaveLength(0);
   });
 
   it("falls back to gm when no preceding ASK_PLAYER", () => {

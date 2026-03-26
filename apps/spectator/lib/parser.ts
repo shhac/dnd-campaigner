@@ -250,11 +250,25 @@ function parseTeammateMessage(
   const tag = extractTag(rawContent);
   const fields = extractFields(rawContent);
 
-  // [ASK_PLAYER] teammate-messages are followed by AskUserQuestion tool calls
-  // with cleaner content. Record the sender and suppress the duplicate.
+  // [ASK_PLAYER] = player agent asking for human input.
+  // Record the sender so we can suppress the duplicate AskUserQuestion that may follow.
   if (tag === "ASK_PLAYER") {
     lastAskPlayerFrom = from;
-    return null;
+    const content = cleanContent(rawContent);
+    return {
+      id: nextId(),
+      timestamp,
+      type: "ask_player",
+      from,
+      to: HUMAN,
+      content,
+      summary,
+      color,
+      parsed: {
+        tag: "ASK_PLAYER",
+        character: from,
+      },
+    };
   }
 
   // GM messages use "character:" to identify the recipient
@@ -359,20 +373,25 @@ function parseAskUserQuestion(
     content += "\n\n" + optionLines.join("\n");
   }
 
-  const sender = lastAskPlayerFrom || GM;
-  lastAskPlayerFrom = null;
+  // If a preceding [ASK_PLAYER] teammate-message already emitted this event,
+  // suppress the duplicate. The teammate-message has the correct sender.
+  if (lastAskPlayerFrom) {
+    lastAskPlayerFrom = null;
+    return null;
+  }
 
+  // No preceding [ASK_PLAYER] — this is a standalone AskUserQuestion (e.g. setup questions)
   return {
     id: nextId(),
     timestamp,
     type: "ask_player",
-    from: sender,
+    from: GM,
     to: HUMAN,
     content,
     summary: header || question.slice(0, 80),
     parsed: {
       tag: "ASK_PLAYER",
-      character: sender,
+      character: GM,
     },
   };
 }
