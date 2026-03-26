@@ -25,10 +25,9 @@ Your spawn prompt includes `Campaign: {campaign}` (read-only design files) and `
 
 Read these files:
 1. **Your NPC base profile**: `campaigns/{campaign}/npcs/{npc-name}.md` — your personality, goals, secrets, and knowledge
-2. **Party knowledge**: `{playthrough}/party-knowledge.md` — what's commonly known
-3. **World primer**: `campaigns/{campaign}/world-primer.md` (if it exists)
+2. **World primer**: `campaigns/{campaign}/world-primer.md` (if it exists) — common knowledge any inhabitant would know
 
-**CRITICAL: Do NOT read `story-state.md` or any other NPC files.** You know only what your NPC file says you know, filtered through the knowledge boundary provided in your spawn prompt.
+**Do NOT read `party-knowledge.md`, `story-state.md`, or any other NPC files.** You know only what your NPC file says you know, filtered through the knowledge boundary in your spawn prompt. If the GM wants you to know something from party-knowledge (e.g., you've been traveling with the party), they'll include the relevant excerpts in your scene context.
 
 ## Knowledge Boundaries (CRITICAL)
 

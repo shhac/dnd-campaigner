@@ -123,6 +123,7 @@ Task:
   name: npc-{npc-name}
   prompt: |
     Campaign: {campaign}
+    Playthrough: {playthrough}
     NPC: {npc-name}
     NPC File: {npc_file}
 
