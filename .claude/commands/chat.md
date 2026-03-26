@@ -11,7 +11,7 @@ Have a meta-conversation with a character outside of gameplay. Perfect for explo
 
 - `campaign` (required): The campaign name (e.g., `the-rot-beneath`)
 - `character` (required): The character's full hyphenated name (e.g., `gideon-harrowmoor`)
-- `--playthrough <game-name>` (optional): A playthrough name (e.g., `session-1`). When provided, the character reads their evolved sheet, journal, and relationships from `playthroughs/{campaign}/{game-name}/`. Without this, the character is "fresh" — base sheet only, no session history.
+- `--playthrough <game-name>` (optional): A playthrough name (e.g., `playthrough-1`). When provided, the character reads their evolved sheet, journal, and relationships from `playthroughs/{campaign}/{game-name}/`. If omitted and playthroughs exist, the user is prompted to select one. Without a playthrough, the character is "fresh" — base sheet only, no session history.
 
 ## What This Does
 
@@ -97,9 +97,11 @@ You are the **orchestrator** for a character chat session. Your job is to valida
    - Otherwise: check `campaigns/{campaign}/party/{character}.md` exists
    - If not found, list available characters in the relevant party directory and ask user to choose
 
-4. **Verify playthrough exists** (if `--playthrough` provided):
-   - Check `playthroughs/{campaign}/{game-name}/` directory exists
-   - If not, list available playthroughs for that campaign and ask user to choose
+4. **Resolve playthrough**:
+   - If `--playthrough` provided: check `playthroughs/{campaign}/{game-name}/` exists. If not, list available and ask.
+   - If `--playthrough` NOT provided: check if `playthroughs/{campaign}/` has any subdirectories.
+     - If playthroughs exist: list them and ask user to select one, or offer "fresh" (no playthrough)
+     - If no playthroughs exist: proceed without playthrough (fresh character)
 
 ### Spawning the Agent
 
@@ -108,7 +110,7 @@ Once validated, spawn the `character-chat` agent with this prompt structure:
 ```
 Campaign: {campaign}
 Character: {character}
-Playthrough: {game-name}  ← include this line ONLY if --playthrough was provided
+Playthrough: playthroughs/{campaign}/{game-name}  ← include ONLY if a playthrough was selected
 
 The user wants to have a fireside conversation with this character. This is a meta-conversation outside the game - no campaign state changes will occur.
 

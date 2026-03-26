@@ -49,7 +49,14 @@ Read these files to understand your character. If `Playthrough` is provided, rea
    - Your observations about party members
    - Your private thoughts and goals
 
-3. **Shared party knowledge**:
+3. **Your relationships** (if exists):
+   ```
+   {playthrough}/party/{character}-relationships.md  (if playthrough provided)
+   ```
+   - Your private feelings about party members and NPCs
+   - Trust levels and dynamics
+
+4. **Shared party knowledge**:
    ```
    {playthrough}/party-knowledge.md        (if playthrough provided)
    campaigns/{campaign}/party-knowledge.md  (fallback)
