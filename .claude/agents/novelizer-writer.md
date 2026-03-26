@@ -117,7 +117,7 @@ After reading the previous chapter (step 7), before writing:
 
 ### Voice Continuity Without Pattern Copying
 
-For Chapter 2+, read `novel/voice-profile-{pov-character}.md` (if it exists) for voice guidance. Read the previous chapter for **narrative continuity only** — what happened, emotional state, active threads.
+For Chapter 2+, read `{playthrough}/novel/voice-profile-{pov-character}.md` (if it exists) for voice guidance. Read the previous chapter for **narrative continuity only** — what happened, emotional state, active threads.
 
 **Do NOT replicate sentence structures, metaphor choices, or transitional patterns from the previous chapter.**
 

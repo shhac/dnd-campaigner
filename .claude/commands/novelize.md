@@ -427,8 +427,9 @@ For each chapter N:
 Scan for repetitive prose patterns across all chapters.
 
 ```
-1. Spawn novelizer-pattern-reviewer:
+1. Spawn novelizer-continuity in PATTERN mode:
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   MODE: PATTERN
    CAMPAIGN: {campaign}
    PLAYTHROUGH: {playthrough}
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -773,7 +774,7 @@ Files:
   - `.claude/agents/novelizer-editor.md` - Prose quality editing
   - `.claude/agents/novelizer-continuity.md` - Consistency checking
   - `.claude/agents/novelizer-reader.md` - Beta reader reactions
-  - `.claude/agents/novelizer-pattern-reviewer.md` - Cross-chapter repetition analysis
+
   - `.claude/agents/novelizer-publisher.md` - Reader experience assessment
 - **Tone files**: `.claude/skills/novelization-style/tones/`
 - **Style files**: `.claude/skills/novelization-style/styles/`

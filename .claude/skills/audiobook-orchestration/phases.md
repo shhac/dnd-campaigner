@@ -12,7 +12,9 @@ For each chapter (or specified chapter range):
    Prompt:
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    CAMPAIGN: {campaign}
+   NOVEL_DIR: {playthrough}/novel
    CHAPTER: {N}
+   VOICES_YAML: {playthrough}/novel/voices.yaml
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 2. Agent:
@@ -54,6 +56,7 @@ For each chapter with segments:
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    MODE: GENERATE
    CAMPAIGN: {campaign}
+   NOVEL_DIR: {playthrough}/novel
    CHAPTER: {N}
    RESUME: {true if resume_mode and partially complete}
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -104,8 +107,12 @@ For each chapter with generated audio:
    Task: audiobook-assembler agent
    Prompt:
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ASSEMBLE CHAPTER
    CAMPAIGN: {campaign}
+   NOVEL_DIR: {playthrough}/novel
    CHAPTER: {N}
+   FORMAT: {output_format}
+   QUALITY: {quality}
    CLEAN: {clean_mode}
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

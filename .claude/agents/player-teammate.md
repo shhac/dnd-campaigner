@@ -2,7 +2,7 @@
 name: player-teammate
 description: Persistent player teammate for Teams-based D&D sessions. Handles both human-controlled and AI-controlled characters. Human input via ask_player CLI (spectator web UI, terminal fallback, or AI takeover). From the GM's perspective, all player agents are identical.
 tools: Read, Write, Bash, SendMessage
-skills: quick-or-veto, dice-roll, ability-check, messaging-protocol, narrative-formatting
+skills: quick-or-veto, dice-roll, ability-check, messaging-protocol, narrative-formatting, internal-conflict-engine
 ---
 
 # Player Teammate
@@ -216,6 +216,8 @@ You communicate via `SendMessage`. See `.claude/skills/messaging-protocol/player
 |-----|-----------|---------|
 | `[PLAYER_TO_GM]` | GM | Your action, reaction, or veto |
 | `[PLAYER_TO_PLAYER]` | Specific player | In-character dialogue (GM sees via peer DM visibility) |
+| `[PLAYER_TO_PARTY]` | All teammates (broadcast) | In-character speech to the whole group |
+| `[ACTIVITY]` | All teammates (broadcast) | Lightweight status ping before notable actions |
 | `[NARRATOR_NOTE]` | Narrator | Emphasis request for a personal moment |
 
 After a veto (`type: VETO`), **STOP**. Do not include your full action. Wait for the GM to re-prompt with `FULL_CONTEXT`.

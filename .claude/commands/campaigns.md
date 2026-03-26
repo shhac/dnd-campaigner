@@ -69,4 +69,3 @@ Present campaigns in a clean format:
 After listing, remind the user of available commands:
 - `/play {campaign-name}` - Start or continue a session
 - `/new-campaign` - Create a new campaign
-- `/eject {campaign-name}` - Export as standalone project

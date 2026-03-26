@@ -176,6 +176,7 @@ Multiple playthroughs of the same campaign are supported. Each playthrough has i
 - **audiobook-assembler**: Assembles WAV segments into final audiobook files (MP3/M4A). Verifies output and reports results.
 
 ### Utility Agents
+- **npc-teammate**: Semi-persistent NPC teammate for complex interactions requiring strict knowledge boundaries. Spawned by team lead when GM requests via `[NPC_SPAWN_REQUEST]`, despawned when interaction ends.
 - **character-chat**: Meta-conversations with D&D characters outside gameplay. Fireside chat mode -- READ-ONLY, does not affect campaign state.
 - **llm-prompt-expert**: Expert in LLM prompting, agent design, and prompt engineering. Use for validating plans, reviewing implementations.
 

@@ -85,7 +85,7 @@ clean_mode: --clean flag present
 2. **Novel exists**: Check `{playthrough}/novel/` directory exists (unless --clean)
 3. **Chapters exist**: Check at least one `chapter-*.md` file exists in `{playthrough}/novel/` (unless --clean)
 4. **Voices configured**: Check `{playthrough}/novel/voices.yaml` exists (unless --clean)
-5. **Resume mode**: If `--resume`, verify `audiobook/audiobook-state.yaml` exists
+5. **Resume mode**: If `--resume`, verify `{playthrough}/novel/chatterbox/audiobook-state.yaml` exists
 
 If validation fails:
 - Campaign not found: List available campaigns

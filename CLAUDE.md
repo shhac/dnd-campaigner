@@ -227,12 +227,6 @@ Have a fireside conversation with a D&D character outside of gameplay. Character
 ```
 Shows all available campaigns and their status. **Time estimate:** under 1 minute.
 
-### Ejecting a Campaign
-```
-/eject {campaign-name} [destination]
-```
-Exports a campaign as a standalone project with all necessary agents, skills, and commands. The ejected campaign can be played independently of this repository. **Time estimate:** 2-5 minutes.
-
 ### Novelizing a Campaign
 ```
 /novelize {campaign-name} [options]

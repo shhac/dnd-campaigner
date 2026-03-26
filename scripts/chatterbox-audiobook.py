@@ -29,7 +29,7 @@ import sys
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
+from __future__ import annotations
 
 import yaml
 
@@ -139,8 +139,8 @@ class Chunk:
     text: str
     voice: str
     segment_type: str
-    speaker: Optional[str] = None
-    speech_verb: Optional[str] = None
+    speaker: str | None = None
+    speech_verb: str | None = None
 
 
 @dataclass
@@ -150,8 +150,8 @@ class Segment:
     segment_type: str
     text: str = ''
     voice: str = ''
-    speaker: Optional[str] = None
-    speech_verb: Optional[str] = None
+    speaker: str | None = None
+    speech_verb: str | None = None
     pause_before_sec: float = 0.0
     exaggeration: float = 0.5
     cfg_weight: float = 0.5
@@ -273,7 +273,7 @@ def update_audiobook_state(campaign: str, chapter_num: int, status: str, details
     atomic_write_yaml(state_path, state)
 
 
-def parse_chapter_range(chapter_arg: Optional[int], chapters_arg: Optional[str]) -> list[int]:
+def parse_chapter_range(chapter_arg: int | None, chapters_arg: str | None) -> list[int]:
     """Parse --chapter N or --chapters N-M into list of chapter numbers."""
     if chapter_arg is not None:
         return [chapter_arg]
@@ -561,7 +561,7 @@ def is_scene_break(paragraph: str) -> bool:
     return bool(re.match(r'^\*\s*\*\s*\*\s*$', stripped)) or stripped == '---'
 
 
-def extract_speech_verb(text: str) -> Optional[str]:
+def extract_speech_verb(text: str) -> str | None:
     """Extract speech verb from dialogue attribution."""
     # Look for common speech verbs after closing quote
     verbs = list(SPEECH_VERB_MODIFIERS.keys()) + ['said', 'asked', 'replied', 'answered', 'stated', 'added']
@@ -572,7 +572,7 @@ def extract_speech_verb(text: str) -> Optional[str]:
     return None
 
 
-def apply_speech_verb_modifier(segment_type: str, speech_verb: Optional[str],
+def apply_speech_verb_modifier(segment_type: str, speech_verb: str | None,
                                 base_exaggeration: float, base_cfg_weight: float) -> tuple[str, float, float]:
     """Apply speech verb modifiers to base TTS settings."""
     if not speech_verb or speech_verb not in SPEECH_VERB_MODIFIERS:
@@ -596,7 +596,7 @@ def detect_paralinguistic_tags(text: str, context: str = '') -> list[str]:
     return tags
 
 
-def extract_speaker_from_context(text: str, last_named_speakers: dict) -> Optional[str]:
+def extract_speaker_from_context(text: str, last_named_speakers: dict) -> str | None:
     """Extract a speaker name from narrative context.
 
     Looks for patterns like:
@@ -626,7 +626,7 @@ def extract_speaker_from_context(text: str, last_named_speakers: dict) -> Option
     return None
 
 
-def resolve_pronoun_to_speaker(pronoun: str, last_named_speakers: dict, recent_speakers: list) -> Optional[str]:
+def resolve_pronoun_to_speaker(pronoun: str, last_named_speakers: dict, recent_speakers: list) -> str | None:
     """Resolve a pronoun to a speaker based on tracked gender."""
     pronoun = pronoun.lower()
 
@@ -1049,7 +1049,7 @@ def split_segment_at_sentences(segment: Segment) -> list[Segment]:
     return segments
 
 
-def calculate_pause_before(prev_segment: Optional[Segment], current_segment: Segment) -> float:
+def calculate_pause_before(prev_segment: Segment | None, current_segment: Segment) -> float:
     """Calculate pause duration before a segment based on context."""
     if current_segment.segment_type == 'scene_break':
         return SCENE_BREAK_PAUSE

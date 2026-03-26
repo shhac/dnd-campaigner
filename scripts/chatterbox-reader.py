@@ -42,9 +42,12 @@ def parse_frontmatter(content: str) -> dict:
     return frontmatter
 
 
-def get_character_gender(campaign: str, character: str) -> str:
+def get_character_gender(campaign: str, character: str, novel_dir: Path | None = None) -> str:
     """Detect character gender from their sheet."""
-    char_path = REPO_ROOT / 'campaigns' / campaign / 'party' / f'{character}.md'
+    if novel_dir:
+        char_path = novel_dir.parent / 'party' / f'{character}.md'
+    else:
+        char_path = REPO_ROOT / 'campaigns' / campaign / 'party' / f'{character}.md'
 
     if not char_path.exists():
         return 'male'  # default
@@ -59,9 +62,12 @@ def get_character_gender(campaign: str, character: str) -> str:
     return 'male'  # default
 
 
-def get_voice_sample(campaign: str, gender: str) -> Path:
+def get_voice_sample(campaign: str, gender: str, novel_dir: Path | None = None) -> Path | None:
     """Get the voice sample path for the given gender."""
-    samples_dir = REPO_ROOT / 'campaigns' / campaign / 'novel' / 'voice-samples'
+    if novel_dir:
+        samples_dir = novel_dir / 'voice-samples'
+    else:
+        samples_dir = REPO_ROOT / 'campaigns' / campaign / 'novel' / 'voice-samples'
 
     if gender == 'female':
         sample = samples_dir / 'narrator-female.wav'
@@ -95,9 +101,12 @@ def enhance_text_for_tts(text: str) -> str:
     return text
 
 
-def read_chapter(campaign: str, chapter: int) -> tuple[str, dict]:
+def read_chapter(campaign: str, chapter: int, novel_dir: Path | None = None) -> tuple[str, dict]:
     """Read chapter content and frontmatter."""
-    chapter_path = REPO_ROOT / 'campaigns' / campaign / 'novel' / f'chapter-{chapter:02d}.md'
+    if novel_dir:
+        chapter_path = novel_dir / f'chapter-{chapter:02d}.md'
+    else:
+        chapter_path = REPO_ROOT / 'campaigns' / campaign / 'novel' / f'chapter-{chapter:02d}.md'
 
     if not chapter_path.exists():
         raise FileNotFoundError(f"Chapter not found: {chapter_path}")
@@ -151,25 +160,28 @@ def main():
     parser.add_argument('--save', '-s', help='Save to file instead of playing')
     parser.add_argument('--voice', '-v', choices=['male', 'female'], help='Override voice')
     parser.add_argument('--play', '-p', action='store_true', help='Play after saving')
+    parser.add_argument('--novel-dir', type=str, help='Override novel directory path (default: campaigns/{campaign}/novel)')
 
     args = parser.parse_args()
 
+    novel_dir = Path(args.novel_dir) if args.novel_dir else None
+
     # Read chapter
     print(f"Reading chapter {args.chapter} from {args.campaign}...")
-    body, frontmatter = read_chapter(args.campaign, args.chapter)
+    body, frontmatter = read_chapter(args.campaign, args.chapter, novel_dir)
 
     # Determine voice
     pov = frontmatter.get('pov', '')
     if args.voice:
         gender = args.voice
     elif pov:
-        gender = get_character_gender(args.campaign, pov)
+        gender = get_character_gender(args.campaign, pov, novel_dir)
         print(f"POV character: {pov} ({gender})")
     else:
         gender = 'male'
 
     # Get voice sample
-    voice_sample = get_voice_sample(args.campaign, gender)
+    voice_sample = get_voice_sample(args.campaign, gender, novel_dir)
 
     # Enhance text
     text = enhance_text_for_tts(body)

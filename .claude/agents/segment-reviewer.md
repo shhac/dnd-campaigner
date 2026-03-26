@@ -258,14 +258,11 @@ When changing voice, update these fields:
 - `settings.audio_prompt:` - derive from working directory
 
 **Audio prompt path derivation:**
-1. Find the chapter directory from the segment file location
-2. The repo root is 4 levels up: `chapter-dir/chatterbox/novel/{campaign}/campaigns`
+1. Voice samples live at `.chatterbox-voices/` in the repo root
+2. Look up the character's voice in voices.yaml: `{character}.chatterbox.voice` -> `{voice}`
 3. Build path: `{repo_root}/.chatterbox-voices/{voice}.wav`
 
-Example: If segment is at `campaigns/the-rot-beneath/novel/chatterbox/chapter-1/segment-020.yaml`:
-- Repo root: `/Users/paul/projects-personal/dnd-campaigner`
-- Voice lookup: `lysara-vendrath` -> `chatterbox.voice` = `zoe-sample`
-- Audio prompt: `/Users/paul/projects-personal/dnd-campaigner/.chatterbox-voices/zoe-sample.wav`
+**Tip:** Extract the repo root from any existing segment's `settings.audio_prompt` path, or derive it from the `{novel_dir}` parameter (repo root is the ancestor containing `.chatterbox-voices/`).
 
 **Tip:** Extract the repo root from any existing segment's `settings.audio_prompt` path.
 

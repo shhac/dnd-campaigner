@@ -48,6 +48,12 @@ Lightweight status ping. Fields: `character`, `doing`.
 Action: Update activity display (see Activity Visualization in play-orchestration skill).
 Fire-and-forget — no confirmation needed.
 
+### `[PLAYER_TO_PARTY]` — from player teammates (broadcast)
+
+In-character speech addressed to the whole group. Fields: `character`, `content`.
+Action: Display to human as in-character speech (see message-handling.md).
+Fire-and-forget — no confirmation needed.
+
 ---
 
 ## Messages Team Lead Sends
