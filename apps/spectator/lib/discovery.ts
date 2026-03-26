@@ -71,7 +71,12 @@ export function findSession(
   sessionId: string
 ): SessionInfo | null {
   const sessions = listSessions(cwd);
-  return sessions.find((s) => s.sessionId === sessionId) ?? null;
+  // Exact match first, then prefix match
+  const exact = sessions.find((s) => s.sessionId === sessionId);
+  if (exact) return exact;
+  const prefixMatches = sessions.filter((s) => s.sessionId.startsWith(sessionId));
+  if (prefixMatches.length === 1) return prefixMatches[0];
+  return null;
 }
 
 /**

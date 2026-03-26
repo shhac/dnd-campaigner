@@ -274,7 +274,7 @@ async function handlePlayerApiAsync(req: Request, url: URL): Promise<Response | 
 
 const server = Bun.serve({
   port,
-  fetch(req, server) {
+  async fetch(req, server) {
     const url = new URL(req.url);
 
     // WebSocket upgrade
@@ -330,14 +330,15 @@ const server = Bun.serve({
       filePath = activeSession ? "/index.html" : "/picker.html";
     }
 
-    // Serve static files
+    // Serve static files (no-cache in dev to avoid stale JS/CSS)
     const fullPath = join(publicDir, filePath);
-    try {
-      const file = Bun.file(fullPath);
-      return new Response(file);
-    } catch {
-      return new Response("Not Found", { status: 404 });
+    const file = Bun.file(fullPath);
+    if (await file.exists()) {
+      return new Response(file, {
+        headers: { "Cache-Control": "no-cache" },
+      });
     }
+    return new Response("Not Found", { status: 404 });
   },
   websocket: {
     open(ws) {

@@ -197,7 +197,18 @@ function parseTeammateMessage(
 
   const tag = extractTag(content);
   const fields = extractFields(content);
-  const to = fields.to || fields.recipient || "gm";
+
+  // [ASK_PLAYER] teammate-messages are followed by AskUserQuestion tool calls
+  // with cleaner content. Record the sender and suppress the duplicate.
+  if (tag === "ASK_PLAYER") {
+    lastAskPlayerFrom = from;
+    return null;
+  }
+
+  // GM messages use "character:" to identify the recipient
+  const to = fields.to || fields.recipient
+    || (from === "gm" && fields.character ? fields.character : null)
+    || "gm";
   const eventType = tagToEventType(tag, from, to);
 
   return {
@@ -269,6 +280,55 @@ function parseSendMessage(
 }
 
 /**
+ * Parse an AskUserQuestion tool_use block into a SpectatorEvent.
+ */
+function parseAskUserQuestion(
+  input: Record<string, unknown>,
+  toolUseId: string,
+  timestamp: string
+): SpectatorEvent | null {
+  const questions = input.questions as Array<Record<string, unknown>> | undefined;
+  if (!questions?.length) return null;
+
+  const q = questions[0];
+  const header = (q.header as string) || "";
+  const question = (q.question as string) || "";
+  const options = q.options as Array<Record<string, unknown>> | undefined;
+
+  let content = question;
+  if (options?.length) {
+    const optionLines = options.map(
+      (o) => `- **${o.label}**: ${o.description || ""}`
+    );
+    content += "\n\n" + optionLines.join("\n");
+  }
+
+  const sender = lastAskPlayerFrom || "gm";
+  lastAskPlayerFrom = null;
+
+  return {
+    id: nextId(),
+    timestamp,
+    type: "ask_player",
+    from: sender,
+    to: "human",
+    content,
+    summary: header || question.slice(0, 80),
+    parsed: {
+      tag: "ASK_PLAYER",
+      character: sender,
+    },
+  };
+}
+
+// Track AskUserQuestion tool IDs → sender character for matching answers
+const pendingAskIds = new Map<string, string>();
+
+// Track the last character that sent [ASK_PLAYER] so we can attribute
+// the subsequent AskUserQuestion tool call to the right agent
+let lastAskPlayerFrom: string | null = null;
+
+/**
  * Parse a single JSONL line into zero or more SpectatorEvents.
  */
 export function parseLine(line: string): SpectatorEvent[] {
@@ -279,7 +339,7 @@ export function parseLine(line: string): SpectatorEvent[] {
     const timestamp =
       record.timestamp || new Date().toISOString();
 
-    // Handle user messages (incoming teammate messages)
+    // Handle user messages (incoming teammate messages + AskUserQuestion answers)
     if (record.type === "user") {
       const content = record.message?.content;
       if (typeof content === "string" && content.includes("<teammate-message")) {
@@ -295,6 +355,43 @@ export function parseLine(line: string): SpectatorEvent[] {
           }
         }
       }
+
+      // Check for AskUserQuestion tool_result answers
+      if (Array.isArray(content)) {
+        for (const block of content) {
+          if (
+            block.type === "tool_result" &&
+            pendingAskIds.has(block.tool_use_id)
+          ) {
+            const answerTo = pendingAskIds.get(block.tool_use_id) || "gm";
+            pendingAskIds.delete(block.tool_use_id);
+            let text = block.content ?? "";
+            if (Array.isArray(text)) {
+              for (const t of text) {
+                if (t.type === "text") { text = t.text; break; }
+              }
+            }
+            if (typeof text !== "string") continue;
+            // Extract the answer from "User has answered your questions: "Q"="A""
+            const answerMatch = text.match(/="([^]*?)(?:"|$)/);
+            const answer = answerMatch ? answerMatch[1] : text;
+            if (!answer.trim()) continue;
+
+            events.push({
+              id: nextId(),
+              timestamp,
+              type: "player_to_gm",
+              from: "human",
+              to: answerTo,
+              content: answer,
+              parsed: {
+                tag: "PLAYER_TO_GM",
+                actionType: "RESPONSE",
+              },
+            });
+          }
+        }
+      }
     }
 
     // Handle assistant messages (outgoing tool calls)
@@ -302,11 +399,18 @@ export function parseLine(line: string): SpectatorEvent[] {
       const content = record.message?.content;
       if (Array.isArray(content)) {
         for (const block of content) {
-          if (
-            block.type === "tool_use" &&
-            block.name === "SendMessage"
-          ) {
+          if (block.type !== "tool_use") continue;
+          if (block.name === "SendMessage") {
             const event = parseSendMessage(block.input || {}, timestamp);
+            if (event) events.push(event);
+          }
+          if (block.name === "AskUserQuestion") {
+            pendingAskIds.set(block.id, lastAskPlayerFrom || "gm");
+            const event = parseAskUserQuestion(
+              block.input || {},
+              block.id,
+              timestamp
+            );
             if (event) events.push(event);
           }
         }

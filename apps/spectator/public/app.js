@@ -31,6 +31,7 @@ const AGENT_COLORS = {
   gm: "var(--color-gm)",
   narrator: "var(--color-narrator)",
   "team-lead": "var(--color-lead)",
+  human: "var(--color-human, #4fc3f7)",
 };
 
 function getAgentColor(id, color) {
@@ -46,6 +47,7 @@ function getAgentShortName(id) {
   if (id === "gm") return "GM";
   if (id === "narrator") return "Narrator";
   if (id === "team-lead") return "Lead";
+  if (id === "human") return "You";
   if (id === "*") return "All";
   const parts = id.split("-");
   return parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
@@ -187,6 +189,7 @@ function renderEvent(event) {
       el.innerHTML = renderNarrative(event);
       break;
     case "gm_to_player":
+    case "ask_player":
       el.innerHTML = renderGmPrompt(event);
       break;
     case "player_to_gm":
@@ -264,7 +267,7 @@ function renderGmPrompt(event) {
 
   return `
     <div class="event-header">
-      <span class="event-from" style="color: var(--color-gm)">GM</span>
+      <span class="event-from" style="color: ${getAgentColor(event.from)}">${getAgentShortName(event.from).toUpperCase()}</span>
       <span class="event-arrow">→</span>
       <span class="event-to" style="color: ${toColor}">${toName}</span>
       ${reqType ? `<span class="event-tag">${reqType}</span>` : ""}

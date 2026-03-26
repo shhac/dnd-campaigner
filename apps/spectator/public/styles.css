@@ -25,6 +25,7 @@
   --color-red: #ef9a9a;
   --color-cyan: #80deea;
   --color-lead: #78909c;
+  --color-human: #4fc3f7;
 
   /* Event type colors */
   --narrative-bg: #1a1a28;
@@ -243,7 +244,8 @@ main {
 .event.narrative .event-content p:last-child { margin-bottom: 0; }
 
 /* GM to Player */
-.event.gm_to_player {
+.event.gm_to_player,
+.event.ask_player {
   background: var(--gm-to-player-bg);
   border-left: 3px solid var(--color-gm);
   padding: 10px 16px;
