@@ -227,6 +227,11 @@ main {
 
 /* Event blocks */
 .event { margin-bottom: 12px; animation: fadeIn 0.3s ease; }
+.event.flash { animation: flashHighlight 1.5s ease; }
+@keyframes flashHighlight {
+  0% { box-shadow: 0 0 0 2px var(--accent); }
+  100% { box-shadow: none; }
+}
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
@@ -242,6 +247,21 @@ main {
 .event.narrative .event-content { font-size: 13px; line-height: 1.7; color: var(--text-bright); }
 .event.narrative .event-content p { margin-bottom: 10px; }
 .event.narrative .event-content p:last-child { margin-bottom: 0; }
+
+/* Reading aid — paragraph and sentence hover highlighting */
+.event-content p:hover,
+.event-content .para-block:hover {
+  border-left: 2px solid rgba(196, 160, 74, 0.25);
+  padding-left: 8px;
+  margin-left: -10px;
+}
+.event-content .sentence {
+  border-radius: 2px;
+  transition: background 0.15s ease;
+}
+.event-content .sentence:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
 
 /* GM to Player */
 .event.gm_to_player,
@@ -433,7 +453,10 @@ main {
   gap: 4px;
   color: var(--text-dim);
   animation: fadeIn 0.2s ease;
+  cursor: pointer;
+  border-radius: 2px;
 }
+.flow-entry:hover { background: var(--bg-hover); }
 
 .flow-entry .flow-from { font-weight: 600; min-width: 32px; text-align: right; }
 .flow-entry .flow-arrow { color: #444; }

@@ -276,7 +276,7 @@ function renderGmPrompt(event) {
 function renderPlayerAction(event, fromColor) {
   const fromName = getAgentShortName(event.from);
   const toName = event.to === "*" ? "All" : getAgentShortName(event.to);
-  const toColor = event.to === "gm" ? "var(--color-gm)" : getAgentColor(event.to);
+  const toColor = getAgentColor(event.to);
 
   // Format the body with inline markdown
   let rendered = formatInlineMarkdown(event.content);
@@ -372,12 +372,22 @@ function addFlowEntry(event) {
     : event.type === "session_end" ? "END"
     : (event.parsed.tag || event.type).substring(0, 8);
 
+  entry.dataset.eventId = event.id;
   entry.innerHTML = `
     <span class="flow-from" style="color: ${fromColor}">${getAgentShortName(event.from)}</span>
     <span class="flow-arrow">→</span>
     <span class="flow-to" style="color: ${toColor}">${event.to === "*" ? "ALL" : getAgentShortName(event.to)}</span>
     <span class="flow-type">${typeLabel}</span>
   `;
+
+  entry.addEventListener("click", () => {
+    const target = document.querySelector(`[data-event-id="${event.id}"]`);
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+      target.classList.add("flash");
+      setTimeout(() => target.classList.remove("flash"), 1500);
+    }
+  });
 
   container.appendChild(entry);
   while (container.children.length > 100) container.removeChild(container.firstChild);
@@ -444,6 +454,15 @@ function stripTag(content) {
   return content.replace(/^\[[A-Z_]+\]\n?/, "");
 }
 
+function wrapSentences(html) {
+  // Split on sentence boundaries (. ! ? followed by space or end), preserving delimiters.
+  // Avoids splitting on abbreviations, decimals, or mid-sentence punctuation.
+  return html.replace(
+    /([^<>]*?)([.!?]+(?:\s+|&quot;|"|'|&rsquo;|\s*$))/g,
+    '<span class="sentence">$1$2</span>'
+  );
+}
+
 function formatNarrativeText(text) {
   return text
     .split(/\n\n+/)
@@ -455,6 +474,7 @@ function formatNarrativeText(text) {
         /(\d+d\d+(?:[+-]\d+)?\s*=\s*\[\d+\][^\n]*)/g,
         '<span class="dice-roll">🎲 $1</span>'
       );
+      html = wrapSentences(html);
       return `<p>${html}</p>`;
     })
     .join("");
@@ -481,8 +501,15 @@ function formatInlineMarkdown(text) {
   html = html.replace(/^- (.+)$/gm, '<div class="md-bullet">· $1</div>');
   // Quoted dialogue
   html = html.replace(/&quot;([^&]*?)&quot;/g, '"<span class="dialogue">$1</span>"');
-  // Paragraphs
-  html = html.replace(/\n\n+/g, '<div class="para-break"></div>');
+  // Paragraphs — wrap in blocks for hover targeting
+  html = html.replace(/\n\n+/g, '</div><div class="para-break"></div><div class="para-block">');
+  html = `<div class="para-block">${html}</div>`;
+  // Clean up empty blocks
+  html = html.replace(/<div class="para-block"><\/div>/g, "");
+  // Wrap sentences within para-blocks
+  html = html.replace(/(<div class="para-block">)([\s\S]*?)(<\/div>)/g, (_, open, inner, close) => {
+    return open + wrapSentences(inner) + close;
+  });
   return html;
 }
 
