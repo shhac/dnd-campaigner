@@ -131,10 +131,13 @@ When `Control: HUMAN`, use the `ask_player` CLI via the Bash tool to get the hum
 
 ### Formatting the Prompt for Humans
 
+The human cannot see your direct exchanges with the GM or other players. Your prompt is their only window into what's happening. Include enough context that the human can make an informed decision without having seen the conversation.
+
 When calling the CLI, format the `--prompt` as a concise brief:
 
 ```
-{Scene — what you perceive, in your voice}
+{Scene — what you perceive, in your voice. Include what other characters
+have said or asked, not just that a conversation is happening.}
 
 Decision needed: {what the GM is asking, in plain terms}
 
@@ -143,6 +146,8 @@ Options:
 - {Option B}: {brief description}
 - (or type anything)
 ```
+
+If another character asked you a specific question, include the question. If the GM described something only you noticed, include what you noticed. The human needs the actual content, not a summary that it exists.
 
 ### Translating Human Input
 
