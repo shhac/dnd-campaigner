@@ -30,6 +30,7 @@ export interface SessionState {
 export class SessionManager {
   state: SessionState;
   private maxEvents: number;
+  private characterLookup = new Map<string, CharacterInfo>();
 
   constructor(sessionId: string, maxEvents = 5000) {
     this.maxEvents = maxEvents;
@@ -43,16 +44,16 @@ export class SessionManager {
 
   setCampaign(campaign: CampaignInfo): void {
     this.state.campaign = campaign;
-    // Pre-populate agent entries for known characters
+    // Store character data as a lookup — agents are created dynamically
+    // from session events so only active participants appear
     for (const char of campaign.characters) {
-      if (!this.state.agents.has(char.id)) {
-        this.state.agents.set(char.id, {
-          id: char.id,
-          name: char.name,
-          status: "idle",
-          role: "player",
-          character: char,
-        });
+      this.characterLookup.set(char.id, char);
+    }
+    // Enrich any agents already discovered from events
+    for (const [id, agent] of this.state.agents) {
+      if (!agent.character && this.characterLookup.has(id)) {
+        agent.character = this.characterLookup.get(id);
+        agent.name = agent.character!.name;
       }
     }
   }
@@ -98,16 +99,18 @@ export class SessionManager {
 
   private updateAgentFromEvent(event: SpectatorEvent): void {
     const fromId = event.from;
-    if (!fromId || fromId === "team-lead") return;
+    if (!fromId || fromId === "team-lead" || fromId === "human") return;
 
     // Ensure agent exists
     if (!this.state.agents.has(fromId)) {
+      const character = this.characterLookup.get(fromId);
       this.state.agents.set(fromId, {
         id: fromId,
-        name: this.formatAgentName(fromId),
+        name: character?.name || this.formatAgentName(fromId),
         color: event.color,
         status: "active",
         role: this.inferRole(fromId),
+        character,
       });
     }
 
