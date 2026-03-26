@@ -449,6 +449,236 @@ describe("AskUserQuestion answer parsing", () => {
   });
 });
 
+// === Additional protocol tags ===
+
+describe("additional teammate-message tags", () => {
+  it("parses PLAYER_TO_PLAYER", () => {
+    const content = "[PLAYER_TO_PLAYER]\nto: lasinne\ncharacter: eamon\n\n*whispers* Keep your eyes on the innkeeper.";
+    const events = parseLine(teammateMsg("eamon", content));
+    expect(events).toHaveLength(1);
+    expect(events[0].type).toBe("player_to_player");
+    expect(events[0].from).toBe("eamon");
+    expect(events[0].to).toBe("lasinne");
+    expect(events[0].content).toContain("Keep your eyes on the innkeeper");
+    expect(events[0].content).not.toContain("[PLAYER_TO_PLAYER]");
+  });
+
+  it("parses PLAYER_TO_PARTY", () => {
+    const content = "[PLAYER_TO_PARTY]\ncharacter: eamon\ntype: ACTION\n\nEveryone, we need to move.";
+    const events = parseLine(teammateMsg("eamon", content));
+    expect(events).toHaveLength(1);
+    expect(events[0].type).toBe("player_to_party");
+    expect(events[0].from).toBe("eamon");
+    expect(events[0].content).toBe("Everyone, we need to move.");
+  });
+
+  it("parses DICE_RESULT", () => {
+    const content = "[DICE_RESULT]\ncharacter: eamon\n\nPersuasion: 1d20+4 = [17]+4 = 21";
+    const events = parseLine(teammateMsg("eamon", content));
+    expect(events).toHaveLength(1);
+    expect(events[0].type).toBe("dice_result");
+    expect(events[0].parsed.diceRolls).toHaveLength(1);
+    expect(events[0].parsed.diceRolls![0]).toContain("1d20+4");
+  });
+
+  it("parses SESSION_END", () => {
+    const content = "[SESSION_END]\n\nSession complete. 4 beats, 12 rolls.";
+    const events = parseLine(teammateMsg("gm", content));
+    expect(events).toHaveLength(1);
+    expect(events[0].type).toBe("session_end");
+    expect(events[0].from).toBe("gm");
+  });
+
+  it("parses NARRATOR_NOTE", () => {
+    const content = "[NARRATOR_NOTE]\n\nScene 3 written to scenes/003-the-well.md";
+    const events = parseLine(teammateMsg("narrator", content));
+    expect(events).toHaveLength(1);
+    expect(events[0].type).toBe("narrator_note");
+    expect(events[0].from).toBe("narrator");
+  });
+
+  it("parses COMMAND_ACK", () => {
+    const content = "[COMMAND_ACK]\ncommand: start";
+    const events = parseLine(teammateMsg("gm", content));
+    expect(events).toHaveLength(1);
+    expect(events[0].type).toBe("command_ack");
+  });
+
+  it("parses SESSION_COMMAND", () => {
+    const content = "[SESSION_COMMAND]\ncommand: end";
+    const events = parseLine(teammateMsg("gm", content));
+    expect(events).toHaveLength(1);
+    expect(events[0].type).toBe("session_command");
+  });
+
+  it("infers gm_to_player for untagged GM messages", () => {
+    const events = parseLine(teammateMsg("gm", "You notice a shadow moving."));
+    expect(events).toHaveLength(1);
+    expect(events[0].type).toBe("gm_to_player");
+  });
+
+  it("infers player_to_gm for untagged player messages", () => {
+    const events = parseLine(teammateMsg("eamon", "I look around carefully."));
+    expect(events).toHaveLength(1);
+    expect(events[0].type).toBe("player_to_gm");
+  });
+});
+
+// === SendMessage additional tags ===
+
+describe("SendMessage additional tags", () => {
+  it("parses GM_TO_PLAYER SendMessage", () => {
+    const events = parseLine(
+      assistantMsg([
+        {
+          type: "tool_use",
+          id: "tool_gm",
+          name: "SendMessage",
+          input: {
+            to: "eamon",
+            content: "[GM_TO_PLAYER]\ncharacter: eamon\nrequest_type: FULL_CONTEXT\n\n## Request\nWhat do you do?",
+          },
+        },
+      ])
+    );
+    expect(events).toHaveLength(1);
+    expect(events[0].type).toBe("gm_to_player");
+    expect(events[0].from).toBe("gm");
+    expect(events[0].to).toBe("eamon");
+    expect(events[0].parsed.requestType).toBe("FULL_CONTEXT");
+    expect(events[0].content).not.toContain("[GM_TO_PLAYER]");
+    expect(events[0].content).not.toContain("request_type:");
+  });
+
+  it("parses ASK_PLAYER SendMessage as gm", () => {
+    const events = parseLine(
+      assistantMsg([
+        {
+          type: "tool_use",
+          id: "tool_ask",
+          name: "SendMessage",
+          input: {
+            to: "verdakho",
+            content: "[ASK_PLAYER]\ncharacter: verdakho\n\nHow do you respond?",
+          },
+        },
+      ])
+    );
+    expect(events).toHaveLength(1);
+    expect(events[0].from).toBe("gm");
+  });
+
+  it("parses NARRATOR_NOTE SendMessage", () => {
+    const events = parseLine(
+      assistantMsg([
+        {
+          type: "tool_use",
+          id: "tool_narr",
+          name: "SendMessage",
+          input: {
+            to: "narrator",
+            content: "[NARRATOR_NOTE]\n\nScene written.",
+          },
+        },
+      ])
+    );
+    expect(events).toHaveLength(1);
+    expect(events[0].from).toBe("gm");
+    expect(events[0].type).toBe("narrator_note");
+  });
+
+  it("attributes untagged SendMessage to team-lead", () => {
+    const events = parseLine(
+      assistantMsg([
+        {
+          type: "tool_use",
+          id: "tool_lead",
+          name: "SendMessage",
+          input: {
+            to: "gm",
+            content: "Session starting. All agents ready.",
+          },
+        },
+      ])
+    );
+    expect(events).toHaveLength(1);
+    expect(events[0].from).toBe("team-lead");
+  });
+
+  it("extracts dice rolls from SendMessage content", () => {
+    const events = parseLine(
+      assistantMsg([
+        {
+          type: "tool_use",
+          id: "tool_dice",
+          name: "SendMessage",
+          input: {
+            to: "*",
+            content: "[NARRATIVE]\n\nThe attack lands. 1d20+5 = [18]+5 = 23",
+          },
+        },
+      ])
+    );
+    expect(events).toHaveLength(1);
+    expect(events[0].parsed.diceRolls).toHaveLength(1);
+  });
+});
+
+// === Agents module ===
+
+describe("agents module", () => {
+  // Import agents functions for direct testing
+  let agents: typeof import("../lib/agents");
+  beforeEach(async () => {
+    agents = await import("../lib/agents");
+  });
+
+  it("isSystemAgent identifies system agents", () => {
+    expect(agents.isSystemAgent("gm")).toBe(true);
+    expect(agents.isSystemAgent("narrator")).toBe(true);
+    expect(agents.isSystemAgent("team-lead")).toBe(true);
+    expect(agents.isSystemAgent("human")).toBe(true);
+    expect(agents.isSystemAgent("eamon")).toBe(false);
+    expect(agents.isSystemAgent("verdakho")).toBe(false);
+  });
+
+  it("isVisibleAgent hides team-lead and human", () => {
+    expect(agents.isVisibleAgent("gm")).toBe(true);
+    expect(agents.isVisibleAgent("narrator")).toBe(true);
+    expect(agents.isVisibleAgent("team-lead")).toBe(false);
+    expect(agents.isVisibleAgent("human")).toBe(false);
+    expect(agents.isVisibleAgent("eamon")).toBe(true);
+  });
+
+  it("inferRole returns correct roles", () => {
+    expect(agents.inferRole("gm")).toBe("gm");
+    expect(agents.inferRole("narrator")).toBe("narrator");
+    expect(agents.inferRole("team-lead")).toBe("lead");
+    expect(agents.inferRole("eamon")).toBe("player");
+  });
+
+  it("getIdentity returns records for system agents, null for others", () => {
+    expect(agents.getIdentity("gm")?.shortName).toBe("GM");
+    expect(agents.getIdentity("human")?.shortName).toBe("Human");
+    expect(agents.getIdentity("eamon")).toBeNull();
+  });
+
+  it("formatAgentName handles system and player agents", () => {
+    expect(agents.formatAgentName("gm")).toBe("Game Master");
+    expect(agents.formatAgentName("narrator")).toBe("Narrator");
+    expect(agents.formatAgentName("eamon-lightward")).toBe("Eamon Lightward");
+    expect(agents.formatAgentName("verdakho")).toBe("Verdakho");
+  });
+
+  it("getAgentMetadata returns all system agents", () => {
+    const meta = agents.getAgentMetadata();
+    expect(Object.keys(meta)).toEqual(["gm", "narrator", "team-lead", "human"]);
+    expect(meta.gm.role).toBe("gm");
+    expect(meta.gm.color).toBe("gm");
+    expect(meta.human.isSystem).toBe(true);
+  });
+});
+
 // === Edge cases ===
 
 describe("edge cases", () => {
