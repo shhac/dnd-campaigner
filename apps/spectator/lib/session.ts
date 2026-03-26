@@ -21,6 +21,7 @@ export interface SessionState {
   sessionId: string;
   campaign?: CampaignInfo;
   agents: Map<string, AgentState>;
+  humanControlled: Set<string>;
   events: SpectatorEvent[];
   currentScene?: string;
   status: "starting" | "active" | "ending" | "ended";
@@ -37,6 +38,7 @@ export class SessionManager {
     this.state = {
       sessionId,
       agents: new Map(),
+      humanControlled: new Set(),
       events: [],
       status: "starting",
     };
@@ -70,6 +72,11 @@ export class SessionManager {
 
     // Update agent states
     this.updateAgentFromEvent(event);
+
+    // ask_player events identify human-controlled characters
+    if (event.type === "ask_player" && event.from !== "gm") {
+      this.state.humanControlled.add(event.from);
+    }
 
     // Update session status
     if (event.type === "session_command") {
@@ -172,6 +179,7 @@ export class SessionManager {
       sessionId: this.state.sessionId,
       campaign: this.state.campaign,
       agents: Object.fromEntries(this.state.agents),
+      humanControlled: [...this.state.humanControlled],
       events: this.state.events,
       currentScene: this.state.currentScene,
       status: this.state.status,

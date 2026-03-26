@@ -131,15 +131,20 @@ function handlePlayerApi(req: Request, url: URL): Response | null {
     const dir = campaignTmpDir();
     // Scan for per-character auto flags and pending prompts
     const characters: Record<string, { mode: string; hasPrompt: boolean }> = {};
-    if (dir) {
-      const campaign = manager?.state.campaign;
-      if (campaign) {
-        for (const char of campaign.characters) {
-          characters[char.id] = {
-            mode: existsSync(join(dir, `${char.id}.auto`)) ? "full_auto" : "human",
-            hasPrompt: existsSync(join(dir, `${char.id}-prompt.json`)),
-          };
-        }
+    if (dir && manager) {
+      const humanControlled = manager.state.humanControlled;
+      for (const [id, agent] of manager.state.agents) {
+        if (!agent.character) continue;
+        // .auto file overrides session detection (user toggled via UI)
+        const hasAutoFile = existsSync(join(dir, `${id}.auto`));
+        const hasHumanFile = existsSync(join(dir, `${id}.human`));
+        const mode = hasAutoFile ? "full_auto"
+          : hasHumanFile ? "human"
+          : humanControlled.has(id) ? "human" : "full_auto";
+        characters[id] = {
+          mode,
+          hasPrompt: existsSync(join(dir, `${id}-prompt.json`)),
+        };
       }
     }
     return Response.json({

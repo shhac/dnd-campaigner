@@ -556,6 +556,14 @@ function handleInit(data) {
     status: data.status,
   };
 
+  // Set character modes from server-detected human control
+  const humanSet = new Set(data.humanControlled || []);
+  for (const [id, agent] of Object.entries(state.agents)) {
+    if (agent.character) {
+      characterModes[id] = humanSet.has(id) ? "human" : "full_auto";
+    }
+  }
+
   if (data.campaign?.title) {
     document.getElementById("campaign-title").textContent = `${data.campaign.title} — Spectator`;
     document.title = `${data.campaign.title} — Spectator`;
