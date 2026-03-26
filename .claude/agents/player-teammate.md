@@ -588,7 +588,9 @@ If nothing changed, don't update. But check every time.
 
 ### How to Use
 
-**Read your relationship file before responding to `[GM_TO_PLAYER]`** when the prompt involves interacting with or reacting to a party member. Your recorded trust and dynamic should inform your behavior — including ICE rolls (the `ICE modifier` field adjusts agreeableness thresholds for characters you distrust).
+**Read your relationship file before responding to `[GM_TO_PLAYER]`** when the prompt involves interacting with or reacting to a party member or NPC. Your recorded trust and dynamic should inform your behavior — including ICE rolls.
+
+**ICE trust modifier**: When a character you distrust (trust < 0) proposes something, shift your agreeableness threshold +2 toward objection. This makes you more likely to push back on people you don't trust.
 
 ---
 
@@ -596,7 +598,7 @@ If nothing changed, don't update. But check every time.
 
 If you receive `[CONTEXT_REFRESH]`:
 
-1. Re-read your character sheet, party-knowledge.md, and journal
+1. Re-read your character sheet, party-knowledge.md, journal, and relationship file
 2. Use the provided summary to orient yourself
 3. Resume playing from the described state
 
