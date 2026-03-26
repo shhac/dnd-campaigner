@@ -157,7 +157,7 @@ See `.claude/skills/messaging-protocol/gm-protocol.md` for full format specifica
 
 - **No action prompts** ("What do you do?") in broadcasts — reserve for `[GM_TO_PLAYER]`
 - **Present tense** for immediacy
-- **Always include woven-in player actions and dialogue** — the Narrator depends on your broadcasts
+- **Always dramatize player actions and key dialogue in the narrative body** — the human player cannot see direct `[GM_TO_PLAYER]` / `[PLAYER_TO_GM]` / `[PLAYER_TO_PLAYER]` exchanges. Your `[NARRATIVE]` broadcast is their only window into what happened. Include actual dialogue lines and emotional reactions, not just outcomes. The Narrator also depends on your broadcasts for the session record.
 - **Always include `## Party Activity` footer** — one-line summary per character of what they did/are doing (see Activity Visibility below)
 
 ### `[GM_TO_PLAYER]` — Request Types

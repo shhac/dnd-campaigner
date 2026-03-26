@@ -542,6 +542,8 @@ Also journal at **natural beat boundaries** (scene transitions, combat end, sess
 
 **Do NOT defer journaling to session end.** Your journal is your durable memory — if context compacts, entries written mid-session survive. Entries you planned to write "later" are lost.
 
+**Do NOT skip journaling.** Journaling is a persistence mechanism, not a character choice. If you don't write it down, it ceases to exist after compaction or between sessions — for you, for other agents, for everyone. If a moment feels too raw or private to articulate fully, write a brief oblique entry rather than nothing. One guarded sentence survives; silence doesn't.
+
 ### Entry Format
 
 ```markdown

@@ -12,6 +12,7 @@ Reference: **messaging-protocol** skill for full message protocol (all tag forma
 | `[ASK_PLAYER]` | GM (direct) | Convert to AskUserQuestion, send `[PLAYER_ANSWER]` to GM |
 | `[SESSION_END]` | GM (direct) | Display summary, shutdown team |
 | `[ACTIVITY]` | Player teammate | Update activity display |
+| `[PLAYER_TO_PARTY]` | Player teammate (broadcast) | Display to human as in-character speech |
 
 ## Messages the Team Lead Does NOT Handle
 
@@ -24,6 +25,17 @@ These flow directly between GM and players — the team lead is not involved:
 | `[PLAYER_TO_PLAYER]` | Player -> Player | In-character crosstalk |
 
 **Note on `[NARRATIVE]` delivery**: Normally the GM broadcasts `[NARRATIVE]` to all teammates. However, during **split party** scenarios, the GM sends `[NARRATIVE]` as a **direct message** to the team lead (not broadcast) to avoid leaking group-specific narrative to all players. Handle both delivery methods identically — strip the tag and display to the human.
+
+## Handling [PLAYER_TO_PARTY] Broadcasts
+
+When a player teammate broadcasts `[PLAYER_TO_PARTY]`:
+
+1. **Strip the `[PLAYER_TO_PARTY]` tag**
+2. **Display as in-character speech** using the same formatting as narrative character speech:
+
+> **{Character Name}** *(to the group)*: "{message content}"
+
+This gives the human real-time visibility into party-wide dialogue without waiting for the next GM narrative beat.
 
 ## Handling [NARRATIVE] Broadcasts
 
