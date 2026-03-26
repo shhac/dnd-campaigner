@@ -183,8 +183,19 @@ def get_campaign_dir(campaign: str) -> Path:
     return REPO_ROOT / 'campaigns' / campaign
 
 
+_novel_dir_override: Path | None = None
+
+
+def set_novel_dir_override(path: str):
+    """Set a custom novel directory path (from --novel-dir CLI flag)."""
+    global _novel_dir_override
+    _novel_dir_override = Path(path)
+
+
 def get_novel_dir(campaign: str) -> Path:
     """Get the novel directory path."""
+    if _novel_dir_override:
+        return _novel_dir_override
     return get_campaign_dir(campaign) / 'novel'
 
 
@@ -1721,6 +1732,8 @@ def segment_single_chapter(campaign: str, chapter: int, voices_yaml: dict) -> bo
 def cmd_segment(args):
     """Segment command: parse chapter markdown and create segment files."""
     campaign = args.campaign
+    if args.novel_dir:
+        set_novel_dir_override(args.novel_dir)
     chapters = parse_chapter_range(args.chapter, args.chapters)
 
     if not chapters:
@@ -1864,6 +1877,8 @@ def cmd_generate(args):
     from chatterbox.tts_turbo import ChatterboxTurboTTS
 
     campaign = args.campaign
+    if args.novel_dir:
+        set_novel_dir_override(args.novel_dir)
     chapters = parse_chapter_range(args.chapter, args.chapters)
     resume = args.resume
 
@@ -1972,6 +1987,8 @@ def assemble_single_chapter(campaign: str, chapter: int, output_format: str,
 def cmd_assemble(args):
     """Assemble command: concatenate segments and encode to MP3."""
     campaign = args.campaign
+    if args.novel_dir:
+        set_novel_dir_override(args.novel_dir)
     chapters = parse_chapter_range(args.chapter, args.chapters)
     output_format = args.format
     quality = args.quality
@@ -2016,6 +2033,7 @@ Examples:
     segment_parser.add_argument('campaign', help='Campaign name')
     segment_parser.add_argument('--chapter', '-c', type=int, help='Chapter number')
     segment_parser.add_argument('--chapters', type=str, help='Chapter range (e.g., 1-5)')
+    segment_parser.add_argument('--novel-dir', type=str, help='Override novel directory path (default: campaigns/{campaign}/novel)')
 
     # Generate command
     generate_parser = subparsers.add_parser('generate', help='Generate WAV files for segments')
@@ -2023,12 +2041,14 @@ Examples:
     generate_parser.add_argument('--chapter', '-c', type=int, help='Chapter number')
     generate_parser.add_argument('--chapters', type=str, help='Chapter range (e.g., 1-5)')
     generate_parser.add_argument('--resume', '-r', action='store_true', help='Resume from checkpoint')
+    generate_parser.add_argument('--novel-dir', type=str, help='Override novel directory path (default: campaigns/{campaign}/novel)')
 
     # Assemble command
     assemble_parser = subparsers.add_parser('assemble', help='Concatenate segments and encode to M4A/MP3')
     assemble_parser.add_argument('campaign', help='Campaign name')
     assemble_parser.add_argument('--chapter', '-c', type=int, help='Chapter number')
     assemble_parser.add_argument('--chapters', type=str, help='Chapter range (e.g., 1-5)')
+    assemble_parser.add_argument('--novel-dir', type=str, help='Override novel directory path (default: campaigns/{campaign}/novel)')
     assemble_parser.add_argument('--format', '-f', choices=['mp3', 'wav', 'm4a'], default='m4a',
                                  help='Output format (default: m4a)')
     assemble_parser.add_argument('--quality', '-q', choices=['high', 'medium', 'low'], default='high',

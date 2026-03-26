@@ -63,9 +63,9 @@ Phase Control:
 ### Prerequisites Check
 
 1. **Campaign exists**: Check `campaigns/{campaign}/` directory exists
-2. **Novel exists**: Check `campaigns/{campaign}/novel/` directory exists
+2. **Novel exists**: Check `{playthrough}/novel/` directory exists
 3. **Chapters exist**: Check for `chapter-*.md` files in novel directory
-4. **Voices config exists**: Check `campaigns/{campaign}/novel/voices.yaml` exists
+4. **Voices config exists**: Check `{playthrough}/novel/voices.yaml` exists
 5. **Voice samples exist**: Validate `.chatterbox-voices/` directory contains required samples
 
 ### Voice Sample Validation
@@ -134,7 +134,7 @@ Load the relevant sub-file based on what you need:
 ## Directory Structure Reference
 
 ```
-campaigns/{campaign}/novel/
+{playthrough}/novel/
 ├── chapter-01.md              # Source
 ├── chapter-01.mp3             # Output
 ├── voices.yaml                # Voice mappings
@@ -163,5 +163,5 @@ campaigns/{campaign}/novel/
 ## Related Files
 
 - **CLI Tool**: `scripts/chatterbox-audiobook.py`
-- **Voice Config**: `campaigns/{campaign}/novel/voices.yaml`
+- **Voice Config**: `{playthrough}/novel/voices.yaml`
 - **Voice Samples**: `.chatterbox-voices/*.wav`

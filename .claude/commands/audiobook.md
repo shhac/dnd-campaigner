@@ -49,12 +49,12 @@ This command transforms your novelized campaign chapters into audio files. It us
 ## What Gets Created
 
 ```
-campaigns/{campaign}/audiobook/
-├── audiobook-state.yaml    # Progress tracking for resume
-├── voice-samples/          # Test voice clips (if --test-voices)
-│   ├── corwin-voss.mp3
-│   └── ...
-├── chapter-01.mp3          # Generated audio chapters
+{playthrough}/novel/
+├── chatterbox/
+│   ├── audiobook-state.yaml    # Progress tracking for resume
+│   ├── voice-tests/            # Test voice clips (if --test-voices)
+│   └── chapter-{N}/            # Intermediate segment files
+├── chapter-01.mp3              # Generated audio chapters
 ├── chapter-02.mp3
 └── ...
 ```

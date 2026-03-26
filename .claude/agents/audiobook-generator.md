@@ -16,6 +16,7 @@ Your prompt will include a header:
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CAMPAIGN: {campaign}
+NOVEL_DIR: {path to novel directory}
 CHAPTER: {N}              # Single chapter number
 [CHAPTERS: {N-M}]         # OR chapter range (alternative to CHAPTER)
 [RESUME: true]            # Continue from last checkpoint
@@ -25,7 +26,7 @@ CHAPTER: {N}              # Single chapter number
 ## Directory Structure
 
 ```
-campaigns/{campaign}/novel/
+{novel_dir}/
 ├── chatterbox/
 │   ├── audiobook-state.yaml   # Global progress tracking
 │   └── chapter-{N}/
@@ -42,7 +43,7 @@ campaigns/{campaign}/novel/
 
 Read the chapter manifest to understand what needs generating:
 ```
-campaigns/{campaign}/novel/chatterbox/chapter-{N}/manifest.yaml
+{novel_dir}/chatterbox/chapter-{N}/manifest.yaml
 ```
 
 Check:
@@ -55,17 +56,17 @@ Check:
 Run the Chatterbox CLI script via Bash:
 
 ```bash
-source .chatterbox-venv/bin/activate && python scripts/chatterbox-audiobook.py generate {campaign} --chapter {N}
+source .chatterbox-venv/bin/activate && python scripts/chatterbox-audiobook.py generate {campaign} --novel-dir {novel_dir} --chapter {N}
 ```
 
 With resume flag (continues from checkpoint):
 ```bash
-source .chatterbox-venv/bin/activate && python scripts/chatterbox-audiobook.py generate {campaign} --chapter {N} --resume
+source .chatterbox-venv/bin/activate && python scripts/chatterbox-audiobook.py generate {campaign} --novel-dir {novel_dir} --chapter {N} --resume
 ```
 
 For chapter range:
 ```bash
-source .chatterbox-venv/bin/activate && python scripts/chatterbox-audiobook.py generate {campaign} --chapters {N}-{M} [--resume]
+source .chatterbox-venv/bin/activate && python scripts/chatterbox-audiobook.py generate {campaign} --novel-dir {novel_dir} --chapters {N}-{M} [--resume]
 ```
 
 ### Step 3: Monitor Progress

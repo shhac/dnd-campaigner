@@ -18,6 +18,7 @@ Your prompt will include a header:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ASSEMBLE CHAPTER
 CAMPAIGN: {campaign}
+NOVEL_DIR: {path to novel directory}
 CHAPTER: {N}
 FORMAT: {mp3|m4a}
 QUALITY: {high|medium|low}
@@ -44,7 +45,7 @@ CLEAN: {true|false}
 
 1. **Invoke Assembly Script**:
    ```bash
-   source .chatterbox-venv/bin/activate && python scripts/chatterbox-audiobook.py assemble {campaign} \
+   source .chatterbox-venv/bin/activate && python scripts/chatterbox-audiobook.py assemble {campaign} --novel-dir {novel_dir} \
        --chapter {N} \
        --format {format} \
        --quality {quality} \
@@ -98,7 +99,7 @@ ffprobe -v error {output_file}
 ## Expected Output Path
 
 ```
-campaigns/{campaign}/novel/chapter-{NN}.{format}
+{novel_dir}/chapter-{NN}.{format}
 ```
 
 Where `NN` is zero-padded chapter number (e.g., `chapter-01.mp3`).
@@ -110,7 +111,7 @@ Return YAML directly (no code fences).
 **Success**:
 ```yaml
 status: success
-output_path: campaigns/the-rot-beneath/novel/chapter-01.mp3
+output_path: {novel_dir}/chapter-01.mp3
 duration_sec: 847.3
 file_size_mb: 12.4
 format: mp3
@@ -121,7 +122,7 @@ cleaned: false
 **Success with cleanup**:
 ```yaml
 status: success
-output_path: campaigns/the-rot-beneath/novel/chapter-01.mp3
+output_path: {novel_dir}/chapter-01.mp3
 duration_sec: 847.3
 file_size_mb: 12.4
 format: mp3
@@ -152,7 +153,7 @@ missing_count: 12
 status: failed
 error: verification_failed
 message: "Output file exists but has zero duration"
-output_path: campaigns/the-rot-beneath/novel/chapter-01.mp3
+output_path: {novel_dir}/chapter-01.mp3
 chapter: 1
 ```
 
@@ -193,14 +194,14 @@ CLEAN: false
 Steps:
 1. Run: source .chatterbox-venv/bin/activate && python scripts/chatterbox-audiobook.py assemble the-rot-beneath --chapter 1 --format mp3 --quality high
 2. Check exit code
-3. Verify: campaigns/the-rot-beneath/novel/chapter-01.mp3 exists
+3. Verify: {novel_dir}/chapter-01.mp3 exists
 4. Get duration: ffprobe -v quiet -show_entries format=duration -of csv=p=0 ...
 5. Get size: stat -f%z ...
 6. Return YAML status
 
 Output:
 status: success
-output_path: campaigns/the-rot-beneath/novel/chapter-01.mp3
+output_path: {novel_dir}/chapter-01.mp3
 duration_sec: 847.3
 file_size_mb: 12.4
 format: mp3
@@ -212,7 +213,7 @@ cleaned: false
 
 Before invoking the script, optionally verify readiness:
 
-1. **Manifest exists**: `campaigns/{campaign}/novel/chatterbox/chapter-{N}/manifest.yaml`
+1. **Manifest exists**: `{novel_dir}/chatterbox/chapter-{N}/manifest.yaml`
 2. **All segments generated**: Check manifest's `segments.generated == segments.total`
 3. **No failed segments**: Check manifest's `segments.failed == 0`
 
@@ -225,7 +226,7 @@ Return YAML directly (no markdown code fences).
 **VALID output**:
 ```
 status: success
-output_path: campaigns/the-rot-beneath/novel/chapter-01.mp3
+output_path: {novel_dir}/chapter-01.mp3
 duration_sec: 847.3
 ...
 ```

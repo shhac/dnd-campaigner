@@ -119,7 +119,7 @@ For each chapter with generated audio:
 3. Receive status:
    {
      status: success,
-     output_path: campaigns/the-rot-beneath/novel/chapter-01.mp3,
+     output_path: {playthrough}/novel/chapter-01.mp3,
      duration_sec: 847.3,
      file_size_mb: 12.4
    }

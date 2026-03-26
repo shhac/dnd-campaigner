@@ -106,11 +106,10 @@ campaigns/{campaign}/   # Read-only campaign design (templates)
 │   └── {mechanic}/     # Each mechanic is a subdirectory
 │       ├── README.md   # Player-visible overview (what characters observe)
 │       └── gm-guide.md # Full rules, tracking, adjudication (GM-only)
-├── story-arcs/         # Gated plot secrets (per-act)
-│   ├── UNLOCK.md       # Act preconditions and foreshadowing hints
-│   ├── act-1.md        # Current act (UNLOCKED)
-│   └── ...
-└── novel/              # Novelization output (tied to playthrough — TBD)
+└── story-arcs/         # Gated plot secrets (per-act)
+    ├── UNLOCK.md       # Act preconditions and foreshadowing hints
+    ├── act-1.md        # Current act (UNLOCKED)
+    └── ...
 
 playthroughs/{campaign}/{game-name}/  # Mutable per-playthrough state
 ├── preferences.md      # Authoritative during play
@@ -125,6 +124,7 @@ playthroughs/{campaign}/{game-name}/  # Mutable per-playthrough state
 ├── npcs/               # NPC interaction overlays
 ├── items/              # New items discovered
 ├── scenes/             # Narrator writes here
+├── novel/              # Novelization and audiobook output
 └── tmp/
     └── dashboard.md
 ```
@@ -308,7 +308,7 @@ Generates MP3 audiobook files from novelized chapters using Chatterbox TTS. **Ti
 | `npcs/` | playthrough | NPC interaction overlays | GM only |
 | `items/` | playthrough | New items discovered during play | GM, reference |
 
-### Novel Directory (`novel/`)
+### Novel Directory (`{playthrough}/novel/`)
 
 | File | Purpose |
 |------|---------|

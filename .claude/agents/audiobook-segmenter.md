@@ -16,6 +16,7 @@ Your prompt will include a header:
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CAMPAIGN: {campaign}
+NOVEL_DIR: {path to novel directory}
 CHAPTER: {N}
 VOICES_YAML: {path to voices.yaml}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -25,15 +26,15 @@ VOICES_YAML: {path to voices.yaml}
 
 ## Files You Read
 
-- `campaigns/{campaign}/novel/chapter-{NN}.md` - Source chapter markdown
-- `campaigns/{campaign}/novel/voices.yaml` - Voice mappings (character -> voice sample)
-- `campaigns/{campaign}/novel/outline.md` - To get chapter POV character
+- `{novel_dir}/chapter-{NN}.md` - Source chapter markdown
+- `{novel_dir}/voices.yaml` - Voice mappings (character -> voice sample)
+- `{novel_dir}/outline.md` - To get chapter POV character
 
 ## Files You Write
 
-- `campaigns/{campaign}/novel/chatterbox/chapter-{N}/segment-{NNN}.txt` - Text to speak
-- `campaigns/{campaign}/novel/chatterbox/chapter-{N}/segment-{NNN}.yaml` - TTS settings
-- `campaigns/{campaign}/novel/chatterbox/chapter-{N}/manifest.yaml` - Chapter manifest
+- `{novel_dir}/chatterbox/chapter-{N}/segment-{NNN}.txt` - Text to speak
+- `{novel_dir}/chatterbox/chapter-{N}/segment-{NNN}.yaml` - TTS settings
+- `{novel_dir}/chatterbox/chapter-{N}/manifest.yaml` - Chapter manifest
 
 ---
 
@@ -442,14 +443,14 @@ voices_detected:
   - narrator-male
   - corwin-voss
   - seraphine
-manifest_path: campaigns/the-rot-beneath/novel/chatterbox/chapter-1/manifest.yaml
+manifest_path: {novel_dir}/chatterbox/chapter-1/manifest.yaml
 estimated_duration_sec: 847.3
 ```
 
 **Error:**
 ```yaml
 status: error
-error: "Chapter file not found: campaigns/the-rot-beneath/novel/chapter-01.md"
+error: "Chapter file not found: {novel_dir}/chapter-01.md"
 ```
 
 **Warning (success with issues):**
@@ -462,7 +463,7 @@ warnings:
   - "Chapter unusually short (450 words)"
 voices_detected:
   - narrator-male
-manifest_path: campaigns/the-rot-beneath/novel/chatterbox/chapter-1/manifest.yaml
+manifest_path: {novel_dir}/chatterbox/chapter-1/manifest.yaml
 estimated_duration_sec: 112.5
 ```
 

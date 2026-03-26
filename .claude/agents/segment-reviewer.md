@@ -21,9 +21,11 @@ Reviews and improves audiobook segments created by the Python segmenter. The age
 
 The agent receives:
 - `campaign`: Campaign name (e.g., "the-rot-beneath")
+- `novel_dir`: Path to the novel directory (e.g., "playthroughs/the-rot-beneath/playthrough-1/novel")
+- `playthrough`: Path to the playthrough directory (parent of novel_dir, for character sheets and party-knowledge)
 - `chapter`: Chapter number to review
 
-Working directory: `campaigns/{campaign}/novel/chatterbox/chapter-{chapter}/`
+Working directory: `{novel_dir}/chatterbox/chapter-{chapter}/`
 
 ---
 
@@ -58,7 +60,7 @@ Before processing, load these reference files in this order:
 
 Load these files first to build a character registry for speaker validation:
 
-#### party-knowledge.md (`campaigns/{campaign}/party-knowledge.md`)
+#### party-knowledge.md (`{playthrough}/party-knowledge.md`)
 
 Contains the "## NPCs We've Met" table with character information:
 
@@ -77,7 +79,7 @@ Contains the "## NPCs We've Met" table with character information:
 - Role/description (second column) - for context
 - Gender - infer from description or pronouns if present (e.g., "her employer" suggests female)
 
-#### Character Sheets (`campaigns/{campaign}/party/*.md`)
+#### Character Sheets (`{playthrough}/party/*.md`)
 
 Load all non-journal files (exclude `*-journal.md`). Extract:
 - Character name (from filename and `# {Name}` header)
@@ -89,7 +91,7 @@ Load all non-journal files (exclude `*-journal.md`). Extract:
 - "she", "her", "hers" in character description -> female
 - Use voice.yaml as authoritative source if gender is specified there
 
-### 2. voices.yaml (`campaigns/{campaign}/novel/voices.yaml`)
+### 2. voices.yaml (`{novel_dir}/voices.yaml`)
 
 Structure:
 ```yaml
@@ -133,7 +135,7 @@ Contains `pov:` field identifying the POV character, used for:
 - Determining internal_thoughts voice
 - Default speaker for ambiguous "he"/"she" when only one character matches gender
 
-### 4. Chapter source (`campaigns/{campaign}/novel/chapter-{NN}.md`)
+### 4. Chapter source (`{novel_dir}/chapter-{NN}.md`)
 
 Original text for context when resolving speakers. Read relevant sections when disambiguation is needed.
 
@@ -157,7 +159,7 @@ Before processing segments, build a character registry from campaign state files
    - Note role/description from second column
    - Infer gender from description or pronouns if present
 
-2. **From character sheets** (`campaigns/{campaign}/party/*.md`, excluding journals):
+2. **From character sheets** (`{playthrough}/party/*.md`, excluding journals):
    - Extract PC name from header
    - Infer gender from pronouns in "Character Voice" section
    - Generate aliases (full name + first name)
@@ -613,8 +615,8 @@ For chapters with many segments (100+), process in batches to manage context:
 ### Process Steps
 
 1. **Load campaign state** (do this FIRST)
-   - Read `campaigns/{campaign}/party-knowledge.md` - parse NPCs table
-   - Read `campaigns/{campaign}/party/*.md` (excluding journals) - extract PC info
+   - Read `{playthrough}/party-knowledge.md` - parse NPCs table
+   - Read `{playthrough}/party/*.md` (excluding journals) - extract PC info
    - Build character registry with names, genders, aliases, and roles
 
 2. **Load voice configuration**

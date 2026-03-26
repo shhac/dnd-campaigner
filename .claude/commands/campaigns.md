@@ -41,10 +41,10 @@ For each campaign found, collect:
    - Beat sheet files follow pattern `session-*-beats.md`
    - Extract date from filename or file content if available
 3. **Overview snippet**: Read first few lines of `campaigns/{name}/overview.md` if it exists
-4. **Novelization status**: Check if `campaigns/{name}/novel/` directory exists
-   - If exists, note "Novel available"
+4. **Novelization status**: Check each playthrough under `playthroughs/{name}/*/novel/` for novelization
+   - If exists, note "Novel available" with playthrough name
    - Check for `outline.md` to see chapter count/progress
-5. **Audiobook status**: Check if `campaigns/{name}/novel/chatterbox/` directory exists
+5. **Audiobook status**: Check for `novel/chatterbox/` in any playthrough
    - If exists, note "Audiobook available"
 
 ### Step 3: Display Results

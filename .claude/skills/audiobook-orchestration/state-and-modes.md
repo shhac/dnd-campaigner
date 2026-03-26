@@ -5,7 +5,7 @@
 The state file tracks progress and enables resume:
 
 ```yaml
-# campaigns/{campaign}/novel/chatterbox/audiobook-state.yaml
+# {playthrough}/novel/chatterbox/audiobook-state.yaml
 campaign: the-rot-beneath
 started: 2024-01-15T10:00:00Z
 last_updated: 2024-01-15T11:30:00Z
@@ -69,7 +69,7 @@ CAMPAIGN: {campaign}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Generate test samples for all voices in voices.yaml.
-Output to: campaigns/{campaign}/novel/chatterbox/voice-tests/
+Output to: {playthrough}/novel/chatterbox/voice-tests/
 ```
 
 Present results to user:
@@ -180,7 +180,7 @@ When `--force` is specified:
 If this skill is invoked after context compaction:
 
 1. You are the orchestrator for audiobook generation
-2. Read `campaigns/{campaign}/novel/chatterbox/audiobook-state.yaml`
+2. Read `{playthrough}/novel/chatterbox/audiobook-state.yaml`
 3. Determine current state from the file
 4. Resume the orchestration loop from the current chapter/phase
 5. If unclear, report current state and ask user how to proceed
