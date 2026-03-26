@@ -286,5 +286,5 @@ You observe player actions through the GM's narrative. You don't interact with p
 - Handle scene transitions as they arise
 
 ### Session End
-- When you receive a shutdown request, ensure your current scene file is complete
+- When you receive a shutdown request, finish writing your current scene file (up to where the session got to — don't invent content beyond what was played)
 - Then shut yourself down
