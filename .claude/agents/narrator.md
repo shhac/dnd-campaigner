@@ -287,4 +287,4 @@ You observe player actions through the GM's narrative. You don't interact with p
 
 ### Session End
 - When you receive a shutdown request, ensure your current scene file is complete
-- No special cleanup needed — your scene files persist in the playthrough directory
+- Then shut yourself down
