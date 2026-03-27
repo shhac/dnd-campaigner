@@ -281,6 +281,14 @@ main {
   border-radius: 4px;
 }
 
+/* Human response */
+.event.human_response {
+  background: var(--player-to-gm-bg);
+  border-left: 3px solid var(--color-human);
+  padding: 12px 16px;
+  border-radius: 0 4px 4px 0;
+}
+
 /* Player to Player (whisper) */
 .event.player_to_player {
   background: var(--whisper-bg);

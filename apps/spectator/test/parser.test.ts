@@ -428,7 +428,7 @@ describe("AskUserQuestion answer parsing", () => {
       ])
     );
     expect(events).toHaveLength(1);
-    expect(events[0].type).toBe("player_to_gm");
+    expect(events[0].type).toBe("human_response");
     expect(events[0].from).toBe("human");
     expect(events[0].to).toBe("verdakho");
     expect(events[0].content).toBe("I attack the goblin");

@@ -152,10 +152,9 @@ function shouldShow(event) {
     case "narrative": return filters.narrative;
     case "gm_to_player":
     case "narrator_note": return filters.gm_players;
-    case "player_to_gm":
-      // Human responses go under "You", AI responses under "GM ↔ Players"
-      return event.from === "human" ? filters.you : filters.gm_players;
-    case "ask_player": return filters.you;
+    case "player_to_gm": return filters.gm_players;
+    case "ask_player":
+    case "human_response": return filters.you;
     case "player_to_player":
     case "player_to_party": return filters.crosstalk;
     case "activity": return filters.activity;
@@ -189,6 +188,7 @@ function renderEvent(event) {
       el.innerHTML = renderGmPrompt(event);
       break;
     case "player_to_gm":
+    case "human_response":
       el.innerHTML = renderPlayerAction(event, color);
       break;
     case "player_to_player":

@@ -24,6 +24,7 @@ export interface SpectatorEvent {
     | "command_ack"
     | "session_end"
     | "ask_player"
+    | "human_response"
     | "narrator_note"
     | "idle"
     | "spawn"
@@ -471,12 +472,12 @@ export function parseLine(line: string): SpectatorEvent[] {
             events.push({
               id: nextId(),
               timestamp,
-              type: "player_to_gm",
+              type: "human_response",
               from: HUMAN,
               to: answerTo,
               content: answer,
               parsed: {
-                tag: "PLAYER_TO_GM",
+                tag: "HUMAN_RESPONSE",
                 actionType: "RESPONSE",
               },
             });
