@@ -235,9 +235,11 @@ function renderEvent(event) {
       // This is a reply — flip side
       replyChainSide = replyChainSide === "left" ? "right" : "left";
       el.classList.add(`reply-${replyChainSide}`);
+      if (replyChainSide === "right") event._replyRight = true;
     } else if (event.from === prevRenderedEvent.from && event.to === prevRenderedEvent.to) {
       // Same speaker continuing — keep side
       el.classList.add(`reply-${replyChainSide}`);
+      if (replyChainSide === "right") event._replyRight = true;
     } else {
       // New conversation thread
       replyChainSide = "left";
@@ -349,6 +351,7 @@ function renderPlayerAction(event, fromColor) {
   const fromName = getAgentShortName(event.from);
   const toName = event.to === "*" ? "All" : getAgentShortName(event.to);
   const toColor = getAgentColor(event.to);
+  const isRightAligned = event.type === "player_to_gm" || event.type === "human_response" || event._replyRight;
 
   // Format the body with inline markdown
   let rendered = formatInlineMarkdown(event.content);
@@ -359,13 +362,22 @@ function renderPlayerAction(event, fromColor) {
     ? `<span class="event-tag">${actionType}</span>`
     : "";
 
+  // Right-aligned events: timestamp on left, name on right (natural reading order)
+  const header = isRightAligned
+    ? `<span class="event-meta">${formatTimestamp(event.timestamp)}</span>
+       ${badge}
+       <span class="event-from" style="color: ${fromColor}">${fromName}</span>
+       <span class="event-arrow">→</span>
+       <span class="event-to" style="color: ${toColor}">${toName}</span>`
+    : `<span class="event-from" style="color: ${fromColor}">${fromName}</span>
+       <span class="event-arrow">→</span>
+       <span class="event-to" style="color: ${toColor}">${toName}</span>
+       ${badge}
+       <span class="event-meta">${formatTimestamp(event.timestamp)}</span>`;
+
   return `
     <div class="event-header">
-      <span class="event-from" style="color: ${fromColor}">${fromName}</span>
-      <span class="event-arrow">→</span>
-      <span class="event-to" style="color: ${toColor}">${toName}</span>
-      ${badge}
-      <span class="event-meta">${formatTimestamp(event.timestamp)}</span>
+      ${header}
     </div>
     <div class="event-content">${rendered}</div>
   `;

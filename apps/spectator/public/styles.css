@@ -355,18 +355,16 @@ main {
   border-left: none !important;
   border-radius: 4px 0 0 4px !important;
 }
-.event.reply-right .event-header { flex-direction: row-reverse; }
 .event.reply-right .event-meta { margin-left: 0; margin-right: auto; }
 
-/* Right-aligned events: flip border to right edge and reverse header */
+/* Right-aligned events: border on right edge */
 .event.player_to_gm,
 .event.human_response {
   border-left: none;
   border-right: 3px solid transparent;
 }
 .event.human_response { border-right-color: var(--color-human); border-radius: 4px 0 0 4px; }
-.event.player_to_gm .event-header,
-.event.human_response .event-header { flex-direction: row-reverse; }
+/* Right-aligned headers have timestamp first (set in JS), so meta needs right margin */
 .event.player_to_gm .event-meta,
 .event.human_response .event-meta { margin-left: 0; margin-right: auto; }
 
