@@ -18,7 +18,8 @@ let eventCount = 0;
 // Filter state — which event categories are visible
 const filters = {
   narrative: true,
-  gm_players: true,
+  story: true,
+  moments: true,
   you: true,
   crosstalk: true,
   activity: false,
@@ -193,8 +194,16 @@ function shouldShow(event) {
   switch (event.type) {
     case "narrative": return filters.narrative;
     case "gm_to_player":
-    case "narrator_note": return filters.gm_players;
-    case "player_to_gm": return filters.gm_players;
+    case "narrator_note": {
+      const rt = event.parsed.requestType;
+      if (rt === "REFLECTION" || rt === "INTERACTION" || rt === "OPTIONAL_REACTION") return filters.moments;
+      return filters.story;
+    }
+    case "player_to_gm": {
+      const at = event.parsed.actionType;
+      if (at === "REACTION") return filters.moments;
+      return filters.story;
+    }
     case "ask_player":
     case "human_response": return filters.you;
     case "player_to_player":
@@ -484,7 +493,8 @@ function initFilters() {
   const container = document.getElementById("filter-toggles");
   const filterDefs = [
     { key: "narrative", label: "Narrative", color: "var(--narrative-border)" },
-    { key: "gm_players", label: "GM ↔ Players", color: "var(--color-gm)" },
+    { key: "story", label: "Story", color: "var(--color-gm)" },
+    { key: "moments", label: "Moments", color: "var(--color-narrator)" },
     { key: "you", label: "You", color: "var(--color-human)" },
     { key: "crosstalk", label: "Crosstalk", color: "var(--color-yellow)" },
     { key: "activity", label: "Activity", color: "var(--text-dim)" },
@@ -668,7 +678,22 @@ function handleInit(data) {
 }
 
 function handleEvent(event) {
-  state.events.push(event);
+  // Insert in timestamp order (events from multiple watchers may arrive out of order)
+  const events = state.events;
+  const isLatest = events.length === 0 || event.timestamp >= events[events.length - 1].timestamp;
+  if (isLatest) {
+    events.push(event);
+  } else {
+    // Binary search for insertion point
+    let lo = 0, hi = events.length;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      if (events[mid].timestamp <= event.timestamp) lo = mid + 1;
+      else hi = mid;
+    }
+    events.splice(lo, 0, event);
+  }
+
   eventCount++;
   document.getElementById("event-count").textContent = `${eventCount} events`;
 
@@ -677,16 +702,22 @@ function handleEvent(event) {
   }
   if (event.type === "session_end") updateSessionStatus("ended");
 
-  const container = document.getElementById("events-container");
-  const el = renderEvent(event);
-  if (el) {
-    container.appendChild(el);
-    if (autoScroll) {
-      document.getElementById("play-script").scrollTop =
-        document.getElementById("play-script").scrollHeight;
+  if (isLatest) {
+    // Fast path: append to end (common case)
+    const container = document.getElementById("events-container");
+    const el = renderEvent(event);
+    if (el) {
+      container.appendChild(el);
+      if (autoScroll) {
+        document.getElementById("play-script").scrollTop =
+          document.getElementById("play-script").scrollHeight;
+      }
     }
+    addFlowEntry(event);
+  } else {
+    // Out-of-order: re-render to maintain correct positions and reply chains
+    rerenderEvents();
   }
-  addFlowEntry(event);
 }
 
 function updateSessionStatus(status) {

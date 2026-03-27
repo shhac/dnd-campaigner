@@ -70,10 +70,22 @@ export class SessionManager {
    * Process a new event and update session state.
    */
   processEvent(event: SpectatorEvent): void {
-    // Add to event buffer (with cap)
-    this.state.events.push(event);
-    if (this.state.events.length > this.maxEvents) {
-      this.state.events = this.state.events.slice(-this.maxEvents);
+    // Insert in timestamp order (live events from multiple watchers may arrive out of order)
+    const events = this.state.events;
+    if (events.length === 0 || event.timestamp >= events[events.length - 1].timestamp) {
+      events.push(event);
+    } else {
+      // Binary search for insertion point
+      let lo = 0, hi = events.length;
+      while (lo < hi) {
+        const mid = (lo + hi) >> 1;
+        if (events[mid].timestamp <= event.timestamp) lo = mid + 1;
+        else hi = mid;
+      }
+      events.splice(lo, 0, event);
+    }
+    if (events.length > this.maxEvents) {
+      this.state.events = events.slice(-this.maxEvents);
     }
 
     // Update agent states
