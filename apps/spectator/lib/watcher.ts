@@ -7,19 +7,22 @@ import { watch, readFileSync, openSync, readSync, closeSync, statSync, type FSWa
 import { parseLine, type SpectatorEvent } from "./parser";
 
 export type EventCallback = (events: SpectatorEvent[]) => void;
+export type LineParser = (line: string) => SpectatorEvent[];
 
 export class JsonlWatcher {
   private path: string;
   private offset: number;
   private watcher: FSWatcher | null = null;
   private callback: EventCallback;
+  private parser: LineParser;
   private buffer: string = "";
   private debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
-  constructor(path: string, callback: EventCallback) {
+  constructor(path: string, callback: EventCallback, parser?: LineParser) {
     this.path = path;
     this.offset = 0;
     this.callback = callback;
+    this.parser = parser ?? parseLine;
   }
 
   /**
@@ -34,7 +37,7 @@ export class JsonlWatcher {
       const lines = content.split("\n");
       for (const line of lines) {
         if (!line.trim()) continue;
-        const events = parseLine(line);
+        const events = this.parser(line);
         if (events.length > 0) {
           this.callback(events);
           total += events.length;
@@ -88,7 +91,7 @@ export class JsonlWatcher {
 
       for (const line of lines) {
         if (!line.trim()) continue;
-        const events = parseLine(line);
+        const events = this.parser(line);
         if (events.length > 0) {
           this.callback(events);
         }

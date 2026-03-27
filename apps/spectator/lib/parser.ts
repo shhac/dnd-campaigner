@@ -88,7 +88,7 @@ function stripTag(content: string): string {
 /**
  * Map a protocol tag to a SpectatorEvent type.
  */
-function tagToEventType(
+export function tagToEventType(
   tag: string | undefined,
   from: string,
   to: string
@@ -170,7 +170,7 @@ export function extractDiceRolls(content: string): string[] {
  */
 export function stripMetadataFields(content: string): string {
   const metadataPattern =
-    /^(type|character|scene_number|scene_slug|request_type|recipient|to)\s*:/;
+    /^(type|character|scene_number|scene_slug|request_type|recipient|to|from)\s*:/;
   const lines = content.split("\n");
   let i = 0;
   while (i < lines.length) {
@@ -187,7 +187,7 @@ export function stripMetadataFields(content: string): string {
 /**
  * Clean content for event emission: strip protocol tag and metadata fields.
  */
-function cleanContent(content: string): string {
+export function cleanContent(content: string): string {
   return stripMetadataFields(stripTag(content));
 }
 

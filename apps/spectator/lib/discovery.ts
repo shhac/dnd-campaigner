@@ -171,3 +171,15 @@ export function listSessionSummaries(cwd: string): SessionSummary[] {
   // Filter: show orchestrators + non-team sessions, hide subagent transcripts
   return summaries.filter((s) => !s.hasTeam || s.isOrchestrator);
 }
+
+/**
+ * Get the subagents directory path for a session, if it exists.
+ */
+export function subagentsDir(cwd: string, sessionId: string): string | null {
+  const dir = join(projectDir(cwd), sessionId, "subagents");
+  try {
+    const stat = statSync(dir);
+    if (stat.isDirectory()) return dir;
+  } catch {}
+  return null;
+}

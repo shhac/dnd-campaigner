@@ -16,9 +16,11 @@ import { existsSync, writeFileSync, readFileSync, unlinkSync, mkdirSync } from "
 import {
   findSession,
   listSessionSummaries,
+  subagentsDir,
   type SessionInfo,
 } from "./lib/discovery";
 import { JsonlWatcher } from "./lib/watcher";
+import { SubagentWatcher } from "./lib/subagent-watcher";
 import { SessionManager } from "./lib/session";
 import { readCampaign } from "./lib/campaign";
 import { getAgentMetadata } from "./lib/agents";
@@ -42,6 +44,7 @@ const publicDir = join(import.meta.dir, "public");
 let activeSession: SessionInfo | null = null;
 let manager: SessionManager | null = null;
 let watcher: JsonlWatcher | null = null;
+let subWatcher: SubagentWatcher | null = null;
 const wsClients = new Set<any>();
 
 function broadcast(type: string, data: unknown): void {
@@ -84,6 +87,7 @@ function loadSession(sessionId: string): boolean {
 
   // Clean up previous session
   if (watcher) watcher.stop();
+  if (subWatcher) subWatcher.stop();
   wsClients.clear();
 
   activeSession = session;
@@ -98,6 +102,17 @@ function loadSession(sessionId: string): boolean {
 
   detectAndLoadCampaign();
   watcher.start();
+
+  // Watch subagent JSONLs for direct agent-to-agent messages
+  const subDir = subagentsDir(repoRoot, session.sessionId);
+  if (subDir) {
+    subWatcher = new SubagentWatcher(subDir, onEvents);
+    const subCount = subWatcher.start();
+    console.log(`Subagents: ${subCount} events from ${subDir}`);
+  } else {
+    subWatcher = null;
+  }
+
   console.log("Watching for new events...");
 
   return true;
@@ -375,6 +390,7 @@ if (activeSession) {
 
 process.on("SIGINT", () => {
   if (watcher) watcher.stop();
+  if (subWatcher) subWatcher.stop();
   server.stop();
   process.exit(0);
 });
