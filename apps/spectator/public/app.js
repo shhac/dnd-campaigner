@@ -33,13 +33,21 @@ let agentMeta = {};
 // Each entry: [css-color-for-names, rgba-tint-for-backgrounds]
 const CHARACTER_PALETTE = [
   { color: "#ffd54f", tint: "rgba(255, 213, 79, 0.06)" },   // yellow
-  { color: "#ce93d8", tint: "rgba(206, 147, 216, 0.06)" },   // purple
+  { color: "#ce93d8", tint: "rgba(206, 147, 216, 0.06)" },   // lavender
   { color: "#ffab40", tint: "rgba(255, 171, 64, 0.06)" },    // orange
   { color: "#f48fb1", tint: "rgba(244, 143, 177, 0.06)" },   // pink
   { color: "#64b5f6", tint: "rgba(100, 181, 246, 0.06)" },   // blue
   { color: "#81c784", tint: "rgba(129, 199, 132, 0.06)" },   // green
-  { color: "#80deea", tint: "rgba(128, 222, 234, 0.06)" },   // cyan
   { color: "#ef9a9a", tint: "rgba(239, 154, 154, 0.06)" },   // red
+  { color: "#a5d6a7", tint: "rgba(165, 214, 167, 0.06)" },   // mint
+  { color: "#fff176", tint: "rgba(255, 241, 118, 0.06)" },   // lemon
+  { color: "#b0bec5", tint: "rgba(176, 190, 197, 0.06)" },   // steel
+  { color: "#ffcc80", tint: "rgba(255, 204, 128, 0.06)" },   // peach
+  { color: "#e6ee9c", tint: "rgba(230, 238, 156, 0.06)" },   // lime
+  { color: "#f8bbd0", tint: "rgba(248, 187, 208, 0.06)" },   // rose
+  { color: "#b39ddb", tint: "rgba(179, 157, 219, 0.06)" },   // violet
+  { color: "#90caf9", tint: "rgba(144, 202, 249, 0.06)" },   // sky
+  { color: "#c5e1a5", tint: "rgba(197, 225, 165, 0.06)" },   // sage
 ];
 
 // System agent colors (fixed, not hashed)
