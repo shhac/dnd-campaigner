@@ -307,14 +307,13 @@ main {
   margin-left: auto;
 }
 
-/* --- Crosstalk: centered, narrower (asides) --- */
+/* --- Crosstalk: left-aligned by default, alternates via reply-chain --- */
 .event.player_to_player,
 .event.player_to_party {
   border-left: 2px dashed var(--color-yellow);
   padding: 10px 16px;
   border-radius: 0 4px 4px 0;
   max-width: 80%;
-  margin-left: auto;
   margin-right: auto;
   opacity: 0.85;
 }
@@ -345,15 +344,27 @@ main {
 .event.reply-left {
   margin-left: 0 !important;
   margin-right: auto !important;
+  border-left: 2px dashed var(--color-yellow) !important;
+  border-right: none !important;
+  border-radius: 0 4px 4px 0 !important;
 }
 .event.reply-right {
   margin-left: auto !important;
   margin-right: 0 !important;
+  border-right: 2px dashed var(--color-yellow) !important;
+  border-left: none !important;
+  border-radius: 4px 0 0 4px !important;
 }
 .event.reply-right .event-header { flex-direction: row-reverse; }
 .event.reply-right .event-meta { margin-left: 0; margin-right: auto; }
 
-/* Right-aligned events: flip the header direction */
+/* Right-aligned events: flip border to right edge and reverse header */
+.event.player_to_gm,
+.event.human_response {
+  border-left: none;
+  border-right: 3px solid transparent;
+}
+.event.human_response { border-right-color: var(--color-human); border-radius: 4px 0 0 4px; }
 .event.player_to_gm .event-header,
 .event.human_response .event-header { flex-direction: row-reverse; }
 .event.player_to_gm .event-meta,
