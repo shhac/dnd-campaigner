@@ -356,7 +356,7 @@ window.toggleExpand = toggleExpand;
 // === Flow panel ===
 
 function addFlowEntry(event) {
-  if (event.type === "idle" || event.type === "system" || event.type === "command_ack" || event.type === "activity") return;
+  if (!shouldShow(event)) return;
 
   const container = document.getElementById("flow-log");
   const entry = document.createElement("div");
@@ -390,7 +390,7 @@ function addFlowEntry(event) {
   });
 
   container.appendChild(entry);
-  while (container.children.length > 100) container.removeChild(container.firstChild);
+  while (container.children.length > 500) container.removeChild(container.firstChild);
   container.scrollTop = container.scrollHeight;
 }
 

@@ -113,6 +113,10 @@ function loadSession(sessionId: string): boolean {
     subWatcher = null;
   }
 
+  // Sort all backfilled events chronologically and remove duplicates
+  manager.sortAndDeduplicate();
+  console.log(`Total: ${manager.state.events.length} events after dedup`);
+
   console.log("Watching for new events...");
 
   return true;

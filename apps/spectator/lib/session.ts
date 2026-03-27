@@ -164,6 +164,23 @@ export class SessionManager {
   }
 
   /**
+   * Sort events by timestamp and remove duplicates.
+   * Call after all backfill sources (parent + subagents) are loaded.
+   */
+  sortAndDeduplicate(): void {
+    this.state.events.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+
+    // Deduplicate by (from, to, timestamp, content prefix)
+    const seen = new Set<string>();
+    this.state.events = this.state.events.filter((e) => {
+      const key = `${e.from}|${e.to}|${e.timestamp}|${e.content.slice(0, 80)}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }
+
+  /**
    * Serialize state for WebSocket transmission.
    */
   toJSON(): object {
