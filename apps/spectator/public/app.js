@@ -227,8 +227,9 @@ function renderEvent(event) {
     el.style.background = getAgentBgTint(event.from);
   }
 
-  // Reply-chain alternation for same-category conversations
-  const conversationTypes = new Set(["player_to_player", "player_to_party", "player_to_gm", "gm_to_player"]);
+  // Reply-chain alternation — only for types that share a base position (crosstalk is centered)
+  // GM↔Player already alternates naturally via base CSS (left for prompts, right for responses)
+  const conversationTypes = new Set(["player_to_player", "player_to_party"]);
   if (conversationTypes.has(event.type) && prevRenderedEvent && prevRenderedEvent.type === event.type) {
     if (event.from === prevRenderedEvent.to) {
       // This is a reply — flip side
