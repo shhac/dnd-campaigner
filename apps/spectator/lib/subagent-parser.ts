@@ -46,7 +46,7 @@ export function parseSubagentLine(line: string, agentType: string): SpectatorEve
       const rawContent = (input.content || input.message || "") as string;
       const msgType = (input.type || "message") as string;
 
-      if (msgType === "shutdown_request") continue;
+      if (msgType === "shutdown_request" || msgType === "shutdown_approved") continue;
 
       // Skip messages to team-lead — these are already in the parent JSONL
       if (to === "team-lead") continue;

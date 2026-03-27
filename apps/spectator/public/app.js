@@ -669,6 +669,12 @@ function handleInit(data) {
     document.title = `${data.campaign.title} — Spectator`;
   }
 
+  // Seed dedup set from backfilled events
+  seenEventKeys.clear();
+  for (const event of state.events) {
+    seenEventKeys.add(eventKey(event));
+  }
+
   updateSessionStatus(data.status);
   renderAgentCards();
   rerenderEvents();
@@ -677,14 +683,29 @@ function handleInit(data) {
   document.getElementById("event-count").textContent = `${eventCount} events`;
 }
 
+// Client-side deduplication — track seen events by content fingerprint
+const seenEventKeys = new Set();
+
+function eventKey(event) {
+  // Simple fingerprint: from|to|timestamp|first 80 chars of content
+  return `${event.from}|${event.to}|${event.timestamp}|${event.content.slice(0, 80)}`;
+}
+
+// Debounce re-renders for out-of-order bursts (e.g. shutdown)
+let rerenderTimer = null;
+
 function handleEvent(event) {
+  // Deduplicate
+  const key = eventKey(event);
+  if (seenEventKeys.has(key)) return;
+  seenEventKeys.add(key);
+
   // Insert in timestamp order (events from multiple watchers may arrive out of order)
   const events = state.events;
   const isLatest = events.length === 0 || event.timestamp >= events[events.length - 1].timestamp;
   if (isLatest) {
     events.push(event);
   } else {
-    // Binary search for insertion point
     let lo = 0, hi = events.length;
     while (lo < hi) {
       const mid = (lo + hi) >> 1;
@@ -715,8 +736,12 @@ function handleEvent(event) {
     }
     addFlowEntry(event);
   } else {
-    // Out-of-order: re-render to maintain correct positions and reply chains
-    rerenderEvents();
+    // Out-of-order: debounce re-render to avoid scroll thrashing
+    if (rerenderTimer) clearTimeout(rerenderTimer);
+    rerenderTimer = setTimeout(() => {
+      rerenderTimer = null;
+      rerenderEvents();
+    }, 500);
   }
 }
 

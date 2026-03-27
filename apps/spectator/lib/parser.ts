@@ -235,6 +235,10 @@ function parseTeammateMessage(
           parsed: {},
         };
       }
+      // Hide shutdown protocol messages
+      if (data.type === "shutdown_approved" || data.type === "shutdown_request") {
+        return null;
+      }
       if (data.type === "teammate_terminated") {
         return {
           id: nextId(),
@@ -316,7 +320,7 @@ function parseSendMessage(
   const rawContent = (input.content || input.message || "") as string;
   const msgType = (input.type || "message") as string;
 
-  if (msgType === "shutdown_request") {
+  if (msgType === "shutdown_request" || msgType === "shutdown_approved") {
     return null; // Hide shutdown internals
   }
 
