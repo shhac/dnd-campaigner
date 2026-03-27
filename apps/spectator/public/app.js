@@ -15,12 +15,12 @@ let state = {
 let autoScroll = true;
 let eventCount = 0;
 
-// Filter state — which event types are visible
+// Filter state — which event categories are visible
 const filters = {
   narrative: true,
-  gm_to_player: true,
-  player_to_gm: true,
-  player_to_player: true,
+  gm_players: true,
+  you: true,
+  crosstalk: true,
   activity: false,
   idle: false,
   session: true,
@@ -150,10 +150,14 @@ function renderAgentCards() {
 function shouldShow(event) {
   switch (event.type) {
     case "narrative": return filters.narrative;
-    case "gm_to_player": return filters.gm_to_player;
-    case "player_to_gm": return filters.player_to_gm;
+    case "gm_to_player":
+    case "narrator_note": return filters.gm_players;
+    case "player_to_gm":
+      // Human responses go under "You", AI responses under "GM ↔ Players"
+      return event.from === "human" ? filters.you : filters.gm_players;
+    case "ask_player": return filters.you;
     case "player_to_player":
-    case "player_to_party": return filters.player_to_player;
+    case "player_to_party": return filters.crosstalk;
     case "activity": return filters.activity;
     case "idle": return filters.idle && !!event.summary;
     case "session_command":
@@ -161,8 +165,6 @@ function shouldShow(event) {
     case "system":
     case "command_ack":
     case "terminated": return false;
-    case "ask_player":
-    case "narrator_note": return filters.gm_to_player;
     default: return false;
   }
 }
@@ -400,9 +402,9 @@ function initFilters() {
   const container = document.getElementById("filter-toggles");
   const filterDefs = [
     { key: "narrative", label: "Narrative", icon: "⬥" },
-    { key: "gm_to_player", label: "GM Prompts", icon: "⬦" },
-    { key: "player_to_gm", label: "Actions", icon: "◆" },
-    { key: "player_to_player", label: "Crosstalk", icon: "◇" },
+    { key: "gm_players", label: "GM ↔ Players", icon: "⬦" },
+    { key: "you", label: "You", icon: "◆" },
+    { key: "crosstalk", label: "Crosstalk", icon: "◇" },
     { key: "activity", label: "Activity", icon: "⟐" },
     { key: "idle", label: "Idle", icon: "⟳" },
     { key: "session", label: "Session", icon: "▶" },
