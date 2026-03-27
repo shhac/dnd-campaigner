@@ -210,6 +210,10 @@ function shouldShow(event) {
   }
 }
 
+// Track previous event for reply-chain alternation
+let prevRenderedEvent = null;
+let replyChainSide = "left";
+
 function renderEvent(event) {
   if (!shouldShow(event)) return null;
   // Skip team-lead internal chatter
@@ -222,6 +226,25 @@ function renderEvent(event) {
   if (event.type !== "idle" && event.type !== "activity" && event.type !== "session_command") {
     el.style.background = getAgentBgTint(event.from);
   }
+
+  // Reply-chain alternation for same-category conversations
+  const conversationTypes = new Set(["player_to_player", "player_to_party", "player_to_gm", "gm_to_player"]);
+  if (conversationTypes.has(event.type) && prevRenderedEvent && prevRenderedEvent.type === event.type) {
+    if (event.from === prevRenderedEvent.to) {
+      // This is a reply — flip side
+      replyChainSide = replyChainSide === "left" ? "right" : "left";
+      el.classList.add(`reply-${replyChainSide}`);
+    } else if (event.from === prevRenderedEvent.from && event.to === prevRenderedEvent.to) {
+      // Same speaker continuing — keep side
+      el.classList.add(`reply-${replyChainSide}`);
+    } else {
+      // New conversation thread
+      replyChainSide = "left";
+    }
+  } else {
+    replyChainSide = "left";
+  }
+  prevRenderedEvent = event;
 
   const color = getAgentColor(event.from);
 
@@ -477,6 +500,8 @@ function rerenderEvents() {
   container.innerHTML = "";
   const flowLog = document.getElementById("flow-log");
   flowLog.innerHTML = "";
+  prevRenderedEvent = null;
+  replyChainSide = "left";
 
   for (const event of state.events) {
     const el = renderEvent(event);
