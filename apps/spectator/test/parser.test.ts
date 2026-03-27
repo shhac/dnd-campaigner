@@ -679,6 +679,51 @@ describe("agents module", () => {
   });
 });
 
+// === Shutdown filtering ===
+
+describe("shutdown filtering", () => {
+  it("filters shutdown_approved JSON in a teammate-message", () => {
+    const json = JSON.stringify({
+      type: "shutdown_approved",
+      requestId: "req-abc-123",
+      from: "gm",
+      timestamp: "2026-03-26T18:30:00Z",
+      paneId: "in-process",
+      backendType: "in-process",
+    });
+    const events = parseLine(teammateMsg("gm", json));
+    expect(events).toHaveLength(0);
+  });
+
+  it("filters shutdown_request SendMessage type", () => {
+    const events = parseLine(
+      assistantMsg([
+        {
+          type: "tool_use",
+          id: "tool_sd_req",
+          name: "SendMessage",
+          input: { to: "narrator", type: "shutdown_request" },
+        },
+      ])
+    );
+    expect(events).toHaveLength(0);
+  });
+
+  it("filters shutdown_approved SendMessage type", () => {
+    const events = parseLine(
+      assistantMsg([
+        {
+          type: "tool_use",
+          id: "tool_sd_app",
+          name: "SendMessage",
+          input: { to: "gm", type: "shutdown_approved" },
+        },
+      ])
+    );
+    expect(events).toHaveLength(0);
+  });
+});
+
 // === Edge cases ===
 
 describe("edge cases", () => {

@@ -5,6 +5,7 @@
 
 import { watch, readFileSync, openSync, readSync, closeSync, statSync, type FSWatcher } from "fs";
 import { parseLine, type SpectatorEvent } from "./parser";
+import { debounce } from "./utils";
 
 export type EventCallback = (events: SpectatorEvent[]) => void;
 export type LineParser = (line: string) => SpectatorEvent[];
@@ -16,13 +17,14 @@ export class JsonlWatcher {
   private callback: EventCallback;
   private parser: LineParser;
   private buffer: string = "";
-  private debounceTimer: ReturnType<typeof setTimeout> | null = null;
+  private debouncedReadNew: () => void;
 
   constructor(path: string, callback: EventCallback, parser?: LineParser) {
     this.path = path;
     this.offset = 0;
     this.callback = callback;
     this.parser = parser ?? parseLine;
+    this.debouncedReadNew = debounce(() => this.readNew(), 50);
   }
 
   /**
@@ -57,9 +59,7 @@ export class JsonlWatcher {
 
     try {
       this.watcher = watch(this.path, () => {
-        // Debounce rapid writes
-        if (this.debounceTimer) clearTimeout(this.debounceTimer);
-        this.debounceTimer = setTimeout(() => this.readNew(), 50);
+        this.debouncedReadNew();
       });
     } catch {
       // File might not exist yet — retry periodically
@@ -109,8 +109,6 @@ export class JsonlWatcher {
       this.watcher.close();
       this.watcher = null;
     }
-    if (this.debounceTimer) {
-      clearTimeout(this.debounceTimer);
-    }
+    // debouncedReadNew is self-cleaning; no explicit teardown needed
   }
 }

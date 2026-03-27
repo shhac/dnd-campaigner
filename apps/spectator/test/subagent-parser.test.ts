@@ -102,6 +102,25 @@ describe("subagent parser — deduplication", () => {
     expect(events).toHaveLength(0);
   });
 
+  it("skips shutdown_approved messages", () => {
+    const line = JSON.stringify({
+      type: "assistant",
+      timestamp: "2026-03-26T19:00:00Z",
+      message: {
+        content: [
+          {
+            type: "tool_use",
+            id: "tool_sd_app",
+            name: "SendMessage",
+            input: { to: "narrator", type: "shutdown_approved" },
+          },
+        ],
+      },
+    });
+    const events = parseSubagentLine(line, "gm");
+    expect(events).toHaveLength(0);
+  });
+
   it("skips shutdown_request messages", () => {
     const line = JSON.stringify({
       type: "assistant",
