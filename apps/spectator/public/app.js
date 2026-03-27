@@ -401,18 +401,18 @@ function addFlowEntry(event) {
 function initFilters() {
   const container = document.getElementById("filter-toggles");
   const filterDefs = [
-    { key: "narrative", label: "Narrative", icon: "⬥" },
-    { key: "gm_players", label: "GM ↔ Players", icon: "⬦" },
-    { key: "you", label: "You", icon: "◆" },
-    { key: "crosstalk", label: "Crosstalk", icon: "◇" },
-    { key: "activity", label: "Activity", icon: "⟐" },
-    { key: "idle", label: "Idle", icon: "⟳" },
-    { key: "session", label: "Session", icon: "▶" },
+    { key: "narrative", label: "Narrative", color: "var(--narrative-border)" },
+    { key: "gm_players", label: "GM ↔ Players", color: "var(--color-gm)" },
+    { key: "you", label: "You", color: "var(--color-human)" },
+    { key: "crosstalk", label: "Crosstalk", color: "var(--color-yellow)" },
+    { key: "activity", label: "Activity", color: "var(--text-dim)" },
+    { key: "idle", label: "Idle", color: "var(--text-dim)" },
+    { key: "session", label: "Session", color: "var(--accent)" },
   ];
 
-  container.innerHTML = filterDefs.map(({ key, label, icon }) => `
+  container.innerHTML = filterDefs.map(({ key, label, color }) => `
     <button class="filter-btn ${filters[key] ? "active" : ""}" data-filter="${key}" title="Toggle ${label}">
-      ${icon} ${label}
+      <span class="filter-dot" style="background: ${color}"></span> ${label}
     </button>
   `).join("");
 
