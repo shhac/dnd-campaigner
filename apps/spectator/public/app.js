@@ -29,14 +29,48 @@ const filters = {
 // Agent identity metadata (populated from server on init)
 let agentMeta = {};
 
-function getAgentColor(id, color) {
-  const meta = agentMeta[id];
-  if (meta) return `var(--color-${meta.color})`;
-  if (color) return `var(--color-${color})`;
-  const colors = ["yellow", "purple", "orange", "pink", "blue", "green", "cyan", "red"];
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) | 0;
-  return `var(--color-${colors[Math.abs(hash) % colors.length]})`;
+// Character color palette — deterministic from ID, no stored state needed.
+// Each entry: [css-color-for-names, rgba-tint-for-backgrounds]
+const CHARACTER_PALETTE = [
+  { color: "#ffd54f", tint: "rgba(255, 213, 79, 0.06)" },   // yellow
+  { color: "#ce93d8", tint: "rgba(206, 147, 216, 0.06)" },   // purple
+  { color: "#ffab40", tint: "rgba(255, 171, 64, 0.06)" },    // orange
+  { color: "#f48fb1", tint: "rgba(244, 143, 177, 0.06)" },   // pink
+  { color: "#64b5f6", tint: "rgba(100, 181, 246, 0.06)" },   // blue
+  { color: "#81c784", tint: "rgba(129, 199, 132, 0.06)" },   // green
+  { color: "#80deea", tint: "rgba(128, 222, 234, 0.06)" },   // cyan
+  { color: "#ef9a9a", tint: "rgba(239, 154, 154, 0.06)" },   // red
+];
+
+// System agent colors (fixed, not hashed)
+const SYSTEM_COLORS = {
+  gm:          { color: "var(--color-gm)",       tint: "rgba(179, 136, 255, 0.05)" },
+  narrator:    { color: "var(--color-narrator)",  tint: "rgba(128, 203, 196, 0.05)" },
+  "team-lead": { color: "var(--color-lead)",     tint: "rgba(120, 144, 156, 0.05)" },
+  human:       { color: "var(--color-human)",     tint: "rgba(79, 195, 247, 0.06)" },
+};
+
+function stableHash(str) {
+  // FNV-1a hash — better distribution than DJB2 for short strings
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) {
+    hash ^= str.charCodeAt(i);
+    hash = (hash * 0x01000193) | 0;
+  }
+  return Math.abs(hash);
+}
+
+function getCharacterPalette(id) {
+  if (SYSTEM_COLORS[id]) return SYSTEM_COLORS[id];
+  return CHARACTER_PALETTE[stableHash(id) % CHARACTER_PALETTE.length];
+}
+
+function getAgentColor(id) {
+  return getCharacterPalette(id).color;
+}
+
+function getAgentBgTint(id) {
+  return getCharacterPalette(id).tint;
 }
 
 function getAgentShortName(id) {
@@ -113,7 +147,7 @@ function renderAgentCards() {
   container.innerHTML = agents
     .filter((a) => a.role !== "lead")
     .map((agent) => {
-      const color = getAgentColor(agent.id, agent.color);
+      const color = getAgentColor(agent.id);
       const char = agent.character;
       return `
       <div class="agent-card" style="border-left: 3px solid ${color}">
@@ -176,8 +210,12 @@ function renderEvent(event) {
   const el = document.createElement("div");
   el.className = `event ${event.type}`;
   el.dataset.eventId = event.id;
+  // Subtle background tint from the speaker's character color
+  if (event.type !== "idle" && event.type !== "activity" && event.type !== "session_command") {
+    el.style.background = getAgentBgTint(event.from);
+  }
 
-  const color = getAgentColor(event.from, event.color);
+  const color = getAgentColor(event.from);
 
   switch (event.type) {
     case "narrative":
@@ -364,7 +402,7 @@ function addFlowEntry(event) {
   const entry = document.createElement("div");
   entry.className = "flow-entry";
 
-  const fromColor = getAgentColor(event.from, event.color);
+  const fromColor = getAgentColor(event.from);
   const toColor = event.to === "*" ? "var(--text-dim)" : getAgentColor(event.to);
 
   const typeLabel = event.type === "narrative" ? "NARR"

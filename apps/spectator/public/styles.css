@@ -248,7 +248,6 @@ main {
 
 /* Narrative */
 .event.narrative {
-  background: var(--narrative-bg);
   border-left: 3px solid var(--narrative-border);
   padding: 16px 20px;
   border-radius: 0 4px 4px 0;
@@ -276,7 +275,6 @@ main {
 
 /* GM to Player */
 .event.gm_to_player {
-  background: var(--gm-to-player-bg);
   border-left: 3px solid var(--color-gm);
   padding: 10px 16px;
   border-radius: 0 4px 4px 0;
@@ -284,7 +282,6 @@ main {
 
 /* Ask Player (prompt to human) */
 .event.ask_player {
-  background: var(--gm-to-player-bg);
   border-left: 3px solid var(--color-human);
   padding: 10px 16px;
   border-radius: 0 4px 4px 0;
@@ -292,14 +289,12 @@ main {
 
 /* Player to GM */
 .event.player_to_gm {
-  background: var(--player-to-gm-bg);
   padding: 12px 16px;
   border-radius: 4px;
 }
 
 /* Human response */
 .event.human_response {
-  background: var(--player-to-gm-bg);
   border-left: 3px solid var(--color-human);
   padding: 12px 16px;
   border-radius: 0 4px 4px 0;
@@ -307,7 +302,6 @@ main {
 
 /* Player to Player (crosstalk) */
 .event.player_to_player {
-  background: var(--whisper-bg);
   border-left: 2px dashed var(--color-yellow);
   padding: 10px 16px;
   border-radius: 0 4px 4px 0;
