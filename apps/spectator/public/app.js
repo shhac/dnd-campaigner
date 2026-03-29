@@ -758,12 +758,10 @@ const scrollBtn = document.getElementById("scroll-lock");
 scrollBtn.classList.add("active");
 
 scrollBtn.addEventListener("click", () => {
-  autoScroll = !autoScroll;
-  scrollBtn.classList.toggle("active", autoScroll);
-  if (autoScroll) {
-    document.getElementById("play-script").scrollTop =
-      document.getElementById("play-script").scrollHeight;
-  }
+  autoScroll = true;
+  scrollBtn.classList.add("active");
+  document.getElementById("play-script").scrollTop =
+    document.getElementById("play-script").scrollHeight;
 });
 
 document.getElementById("play-script").addEventListener("scroll", (e) => {
