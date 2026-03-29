@@ -780,6 +780,7 @@ let characterModes = {}; // { "eamon-lightward": "human", ... }
 let isPaused = false;
 let activePrompts = {}; // { "eamon-lightward": { prompt, character, ... }, ... }
 let activePromptChar = null; // which character's prompt is currently shown
+let respondedPrompts = new Set(); // characters we've sent responses for (ignore until prompt file disappears)
 let countdownInterval = null;
 
 function startPromptPolling() {
@@ -789,20 +790,23 @@ function startPromptPolling() {
       const data = await resp.json();
       const newPrompts = data.prompts || {};
 
-      // Detect new prompts
+      // Detect new prompts (skip ones we've already responded to)
       for (const [char, prompt] of Object.entries(newPrompts)) {
-        if (!activePrompts[char]) {
+        if (!activePrompts[char] && !respondedPrompts.has(char)) {
           activePrompts[char] = prompt;
-          // Auto-show the first prompt that appears
           if (!activePromptChar) showPromptBar(char, prompt);
         }
       }
-      // Detect removed prompts (response was consumed)
+      // Detect removed prompts (CLI consumed the file)
       for (const char of Object.keys(activePrompts)) {
         if (!newPrompts[char]) {
           delete activePrompts[char];
           if (activePromptChar === char) hidePromptBar();
         }
+      }
+      // Clear responded tracking once the prompt file is gone
+      for (const char of respondedPrompts) {
+        if (!newPrompts[char]) respondedPrompts.delete(char);
       }
       updatePromptTabs();
     } catch {}
@@ -835,7 +839,7 @@ function showPromptBar(character, data) {
   const label = document.getElementById("prompt-label");
   const choicesEl = document.getElementById("prompt-choices");
 
-  label.textContent = `${getAgentShortName(character)}:`;
+  label.innerHTML = `${getAgentShortName(character)}<span class="prompt-label-role">your turn</span>`;
   text.textContent = data.prompt;
   input.value = "";
   input.style.height = "auto";
@@ -849,7 +853,6 @@ function showPromptBar(character, data) {
       const btn = document.createElement("button");
       btn.className = "prompt-choice";
       btn.textContent = title;
-      if (description) btn.title = description;
       btn.addEventListener("click", () => {
         input.value = title;
         input.style.height = "auto";
@@ -903,7 +906,7 @@ function updatePromptTabs() {
   const chars = Object.keys(activePrompts);
   const label = document.getElementById("prompt-label");
   if (chars.length <= 1 && activePromptChar) {
-    label.textContent = `${getAgentShortName(activePromptChar)}:`;
+    label.innerHTML = `${getAgentShortName(activePromptChar)}<span class="prompt-label-role">your turn</span>`;
     return;
   }
   if (chars.length > 1 && activePromptChar) {
@@ -926,31 +929,35 @@ function updateCountdown(deadline, el) {
 
 async function sendResponse(message) {
   if (!activePromptChar) return;
+  const char = activePromptChar;
   try {
     await fetch("/api/respond", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ character: activePromptChar, message }),
+      body: JSON.stringify({ character: char, message }),
     });
   } catch (e) {
     console.error("Failed to send response:", e);
   }
-  delete activePrompts[activePromptChar];
+  respondedPrompts.add(char);
+  delete activePrompts[char];
   hidePromptBar();
 }
 
 async function skipTurn() {
   if (!activePromptChar) return;
+  const char = activePromptChar;
   try {
     await fetch("/api/respond", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ character: activePromptChar, message: null, skip: true }),
+      body: JSON.stringify({ character: char, message: null, skip: true }),
     });
   } catch (e) {
     console.error("Failed to skip:", e);
   }
-  delete activePrompts[activePromptChar];
+  respondedPrompts.add(char);
+  delete activePrompts[char];
   hidePromptBar();
 }
 
