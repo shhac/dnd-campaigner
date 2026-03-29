@@ -482,9 +482,10 @@ function addFlowEntry(event) {
     }
   });
 
+  const wasAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 50;
   container.appendChild(entry);
   while (container.children.length > 500) container.removeChild(container.firstChild);
-  container.scrollTop = container.scrollHeight;
+  if (wasAtBottom) container.scrollTop = container.scrollHeight;
 }
 
 // === Filter toggles ===
@@ -768,7 +769,10 @@ scrollBtn.addEventListener("click", () => {
 document.getElementById("play-script").addEventListener("scroll", (e) => {
   const el = e.target;
   const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 50;
-  if (!atBottom && autoScroll) {
+  if (atBottom && !autoScroll) {
+    autoScroll = true;
+    scrollBtn.classList.add("active");
+  } else if (!atBottom && autoScroll) {
     autoScroll = false;
     scrollBtn.classList.remove("active");
   }
