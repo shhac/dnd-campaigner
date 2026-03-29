@@ -647,11 +647,6 @@ main {
   background: #2a2a3a;
 }
 
-.prompt-choice:has(.prompt-choice-desc) {
-  display: flex;
-  flex-direction: column;
-}
-
 .prompt-choice-desc {
   display: none;
   font-size: 11px;
@@ -659,8 +654,10 @@ main {
   margin-top: 2px;
   font-weight: normal;
 }
-.prompt-choice:hover .prompt-choice-desc,
-.prompt-choice:focus .prompt-choice-desc,
+.prompt-choice.selected {
+  display: flex;
+  flex-direction: column;
+}
 .prompt-choice.selected .prompt-choice-desc {
   display: block;
 }
