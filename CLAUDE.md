@@ -125,6 +125,7 @@ playthroughs/{campaign}/{game-name}/  # Mutable per-playthrough state
 ├── items/              # New items discovered
 ├── scenes/             # Narrator writes here
 ├── novel/              # Novelization and audiobook output
+├── spectator/          # Player input state (prompts, interrupts, mode flags)
 └── tmp/
     └── dashboard.md
 ```

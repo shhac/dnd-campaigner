@@ -33,7 +33,7 @@ Read `campaigns/{campaign}/preferences.md` for narrative style. List character s
 Create a temporary playthrough for the test:
 
 ```bash
-mkdir -p playthroughs/{campaign}/playtest/party playthroughs/{campaign}/playtest/scenes playthroughs/{campaign}/playtest/npcs playthroughs/{campaign}/playtest/items playthroughs/{campaign}/playtest/tmp
+mkdir -p playthroughs/{campaign}/playtest/party playthroughs/{campaign}/playtest/scenes playthroughs/{campaign}/playtest/npcs playthroughs/{campaign}/playtest/items playthroughs/{campaign}/playtest/spectator playthroughs/{campaign}/playtest/tmp
 cp campaigns/{campaign}/story-state.md playthroughs/{campaign}/playtest/
 cp campaigns/{campaign}/party-knowledge.md playthroughs/{campaign}/playtest/
 cp campaigns/{campaign}/preferences.md playthroughs/{campaign}/playtest/

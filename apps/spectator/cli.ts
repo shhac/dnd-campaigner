@@ -5,22 +5,22 @@
  * Thin wrapper around lib/player-input.ts. Called by teammate agents via the
  * Bash tool. Outputs JSON to stdout, logs to stderr.
  *
- * Session state lives in /tmp/dnd-campaigner/{session}/ where session is
- * typically "{campaign}-{session-id}".
+ * Player input state lives in {playthrough}/spectator/. Agents pass the
+ * directory via --dir.
  *
  * Usage:
  *   bun apps/spectator/cli.ts ask-player \
- *     --session the-dimming-abc123 \
+ *     --dir playthroughs/the-dimming/playthrough-1/spectator \
  *     --character eamon-lightward \
  *     --prompt "What do you do?" \
  *     --timeout 180 \
  *     --deadline 1710500000000
  *
- *   bun apps/spectator/cli.ts check-interrupt --session the-dimming-abc123
- *   bun apps/spectator/cli.ts check-interrupt --session the-dimming-abc123 --id def456 --clear
+ *   bun apps/spectator/cli.ts check-interrupt --dir playthroughs/the-dimming/playthrough-1/spectator
+ *   bun apps/spectator/cli.ts check-interrupt --dir playthroughs/the-dimming/playthrough-1/spectator --id def456 --clear
  */
 
-import { askPlayer, checkInterrupt, clearInterrupt, sessionDirFor, type PlayerInputConfig } from "./lib/player-input";
+import { askPlayer, checkInterrupt, clearInterrupt, type PlayerInputConfig } from "./lib/player-input";
 
 const DEFAULT_TIMEOUT = 180;
 const HEALTH_TIMEOUT = 1000;
@@ -64,13 +64,13 @@ function parseArgs(argv: string[]): { command: string; args: Record<string, stri
 
 const { command, args } = parseArgs(process.argv.slice(2));
 
-if (!args.session) {
-  log(`Missing --session. Usage: cli.ts <command> --session <campaign-sessionid> ...`);
+if (!args.dir) {
+  log(`Missing --dir. Usage: cli.ts <command> --dir <playthrough/spectator/path> ...`);
   process.exit(1);
 }
 
 const config: PlayerInputConfig = {
-  sessionDir: sessionDirFor(args.session),
+  sessionDir: args.dir,
   pollIntervalMs: 500,
   spectatorCheck: spectatorIsUp,
 };
@@ -78,7 +78,7 @@ const config: PlayerInputConfig = {
 switch (command) {
   case "ask-player": {
     if (!args.character || !args.prompt) {
-      log("Usage: cli.ts ask-player --session <id> --character <id> --prompt <text> [--timeout <seconds>] [--deadline <epoch-ms>]");
+      log("Usage: cli.ts ask-player --dir <path> --character <id> --prompt <text> [--timeout <seconds>] [--deadline <epoch-ms>]");
       process.exit(1);
     }
     const timeoutSeconds = parseInt(args.timeout || String(DEFAULT_TIMEOUT), 10);

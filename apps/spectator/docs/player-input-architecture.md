@@ -45,15 +45,14 @@ One tool, one code path. The calling agent branches on the response mode.
 │  Per-char    │                    └──────┬───────┘
 │  prompt tabs │     POST /api/*           │ writes/reads
 │  Interrupt   │ ──────────────────►       │ lock files
-│  Pause/Mode  │                    ┌──────▼────────────────┐
-└──────────────┘                    │  /tmp/dnd-campaigner/ │
-                                    │  {campaign}-{session}/│
-                                    │    {char}-prompt.json │
-                                    │    {char}-response.json│
-                                    │    player.lock        │
-                                    │    player.pause       │
-                                    │    {char}.auto        │
-                                    └──────▲────────────────┘
+│  Pause/Mode  │                    ┌──────▼──────────────────────┐
+└──────────────┘                    │  {playthrough}/spectator/  │
+                                    │    {char}-prompt.json      │
+                                    │    {char}-response.json    │
+                                    │    player.lock             │
+                                    │    player.pause            │
+                                    │    {char}.auto             │
+                                    └──────▲──────────────────────┘
                                            │
                                     ┌──────┴───────┐
                                     │  CLI Tool    │
@@ -113,7 +112,7 @@ If the GM proves unreliable at calling `check-interrupt` (e.g., the way it forgo
 
 ```bash
 # GM starts this at session begin via Bash with run_in_background: true, timeout: 600000
-bun apps/spectator/cli.ts watch-interrupt --session the-dimming-abc123
+bun apps/spectator/cli.ts watch-interrupt --dir playthroughs/the-dimming/playthrough-1/spectator
 # Blocks until player.lock appears, then returns the interrupt JSON
 # GM gets notified automatically when the background Bash completes
 ```
@@ -131,12 +130,12 @@ bun apps/spectator/cli.ts watch-interrupt --session the-dimming-abc123
 
 #### Prompted Response
 ```
-1. Player agent calls: bun apps/spectator/cli.ts ask-player --session the-dimming-abc123 --character eamon-lightward --prompt "..."
-2. CLI writes tmp/eamon-lightward-prompt.json (with deadline timestamp)
-3. Spectator detects, pushes to browser
+1. Player agent calls: bun apps/spectator/cli.ts ask-player --dir playthroughs/the-dimming/playthrough-1/spectator --character eamon-lightward --prompt "..."
+2. CLI writes spectator/eamon-lightward-prompt.json (with deadline timestamp)
+3. Server detects prompt file, browser polls and displays it
 4. Browser shows prompt under Eamon's tab with countdown (15s less than actual deadline)
 5. Human responds → POST /api/respond { character: "eamon-lightward", message: "..." }
-6. Spectator writes tmp/eamon-lightward-response.json
+6. Server writes spectator/eamon-lightward-response.json
 7. CLI reads response, deletes both files, outputs JSON to stdout
 8. Player agent parses JSON, sends response to GM as [PLAYER_TO_GM]
 ```
@@ -144,7 +143,7 @@ bun apps/spectator/cli.ts watch-interrupt --session the-dimming-abc123
 #### Interrupt (unprompted)
 ```
 1. Human clicks Interrupt → POST /api/interrupt { message, character? }
-2. Spectator writes tmp/player.lock + tmp/player-interrupt.json
+2. Server writes spectator/player.lock + spectator/player-interrupt.json
 3. GM calls check-interrupt CLI at next beat boundary → gets { interrupted: true, id, message, ... }
 4. GM processes the interrupt, then calls clear-interrupt --id {id} → deletes files, applies mode changes
 5. If a newer interrupt arrived between check and clear, clear-interrupt returns { cleared: false } — GM re-checks
@@ -153,7 +152,7 @@ bun apps/spectator/cli.ts watch-interrupt --session the-dimming-abc123
 #### Per-Character Mode Toggle
 ```
 1. Human toggles Eamon to Full Auto → POST /api/mode { character: "eamon-lightward", mode: "full_auto" }
-2. Creates tmp/eamon-lightward.auto
+2. Creates spectator/eamon-lightward.auto
 3. Next ask_player for Eamon → returns { mode: "full_auto" } immediately
 4. Player agent acts autonomously
 ```

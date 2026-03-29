@@ -64,18 +64,27 @@ function onEvents(events: SpectatorEvent[]): void {
     manager.processEvent(event);
     broadcast("event", event);
   }
+  if (!playthroughDir || !manager.state.campaign) {
+    detectSessionMetadata();
+  }
   broadcast("agents", Object.fromEntries(manager.state.agents));
 }
 
-function detectAndLoadCampaign(): void {
+let playthroughDir: string | null = null;
+
+function detectSessionMetadata(): void {
   if (!manager) return;
   for (const event of manager.state.events) {
     if (event.type === "session_command" || event.type === "system") {
-      const match = event.content.match(/campaign:\s*([a-z0-9-]+)/i);
-      if (match) {
-        console.log(`Campaign: ${match[1]}`);
-        manager.setCampaign(readCampaign(repoRoot, match[1]));
-        return;
+      const campaignMatch = event.content.match(/campaign:\s*([a-z0-9-]+)/i);
+      if (campaignMatch && !manager.state.campaign) {
+        console.log(`Campaign: ${campaignMatch[1]}`);
+        manager.setCampaign(readCampaign(repoRoot, campaignMatch[1]));
+      }
+      const playthroughMatch = event.content.match(/playthrough:\s*(\S+)/i);
+      if (playthroughMatch && !playthroughDir) {
+        playthroughDir = join(repoRoot, playthroughMatch[1]);
+        console.log(`Playthrough: ${playthroughMatch[1]}`);
       }
     }
   }
@@ -89,6 +98,7 @@ function loadSession(sessionId: string): boolean {
   if (watcher) watcher.stop();
   if (subWatcher) subWatcher.stop();
   wsClients.clear();
+  playthroughDir = null;
 
   activeSession = session;
   manager = new SessionManager(session.sessionId);
@@ -100,7 +110,7 @@ function loadSession(sessionId: string): boolean {
   const count = watcher.backfill();
   console.log(`Backfilled ${count} events`);
 
-  detectAndLoadCampaign();
+  detectSessionMetadata();
   watcher.start();
 
   // Watch subagent JSONLs for direct agent-to-agent messages
@@ -132,23 +142,17 @@ if (cliSessionId) {
 
 // --- Player input helpers ---
 
-function campaignTmpDir(): string | null {
-  const name = manager?.state.campaign?.name;
-  if (!name) return null;
-  const dir = join(repoRoot, "campaigns", name, "tmp");
+function spectatorDir(): string | null {
+  if (!playthroughDir) return null;
+  const dir = join(playthroughDir, "spectator");
   mkdirSync(dir, { recursive: true });
   return dir;
-}
-
-function tmpFile(name: string): string | null {
-  const dir = campaignTmpDir();
-  return dir ? join(dir, name) : null;
 }
 
 function handlePlayerApi(req: Request, url: URL): Response | null {
   // Health check — always available
   if (url.pathname === "/api/health") {
-    const dir = campaignTmpDir();
+    const dir = spectatorDir();
     // Scan for per-character auto flags and pending prompts
     const characters: Record<string, { mode: string; hasPrompt: boolean }> = {};
     if (dir && manager) {
@@ -171,15 +175,16 @@ function handlePlayerApi(req: Request, url: URL): Response | null {
       ok: true,
       session: activeSession?.sessionId ?? null,
       campaign: manager?.state.campaign?.name ?? null,
+      playthrough: playthroughDir ?? null,
       characters,
       isPaused: dir ? existsSync(join(dir, "player.pause")) : false,
     });
   }
 
   // All other player APIs need an active campaign
-  const dir = campaignTmpDir();
+  const dir = spectatorDir();
   if (!dir) {
-    return Response.json({ error: "No active campaign" }, { status: 503 });
+    return Response.json({ error: "No active playthrough" }, { status: 503 });
   }
 
   // GET /api/prompt — browser polls for pending prompts (per-character)
@@ -235,7 +240,7 @@ function handlePlayerApi(req: Request, url: URL): Response | null {
 
 // Async body handlers (need await for req.json())
 async function handlePlayerApiAsync(req: Request, url: URL): Promise<Response | null> {
-  const dir = campaignTmpDir();
+  const dir = spectatorDir();
   if (!dir) return null;
 
   if (url.pathname === "/api/respond" && req.method === "POST") {

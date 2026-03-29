@@ -4,9 +4,8 @@
  * Extracted from cli.ts for testability. All I/O goes through injected config
  * so tests can use temp dirs, mock the spectator check, and control timing.
  *
- * Session state lives in /tmp/dnd-campaigner/{campaign}-{session-id}/ — fully
- * outside the repo. OS cleans up on reboot. Multiple simultaneous sessions
- * don't collide.
+ * Player input state lives in {playthrough}/spectator/ — scoped to the
+ * playthrough and persisted across sessions.
  */
 
 import {
@@ -18,9 +17,6 @@ import {
 } from "fs";
 import { join } from "path";
 import { createHash } from "crypto";
-import { tmpdir } from "os";
-
-export const SESSION_DIR_ROOT = join(tmpdir(), "dnd-campaigner");
 
 export interface PlayerInputConfig {
   sessionDir: string;
@@ -269,7 +265,3 @@ export async function clearInterrupt(
   return { cleared: true };
 }
 
-/** Build a session directory path from a session identifier */
-export function sessionDirFor(session: string): string {
-  return join(SESSION_DIR_ROOT, session);
-}

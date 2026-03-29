@@ -14,7 +14,6 @@ import {
   askPlayer,
   checkInterrupt,
   clearInterrupt,
-  sessionDirFor,
   type PlayerInputConfig,
 } from "../lib/player-input";
 
@@ -55,18 +54,6 @@ afterEach(() => {
     try { rmSync(c.sessionDir, { recursive: true, force: true }); } catch {}
   }
   configs = [];
-});
-
-// ============================================================
-// sessionDirFor
-// ============================================================
-
-describe("sessionDirFor", () => {
-  it("builds path under /tmp/dnd-campaigner/", () => {
-    const dir = sessionDirFor("the-dimming-abc123");
-    expect(dir).toContain("dnd-campaigner");
-    expect(dir).toContain("the-dimming-abc123");
-  });
 });
 
 // ============================================================

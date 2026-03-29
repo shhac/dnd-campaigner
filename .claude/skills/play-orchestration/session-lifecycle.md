@@ -61,6 +61,7 @@ ls playthroughs/{campaign}/
    mkdir -p playthroughs/{campaign}/{game-name}/scenes
    mkdir -p playthroughs/{campaign}/{game-name}/npcs
    mkdir -p playthroughs/{campaign}/{game-name}/items
+   mkdir -p playthroughs/{campaign}/{game-name}/spectator
    mkdir -p playthroughs/{campaign}/{game-name}/tmp
    ```
 3. Seed files from campaign:

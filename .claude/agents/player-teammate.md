@@ -117,7 +117,7 @@ When `Control: HUMAN`, use the `ask_player` CLI via the Bash tool to get the hum
    → YES: respond directly, note for human in next prompt
 3. Call ask_player via Bash (timeout: 600000):
    bun apps/spectator/cli.ts ask-player \
-     --session "{session}" \
+     --dir "{playthrough}/spectator" \
      --character "{character}" \
      --prompt "scene summary + what the GM needs from you + suggested options"
 4. Parse the JSON output and branch on result:
