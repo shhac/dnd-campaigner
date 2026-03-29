@@ -872,8 +872,11 @@ function showPromptBar(character, data) {
   container.classList.remove("hidden");
   input.focus();
 
-  const hasChoices = data.choices && data.choices.length;
-  document.documentElement.style.setProperty("--player-bar-height", hasChoices ? "180px" : "140px");
+  // Compute bar height from actual rendered content
+  requestAnimationFrame(() => {
+    const barHeight = document.getElementById("player-bar").offsetHeight;
+    document.documentElement.style.setProperty("--player-bar-height", barHeight + "px");
+  });
 
   // deadline is epoch ms from CLI; show 15s less so UI expires before the CLI does
   const deadline = (data.deadline || Date.now() + 180000) - 15000;

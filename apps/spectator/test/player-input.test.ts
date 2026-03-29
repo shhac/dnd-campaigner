@@ -7,7 +7,7 @@
  */
 
 import { describe, it, expect, afterEach } from "bun:test";
-import { mkdtempSync, writeFileSync, existsSync, rmSync } from "fs";
+import { mkdtempSync, writeFileSync, readFileSync, existsSync, rmSync } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
 import {
@@ -302,6 +302,59 @@ describe("ask-player", () => {
       character: "eamon-lightward",
       prompt: "What do you do?",
       deadlineMs: deadline,
+    });
+  });
+
+  it("includes choices in prompt file when provided", async () => {
+    const config = tracked(makeConfig({ spectatorUp: true }));
+    const choices = [
+      { title: "Investigate", description: "Look more closely" },
+      { title: "Leave" },
+    ];
+
+    setTimeout(() => {
+      // Verify prompt file contains choices before responding
+      const promptJson = JSON.parse(
+        readFileSync(fp(config, "eamon-lightward-prompt.json"), "utf-8")
+      );
+      expect(promptJson.choices).toEqual(choices);
+      expect(promptJson.prompt).toBe("What do you do?");
+
+      writeJsonFile(config, "eamon-lightward-response.json", {
+        message: "Investigate",
+        skip: false,
+      });
+    }, 30);
+
+    const result = await askPlayer(config, {
+      character: "eamon-lightward",
+      prompt: "What do you do?",
+      deadlineMs: Date.now() + 2000,
+      choices,
+    });
+
+    expect(result.mode).toBe("web");
+  });
+
+  it("omits choices from prompt file when not provided", async () => {
+    const config = tracked(makeConfig({ spectatorUp: true }));
+
+    setTimeout(() => {
+      const promptJson = JSON.parse(
+        readFileSync(fp(config, "eamon-lightward-prompt.json"), "utf-8")
+      );
+      expect(promptJson.choices).toBeUndefined();
+
+      writeJsonFile(config, "eamon-lightward-response.json", {
+        message: "ok",
+        skip: false,
+      });
+    }, 30);
+
+    await askPlayer(config, {
+      character: "eamon-lightward",
+      prompt: "What do you do?",
+      deadlineMs: Date.now() + 2000,
     });
   });
 
