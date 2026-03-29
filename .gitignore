@@ -21,7 +21,6 @@ CLAUDE.local.md
 # Project specific
 .ai-cache/
 playthroughs/*/*/
-campaigns/*/tmp/
 
 # Python
 __pycache__/
