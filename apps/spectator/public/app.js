@@ -833,14 +833,30 @@ function showPromptBar(character, data) {
   const input = document.getElementById("prompt-input");
   const countdown = document.getElementById("prompt-countdown");
   const label = document.getElementById("prompt-label");
+  const choicesEl = document.getElementById("prompt-choices");
 
   label.textContent = `${getAgentShortName(character)}:`;
   text.textContent = data.prompt;
   input.value = "";
+  input.style.height = "auto";
+
+  // Render choice buttons
+  choicesEl.innerHTML = "";
+  if (data.choices && data.choices.length) {
+    for (const choice of data.choices) {
+      const btn = document.createElement("button");
+      btn.className = "prompt-choice";
+      btn.textContent = choice;
+      btn.addEventListener("click", () => sendResponse(choice));
+      choicesEl.appendChild(btn);
+    }
+  }
+
   container.classList.remove("hidden");
   input.focus();
 
-  document.documentElement.style.setProperty("--player-bar-height", "140px");
+  const hasChoices = data.choices && data.choices.length;
+  document.documentElement.style.setProperty("--player-bar-height", hasChoices ? "180px" : "140px");
 
   // deadline is epoch ms from CLI; show 15s less so UI expires before the CLI does
   const deadline = (data.deadline || Date.now() + 180000) - 15000;
@@ -992,10 +1008,16 @@ function initPlayerControls() {
     const input = document.getElementById("prompt-input");
     if (input.value.trim()) sendResponse(input.value.trim());
   });
-  document.getElementById("prompt-input").addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && e.target.value.trim()) {
+  const promptInput = document.getElementById("prompt-input");
+  promptInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey && e.target.value.trim()) {
+      e.preventDefault();
       sendResponse(e.target.value.trim());
     }
+  });
+  promptInput.addEventListener("input", () => {
+    promptInput.style.height = "auto";
+    promptInput.style.height = Math.min(promptInput.scrollHeight, 80) + "px";
   });
   document.getElementById("prompt-skip").addEventListener("click", skipTurn);
 

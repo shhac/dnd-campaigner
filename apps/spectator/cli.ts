@@ -78,7 +78,7 @@ const config: PlayerInputConfig = {
 switch (command) {
   case "ask-player": {
     if (!args.character || !args.prompt) {
-      log("Usage: cli.ts ask-player --dir <path> --character <id> --prompt <text> [--timeout <seconds>] [--deadline <epoch-ms>]");
+      log("Usage: cli.ts ask-player --dir <path> --character <id> --prompt <text> [--choices <json-array>] [--timeout <seconds>] [--deadline <epoch-ms>]");
       process.exit(1);
     }
     const timeoutSeconds = parseInt(args.timeout || String(DEFAULT_TIMEOUT), 10);
@@ -86,10 +86,19 @@ switch (command) {
       ? parseInt(args.deadline, 10)
       : Date.now() + timeoutSeconds * 1000;
 
+    let choices: string[] | undefined;
+    if (args.choices) {
+      try { choices = JSON.parse(args.choices); } catch {
+        log(`Invalid --choices JSON: ${args.choices}`);
+        process.exit(1);
+      }
+    }
+
     const result = await askPlayer(config, {
       character: args.character,
       prompt: args.prompt,
       deadlineMs,
+      choices,
     });
     log(`${args.character}: ${result.mode}`);
     process.stdout.write(JSON.stringify(result) + "\n");

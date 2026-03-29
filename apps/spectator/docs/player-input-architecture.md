@@ -83,12 +83,15 @@ This means:
 #### `ask_player`
 
 ```
-Input:  { campaign, character, prompt, options?, timeout_seconds? }
+Input:  { character, prompt, choices?, deadline? }
 Output: { mode: "web", response: string }
       | { mode: "ai_takeover" }      ← timeout, AI acts this turn only
       | { mode: "full_auto" }        ← character is AI-controlled
       | { mode: "terminal" }         ← no spectator, use AskUserQuestion
 ```
+
+When `choices` is provided, the browser renders clickable buttons for each option.
+The human can click a choice or type a free-text response in the textarea.
 
 Per-character lock files: `{character}-prompt.json`, `{character}-response.json`, `{character}.auto`
 

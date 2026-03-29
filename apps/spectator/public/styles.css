@@ -617,6 +617,30 @@ main {
   gap: 6px;
 }
 
+#prompt-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+#prompt-choices:empty { display: none; }
+
+.prompt-choice {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 10px;
+  color: var(--text-bright);
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.prompt-choice:hover {
+  border-color: var(--color-gm);
+  background: var(--bg-hover);
+}
+
 #prompt-input {
   flex: 1;
   background: var(--bg);
@@ -627,6 +651,10 @@ main {
   font-family: inherit;
   font-size: 12px;
   outline: none;
+  resize: none;
+  min-height: 28px;
+  max-height: 80px;
+  overflow-y: auto;
 }
 #prompt-input:focus { border-color: var(--color-gm); }
 

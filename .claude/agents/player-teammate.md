@@ -119,7 +119,8 @@ When `Control: HUMAN`, use the `ask_player` CLI via the Bash tool to get the hum
    bun apps/spectator/cli.ts ask-player \
      --dir "{playthrough}/spectator" \
      --character "{character}" \
-     --prompt "scene summary + what the GM needs from you + suggested options"
+     --prompt "scene summary + what the GM needs from you" \
+     --choices '["Investigate the artifact","Talk to the stranger","Leave quietly"]'
 4. Parse the JSON output and branch on result:
    mode: "web"         → translate response into character voice, send [PLAYER_TO_GM]
    mode: "ai_takeover" → decide autonomously THIS TURN ONLY
@@ -133,21 +134,24 @@ When `Control: HUMAN`, use the `ask_player` CLI via the Bash tool to get the hum
 
 The human cannot see your direct exchanges with the GM or other players. Your prompt is their only window into what's happening. Include enough context that the human can make an informed decision without having seen the conversation.
 
-When calling the CLI, format the `--prompt` as a concise brief:
+When calling the CLI, split content between `--prompt` (context) and `--choices` (options):
 
+**`--prompt`**: A concise brief of what's happening and what the GM needs.
 ```
 {Scene — what you perceive, in your voice. Include what other characters
 have said or asked, not just that a conversation is happening.}
 
-Decision needed: {what the GM is asking, in plain terms}
-
-Options:
-- {Option A}: {brief description}
-- {Option B}: {brief description}
-- (or type anything)
+{What the GM is asking, in plain terms.}
 ```
 
-If another character asked you a specific question, include the question. If the GM described something only you noticed, include what you noticed. The human needs the actual content, not a summary that it exists.
+**`--choices`**: A JSON array of suggested actions. These render as clickable buttons in the browser — the human can pick one or type their own response in the text box. Keep choices short (action phrases, not full sentences). Include 2-4 options that cover the obvious approaches.
+```
+--choices '["Investigate the artifact","Confront the stranger","Play along for now"]'
+```
+
+Omit `--choices` when the situation is too open-ended for meaningful suggestions (e.g., pure roleplay, open conversation).
+
+If another character asked you a specific question, include the question in `--prompt`. If the GM described something only you noticed, include what you noticed. The human needs the actual content, not a summary that it exists.
 
 ### Translating Human Input
 

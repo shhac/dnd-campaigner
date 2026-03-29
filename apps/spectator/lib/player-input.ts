@@ -28,6 +28,7 @@ export interface AskPlayerArgs {
   character: string;
   prompt: string;
   deadlineMs: number;
+  choices?: string[];
 }
 
 export type AskPlayerResult =
@@ -118,7 +119,7 @@ export async function askPlayer(
   config: PlayerInputConfig,
   args: AskPlayerArgs
 ): Promise<AskPlayerResult> {
-  const { character, prompt, deadlineMs } = args;
+  const { character, prompt, deadlineMs, choices } = args;
 
   const pausePath = fp(config, "player.pause");
   const promptPath = fp(config, `${character}-prompt.json`);
@@ -146,11 +147,9 @@ export async function askPlayer(
   }
 
   // 4. Write prompt for spectator to pick up
-  writeJson(promptPath, {
-    character,
-    prompt,
-    deadline: deadlineMs,
-  });
+  const promptData: Record<string, unknown> = { character, prompt, deadline: deadlineMs };
+  if (choices?.length) promptData.choices = choices;
+  writeJson(promptPath, promptData);
 
   // 5. Wait for response
   const response = await waitForFile(responsePath, deadlineMs, config.pollIntervalMs);
