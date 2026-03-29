@@ -86,9 +86,15 @@ switch (command) {
       ? parseInt(args.deadline, 10)
       : Date.now() + timeoutSeconds * 1000;
 
-    let choices: string[] | undefined;
+    let choices: import("./lib/player-input").PromptChoice[] | undefined;
     if (args.choices) {
-      try { choices = JSON.parse(args.choices); } catch {
+      try {
+        const parsed = JSON.parse(args.choices);
+        // Accept ["str", ...] or [{title, description?}, ...]
+        choices = parsed.map((c: unknown) =>
+          typeof c === "string" ? { title: c } : c
+        );
+      } catch {
         log(`Invalid --choices JSON: ${args.choices}`);
         process.exit(1);
       }

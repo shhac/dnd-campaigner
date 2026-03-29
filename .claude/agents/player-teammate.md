@@ -120,7 +120,7 @@ When `Control: HUMAN`, use the `ask_player` CLI via the Bash tool to get the hum
      --dir "{playthrough}/spectator" \
      --character "{character}" \
      --prompt "scene summary + what the GM needs from you" \
-     --choices '["Investigate the artifact","Talk to the stranger","Leave quietly"]'
+     --choices '[{"title":"Investigate the artifact","description":"Examine it closely — might reveal its origin"},{"title":"Talk to the stranger","description":"Approach cautiously and ask what they want"},{"title":"Leave quietly","description":"Back away before anyone notices you"}]'
 4. Parse the JSON output and branch on result:
    mode: "web"         → translate response into character voice, send [PLAYER_TO_GM]
    mode: "ai_takeover" → decide autonomously THIS TURN ONLY
@@ -144,9 +144,14 @@ have said or asked, not just that a conversation is happening.}
 {What the GM is asking, in plain terms.}
 ```
 
-**`--choices`**: A JSON array of suggested actions. These render as clickable buttons in the browser — the human can pick one or type their own response in the text box. Keep choices short (action phrases, not full sentences). Include 2-4 options that cover the obvious approaches.
+**`--choices`**: A JSON array of `{title, description}` objects. These render as clickable buttons — clicking one populates the textarea so the human can review or edit before sending. Hovering shows the description.
+
+- **title**: Short action phrase (what the button says)
+- **description**: One sentence explaining what this means in context (shown on hover/select)
+- Include 2-4 choices covering the obvious approaches
+
 ```
---choices '["Investigate the artifact","Confront the stranger","Play along for now"]'
+--choices '[{"title":"Confront the stranger","description":"Step forward and demand to know who they are"},{"title":"Play along","description":"Pretend you don't notice anything suspicious"}]'
 ```
 
 Omit `--choices` when the situation is too open-ended for meaningful suggestions (e.g., pure roleplay, open conversation).

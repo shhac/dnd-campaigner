@@ -24,11 +24,16 @@ export interface PlayerInputConfig {
   spectatorCheck: () => Promise<boolean>;
 }
 
+export interface PromptChoice {
+  title: string;
+  description?: string;
+}
+
 export interface AskPlayerArgs {
   character: string;
   prompt: string;
   deadlineMs: number;
-  choices?: string[];
+  choices?: PromptChoice[];
 }
 
 export type AskPlayerResult =

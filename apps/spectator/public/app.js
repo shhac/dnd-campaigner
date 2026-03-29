@@ -840,14 +840,31 @@ function showPromptBar(character, data) {
   input.value = "";
   input.style.height = "auto";
 
-  // Render choice buttons
+  // Render choice buttons — click populates textarea, doesn't send
   choicesEl.innerHTML = "";
   if (data.choices && data.choices.length) {
     for (const choice of data.choices) {
+      const title = typeof choice === "string" ? choice : choice.title;
+      const description = typeof choice === "string" ? null : choice.description;
       const btn = document.createElement("button");
       btn.className = "prompt-choice";
-      btn.textContent = choice;
-      btn.addEventListener("click", () => sendResponse(choice));
+      btn.textContent = title;
+      if (description) btn.title = description;
+      btn.addEventListener("click", () => {
+        input.value = title;
+        input.style.height = "auto";
+        input.style.height = Math.min(input.scrollHeight, 80) + "px";
+        input.focus();
+        // Deselect siblings, highlight this one
+        choicesEl.querySelectorAll(".prompt-choice").forEach(b => b.classList.remove("selected"));
+        btn.classList.add("selected");
+      });
+      if (description) {
+        const desc = document.createElement("span");
+        desc.className = "prompt-choice-desc";
+        desc.textContent = description;
+        btn.appendChild(desc);
+      }
       choicesEl.appendChild(btn);
     }
   }
