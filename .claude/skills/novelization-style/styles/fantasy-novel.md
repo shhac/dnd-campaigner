@@ -1,101 +1,69 @@
 # Fantasy Novel Style
 
-**Default Style** - D&D mechanics are completely invisible in the prose.
-
-This style produces prose indistinguishable from traditionally-authored fantasy fiction. A reader with no knowledge of D&D should understand every sentence. No dice, no modifiers, no spell slots, no hit points.
+**Default Style** — D&D mechanics are completely invisible in the prose. A reader with no knowledge of D&D should understand every sentence.
 
 ## Formatting Rules
 
 ### Chapter Structure
-- Use descriptive chapter titles that hint at content: "The Crypts Below" not "Session 3, Part 2"
-- Open chapters with scene-setting that grounds the reader in place and mood
-- Close chapters on moments of tension, revelation, or emotional resonance
+- Descriptive chapter titles that hint at content: "The Crypts Below" not "Session 3, Part 2"
+- Open with scene-setting that grounds the reader in place and mood
+- Close on tension, revelation, or emotional resonance
 
 ### Scene Breaks
-Use `* * *` centered on its own line to indicate:
-- Significant time passage
-- Location changes
-- POV shifts (if using multiple viewpoints)
-- Tonal shifts requiring a pause
+Use `* * *` centered on its own line for significant time passage, location changes, POV shifts, or tonal shifts.
 
 ### Paragraphing
 - New speaker, new paragraph
 - Action beats can share paragraphs with related dialogue
-- Internal thoughts italicized, integrated naturally into prose
+- Internal thoughts italicized, integrated naturally
 
-## Handling Combat
+## POV Discipline (Close Third Person)
 
-Combat should read as continuous action, not a sequence of turns. The reader should never sense the underlying round structure.
+Everything is filtered through the POV character's perception. This creates intimacy and earns trust.
 
-**Focus on:**
-- Sensory experience (the clash of steel, the smell of ozone from a lightning bolt)
-- Stakes and consequences (what happens if they fail?)
-- Character decisions and their reasoning
-- The flow and momentum of battle
+### The Perception Rule
 
-**Avoid:**
-- Any sense of "and then it was her turn"
-- Listing attacks in order
-- Equal narrative weight to every action
+The prose can only describe what the POV character perceives. If they aren't looking at someone, the prose can't detail what that person is doing.
 
-**Example - Session Notes:**
-> Round 1: Tilda attacks goblin, hits for 8 damage. Kira casts Sacred Flame, goblin fails save, 6 radiant damage. Goblin retaliates against Tilda, misses.
+**Wrong (omniscient leak):**
+> Lasinne stood a half-step behind, her eyes finding the wounded — an old man with his arm wrapped wrong, a child whose cough carried across the square.
 
-**Converted to Prose:**
-> Tilda's blade caught the goblin across its shoulder, spinning it half around with the force of the blow. Before it could recover, golden light erupted from above—Kira's prayer answered in an instant—and the creature shrieked as divine fire licked across its skin. It slashed back at Tilda in desperation, but she was already moving, the clumsy strike finding only empty air where she'd stood a heartbeat before.
+**Right (filtered through POV):**
+> When he turned, Lasinne was already moving toward the wounded. He could hear her voice across the square a moment later — low, steady, the tone you use with frightened animals and injured strangers.
 
-## Handling Dialogue
+### Name Knowledge Must Be Earned
 
-Natural speech patterns take priority over perfect grammar. Characters should sound distinct.
+The POV character doesn't know a stranger's name until they learn it. Use description first, then the name surfaces naturally — in dialogue, introduction, or overhearing.
 
-**Attribution Guidelines:**
-- Vary tags: said, replied, muttered, called out—but "said" remains invisible and reliable
-- Action beats often replace tags: `Kira set down her pack. "We should rest here."`
-- Internal reactions intersperse dialogue: show characters processing what they hear
+**Wrong:**
+> Tessavri appeared with a kettle and stayed.
 
-**Example:**
-> "The crypt has been sealed for three hundred years." The sage's fingers trembled as he traced the weathered inscription. "Whatever your business there, I'd counsel you to reconsider."
->
-> Tilda exchanged a glance with Kira. Three centuries. Long enough for anything to be waiting in the dark.
->
-> "We don't have a choice," she said. "The missing children—"
->
-> "Will not be helped if you join them among the dead."
+**Also wrong (breaks temporal immersion):**
+> A woman appeared with a kettle and stayed. Later he would learn her name was Tessavri.
 
-## Handling Ability Checks and Saves
+The "later he would learn" construction pulls the reader out of the present moment. Stay in the now — the reader learns the name when the POV character does.
 
-Never mention dice, difficulty classes, modifiers, or skill names. Describe the attempt, the tension, and the outcome.
+**Right — name surfaces in dialogue:**
+> A woman appeared with a kettle and stayed, holding things steady without being asked.
+> "Tessavri," someone called from the fire. "Bring the wrap too."
 
-**Instead of:** "She rolled a 17 on her Sleight of Hand check against DC 15."
+**Right — name surfaces in introduction:**
+> A woman appeared with a kettle. She held things steady without being asked.
+> "What's your name?" he said.
+> "Tessavri."
 
-**Write:** "Her fingers found the lock's mechanism—a sequence of pins that yielded one by one to her patient pressure. The final tumbler clicked into place, and the door swung open on silent hinges."
+### Sentence Opening Variety
 
-**Instead of:** "He failed his Wisdom save against the fear effect."
+Avoid the `<Character name> <verb>...` pattern for paragraph openings. No more than two consecutive paragraphs should open with a character name. Lead with:
 
-**Write:** "The creature's gaze met his, and something cold and ancient slithered into his mind. His sword arm trembled. His feet refused to move. For the first time in years, Aldric knew true terror."
+- **Setting**: "The south wall caught the last of the light."
+- **Sensation**: "Woodsmoke and iron water."
+- **Action without name-lead**: "A hand went to sword pommel — not threat, habit."
+- **Observation**: "Three people sat the gap watch."
+- **Dialogue**: Opens with voice, grounds in character.
 
-**Near Misses (failed by small margin):**
-> The ledge was too far, the gap too wide. Her fingers scraped stone as she fell, close—so close—before the darkness swallowed her.
+## Mechanics Invisibility
 
-**Narrow Successes:**
-> Sweat stung her eyes as she held the beam aloft, arms screaming, certain she would fail. But she held. Somehow, against all reason, she held.
+Combat, ability checks, saves, and magic must read as continuous experience, not game mechanics. No dice, DCs, modifiers, spell slots, or hit points. The reader experiences attempts and outcomes through sensory detail and character perception.
 
-## Example Passage
-
-**Session Notes:**
-> Party enters trapped corridor. Perception check (Tilda 14, success) spots pressure plate. Tilda attempts to disarm (Thieves' Tools, 19, success). Party proceeds. Kira makes Religion check (22) on altar symbols—recognizes them as dedicated to Vecna.
-
-**Fantasy Novel Style:**
-> The corridor stretched into darkness, its stones slick with centuries of moisture. Tilda held up a hand, and the others stopped.
->
-> Something was wrong. She could feel it—that prickle at the back of her neck that had saved her life a dozen times in the Undercity. Her eyes swept the floor, reading the dust patterns, until she found it: a stone slightly raised, its edges too clean.
->
-> She knelt, producing her picks from an inner pocket, and went to work. The mechanism was old but well-made, designed by someone who understood that true danger lay in simplicity. A wrong move would trigger... something. She didn't want to find out what. Minutes crawled past in silence before she felt the final pin give way.
->
-> "Clear," she breathed, rising.
->
-> They found the altar in a chamber beyond, its surface carved with symbols that made Kira stop short. Her face went pale in the torchlight.
->
-> "What is it?" Aldric asked.
->
-> "Vecna." The name came out as barely a whisper. "The Whispered One. God of secrets and undeath." She turned to face them, and her eyes held a fear Tilda had never seen there before. "Whatever happened here, whatever was sealed in this place—it was done in his name."
+See `references/prose-conversion-examples.md` for detailed before/after examples of converting session notes to prose.

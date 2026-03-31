@@ -1,57 +1,58 @@
 # Literary Drama Tone
 
-A world where the most important battles are fought within, where relationships carry the weight of kingdoms, and where a single choice can echo across a lifetime. This tone prioritizes psychological depth, thematic resonance, and the complex truth of being human.
+A world where the most important battles are fought within, where relationships carry the weight of kingdoms, and where a single choice can echo across a lifetime. Psychological depth, thematic resonance, and the complex truth of being human.
 
-## Vocabulary Guidance
+## Vocabulary Palette
 
 **Favor precise emotional and sensory language:**
 - Ache, hollow, bright, distant, familiar
-- Remember, recognize, understand, realize
 - Silence, pause, weight, space, breath
 - Touch, warmth, cold, tension, release
 
 **Descriptive palette:**
 - Light and shadow as emotional metaphor
 - Physical spaces reflecting internal states
-- Small details that carry symbolic weight
+- Small details carrying symbolic weight
 - Weather and season as thematic mirrors
 
-**Character observations should be:**
-- Psychologically astute
-- Aware of contradiction and complexity
-- Attuned to what isn't said
-- Interested in the gap between intention and action
+## Craft Gotchas
 
-## Sentence Structure
+These are the specific ways LLMs fail at literary fiction. Each is a prediction about your defaults.
 
-**Varied rhythm for internal truth:**
-> She had practiced the speech for three days. Every word, every pause, every gesture. And now, standing in the doorway of his study with the afternoon light falling across the books he'd never let her touch, she found she had nothing to say at all.
+**You will over-explain interiority.** "He realized that she was hiding something" is reporting. "Something was off" is experiencing. Use free indirect discourse — embed character thoughts in narration without tags. Level 4 psychic distance: the character's vocabulary and judgment permeate the prose itself. Level 3 (thought tags: "he thought," "she realized") is telling. Use sparingly.
 
-**Internal monologue balanced with external action:**
-- Move fluidly between thought and deed
-- Let pauses carry meaning
-- Trust readers to infer from behavior
-- Use dialogue sparingly, make it count
+**You will make dialogue on-the-nose.** Characters will state exactly what they feel. Real people don't. They talk around what matters, deflect with humor, change the subject, or go overly specific about mundane things to avoid the real topic. Physical action during dialogue (what hands do, where eyes go) carries the real content.
 
-**Rhythm patterns:**
-- Longer sentences for interiority and reflection
-- Shorter sentences for moments of clarity or decision
-- Fragments for emotional impact
-- Dialogue as revelation, not exposition
+**You will infodump worldbuilding.** You'll write a paragraph of setting exposition because "the reader needs context." They don't — not yet. Scatter information through character interaction with the environment, dialogue with purpose, and what the POV character takes for granted. If a passage is mostly worldbuilding with no character or plot movement, cut it.
+
+**You will flatten quiet scenes.** Without action to drive pacing, you'll default to summary or rush to the next event. Quiet scenes need underlying want — what does the character yearn for right now? Sharpen sensory detail when external action slows. Let conflict simmer through what remains unsaid.
+
+**You will sentimentalize emotional peaks.** The Maass technique: identify the character's primary feeling, ask what else they're feeling (repeat 3x for depth), then delete all named emotions. Keep only behavior, perception, and symbolic action. The reader feels it without being told.
+
+**You will homogenize character voices in dialogue.** All characters will sound like they have the same education and register. Vary sentence length, vocabulary, comfort with silence, use of deflection vs directness. A reader should identify speakers without tags.
+
+See `references/craft-techniques.md` for the full psychic distance spectrum, Maass technique steps, dialogue iceberg theory, incluing methods, and prose rhythm guidance.
 
 ## Emotional Register
 
 **Deep interiority and psychological complexity:**
 - Characters are aware of their own contradictions
 - Emotions are layered, often conflicting
-- Past and present interweave in consciousness
 - Understanding is partial, hard-won, sometimes wrong
 
 **Relationships as the primary lens:**
 - How characters see each other, and fail to
-- What they want from one another
-- What they cannot give
-- How they change each other, often without meaning to
+- What they want from one another and cannot give
+- How they change each other without meaning to
+
+## Rhythm
+
+- Longer sentences for interiority and reflection
+- Shorter sentences for moments of clarity or decision
+- Fragments for emotional impact
+- Dialogue as revelation, not exposition
+- Read prose aloud — dull or jerky writing becomes obvious when vocalized
+- Germanic-root words for rawness and physicality; Latinate for ceremony or authority
 
 ## Example Passage
 
@@ -59,41 +60,31 @@ A world where the most important battles are fought within, where relationships 
 >
 > She watched his hands. He kept them clasped behind his back, fingers interlaced, thumbs pressing hard against each other. That was new. That was fear.
 >
-> "You're asking me to trust you," she said, and she heard the edge in her own voice, the old resentment that she'd thought she'd buried, the weight of a hundred similar conversations in a hundred similar rooms over all those years. "You're asking me to trust what you're not saying."
->
-> He turned then, and she saw what she'd somehow known she would see: that he was asking for exactly that. That there was something he couldn't tell her, and he needed her to act as though he had. The sunlight caught the grey in his temple, the new lines around his eyes, and she thought, absurdly, of the young knight she'd met in her father's court, the one who'd had nothing to hide because he'd had nothing yet to lose.
->
-> She had loved him then. She wasn't sure what she felt now. Only that whatever she chose in the next few moments would change everything, and that she would have to live with it for far longer than she wanted to think about.
+> "You're asking me to trust you," she said, and she heard the edge in her own voice, the old resentment that she'd thought she'd buried. "You're asking me to trust what you're not saying."
 
 ## What to Emphasize
 
-- **Character interiority**: The rich inner life of thought, memory, and feeling
-- **Relationships**: The complex web of connection, obligation, love, and conflict
-- **Internal conflict**: Characters at war with themselves
-- **Thematic resonance**: Moments that echo and amplify the story's deeper meanings
-- **Consequence and change**: How characters are shaped by what happens to them
-- **Nuance**: The space between right and wrong, love and resentment, hope and resignation
-- **Silence and subtext**: What characters don't say, and why
+- Character interiority — the rich inner life of thought, memory, and feeling
+- Relationships — the complex web of connection, obligation, love, and conflict
+- Internal conflict — characters at war with themselves
+- Silence and subtext — what characters don't say, and why
+- Consequence — how characters are shaped by what happens to them
+- Nuance — the space between right and wrong, love and resentment
 
 ## What to De-emphasize
 
-- **Action for its own sake**: Combat and spectacle should serve character and theme
-- **Exposition**: Trust the reader to piece things together
-- **Clear-cut morality**: People are complicated, and so are their choices
-- **Plot as driving force**: Story emerges from character, not the other way around
-- **Surface emotions**: Dig deeper than the obvious feeling
-- **Resolution**: Some things remain unresolved, as in life
+- Action for its own sake — combat serves character and theme
+- Exposition — trust the reader to piece things together
+- Clear-cut morality — people are complicated
+- Surface emotions — dig deeper than the obvious feeling
+- Resolution — some things remain unresolved, as in life
 
 ## Tone Markers
 
-When writing in literary drama, these elements signal you're in the right register:
+When these elements appear, you're in the right register:
 - Time moving fluidly (memory, anticipation, the weight of history)
 - Physical sensations grounding emotional states
 - Characters noticing telling details about each other
 - Dialogue that reveals more than it says
-- Moments of stillness and reflection
 - Choices mattering more than events
-- The past as present weight
 - Beauty and pain coexisting
-- Questions without easy answers
-- The gap between who characters are and who they wish to be
