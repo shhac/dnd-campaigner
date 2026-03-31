@@ -160,13 +160,10 @@ Multiple playthroughs of the same campaign are supported. Each playthrough has i
 - **decision-log**: Records character decisions and actions after significant events to help with context reconstruction
 
 ### Novelization Agents
-- **novelizer-planner**: Creates and validates novel outlines from campaign content. Handles planning, validation, and outline extension.
-- **novelizer-writer**: Writes single chapter drafts from outline specs. Reads character sheets, decision-log, and previous chapters for continuity.
-- **novelizer-editor**: Improves prose mechanics (clarity, flow, engagement) without changing plot. Reads drafts, writes edited versions.
-- **novelizer-continuity**: Checks consistency across chapters. INCREMENTAL mode for quick checks every 2-3 chapters, FULL mode for complete analysis. PATTERN mode scans for repetitive prose (overused words, repeated constructions, character tic fatigue) and outputs pattern-report.md. Maintains continuity-manifest.md.
-- **novelizer-fixer**: Applies continuity corrections from approved fix requests to chapter drafts.
-- **novelizer-publisher**: Evaluates reader experience -- "Is this worth reading?" Provides feedback on engagement, pacing, and what might make readers put the book down.
-- **novelizer-reviser**: Applies publisher feedback to improve chapter engagement and pacing without changing plot.
+- **novelizer-writer**: Creates novel content. Modes: WRITE (draft chapters), PLAN (create/validate outlines), REVISE (apply feedback), FIX (correct continuity issues). Workflow instructions in `novelization-workflow/` skills.
+- **novelizer-editor**: Polishes prose mechanics (rhythm, flow, show-vs-tell, AI-tell detection) without changing story.
+- **novelizer-continuity**: Checks consistency across chapters. Modes: INCREMENTAL (quick check + manifest update), FULL (complete analysis + fix requests), PATTERN (novel-scale repetition scan), PATTERN_INCREMENTAL (lightweight 2-3 chapter check).
+- **novelizer-publisher**: Evaluates reader experience from an acquisitions editor perspective. Pacing, engagement, narrative arc, commercial viability.
 - **novelizer-reader**: Beta reader providing emotional/experiential reactions from an enthusiastic fantasy fan perspective.
 
 ### Audiobook Agents
